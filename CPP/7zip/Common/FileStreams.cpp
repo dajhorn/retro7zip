@@ -8,8 +8,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+
+#if defined(__WATCOMC__)
+#include <stdio.h>
+#else
 #include <grp.h>
 #include <pwd.h>
+#endif // defined(__WATCOMC__)
 
 /*
 inclusion of <sys/sysmacros.h> by <sys/types.h> is deprecated since glibc 2.25.
@@ -25,8 +30,13 @@ If you did not intend to use a system-defined macro "major",
 you should undefine it after including <sys/types.h>
 */
 // for major()/minor():
-#if defined(__APPLE__) || defined(__DragonFly__) || \
-    defined(BSD) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__APPLE__)     || \
+    defined(__DragonFly__) || \
+    defined(__FreeBSD__)   || \
+    defined(__NetBSD__)    || \
+    defined(__OpenBSD__)   || \
+    defined(__WATCOMC__)   || \
+    defined(BSD)
 #include <sys/types.h>
 #else
 #include <sys/sysmacros.h>
@@ -716,6 +726,7 @@ Z7_COM7F_IMF(CInFileStream::GetProperty(PROPID propID, PROPVARIANT *value))
         break;
       */
 
+#if !defined(__WATCOMC__)
       case kpidUserId:
       {
         if (StoreOwnerId)
@@ -770,6 +781,7 @@ Z7_COM7F_IMF(CInFileStream::GetProperty(PROPID propID, PROPVARIANT *value))
         }
         break;
       }
+#endif // if !defined(__WATCOMC__)
       default: break;
     }
   }

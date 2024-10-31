@@ -6,8 +6,10 @@
 // #include <stdio.h>
 
 #ifndef _WIN32
+#if !defined(__WATCOMC__)
 #include <grp.h>
 #include <pwd.h>
+#endif // !defined(__WATCOMC__)
 #include "../../../Common/UTFConvert.h"
 #endif
 
@@ -1358,14 +1360,17 @@ HRESULT CDirItems::FillDeviceSizes()
             item.Size = size;
         }
       }
+#if !defined(__WATCOMC__)
       if (StoreOwnerName)
       {
         OwnerNameMap.Add_UInt32(item.uid);
         OwnerGroupMap.Add_UInt32(item.gid);
       }
+#endif // !defined(__WATCOMC__)
     }
   }
 
+#if !defined(__WATCOMC__)
   if (StoreOwnerName)
   {
     UString u;
@@ -1463,6 +1468,7 @@ HRESULT CDirItems::FillDeviceSizes()
     }
     */
   }
+#endif // !defined(__WATCOMC__)
       /*
       for (unsigned i = 0 ; i < 100000000; i++)
       {
