@@ -1166,8 +1166,10 @@ HRESULT CZipDecoder::Decode(
       mi.Coder = new NCompress::NXz::CComDecoder;
     else if (id == NFileHeader::NCompressionMethod::kPPMd)
       mi.Coder = new NCompress::NPpmdZip::CDecoder(true);
+#ifndef Z7_ZIP_ZSTD_DISABLE
     else if (id == NFileHeader::NCompressionMethod::kZstdWz)
       mi.Coder = new NCompress::NZstd::CDecoder();
+#endif // Z7_ZIP_ZSTD_DISABLE
 #ifndef Z7_ZIP_LZFSE_DISABLE
     else if (id == NFileHeader::NCompressionMethod::kWzAES)
       mi.Coder = new NCompress::NLzfse::CDecoder;
