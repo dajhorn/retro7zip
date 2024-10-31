@@ -1691,7 +1691,12 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
       if (updateOptions.Commands.Size() != 1)
         throw CArcCmdLineException("Only one archive can be created with rename command");
   }
-#if !defined(__WATCOMC__)
+#if defined(__WATCOMC__)
+  else if (options.Command.CommandType == NCommandType::kBenchmark)
+  {
+    throw CArcCmdLineException("Benchmarking is disabled in this build.");
+  }
+#else
   else if (options.Command.CommandType == NCommandType::kBenchmark)
   {
     options.NumIterations = 1;
@@ -1704,7 +1709,7 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
       options.NumIterations_Defined = true;
     }
   }
-#endif // !defined(__WATCOMC__)
+#endif // defined(__WATCOMC__)
   else if (options.Command.CommandType == NCommandType::kHash)
   {
     options.Censor.AddPathsToCensor(censorPathMode);
