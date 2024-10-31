@@ -3,10 +3,18 @@
 #ifndef ZIP7_INC_WINDOWS_FILE_FIND_H
 #define ZIP7_INC_WINDOWS_FILE_FIND_H
 
-#ifndef _WIN32
+#if defined(__DOS__)
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <direct.h>
+#elif defined(_WIN32)
+#include <sys/stat.h>
+#include <sys/types.h>
+#if defined(__WATCOMC__)
+#include <direct.h>
+#else
 #include <dirent.h>
+#endif // defined(__WATCOM__)
 #endif
 
 #include "../Common/MyLinux.h"
@@ -310,7 +318,7 @@ public:
   bool Fill_FileInfo(const CDirEntry &de, CFileInfo &fileInfo, bool followLink) const;
   bool DirEntry_IsDir(const CDirEntry &de, bool followLink) const
   {
-#if !defined(_AIX) && !defined(__sun)
+#if !defined(_AIX) && !defined(__sun) && !defined(__DOS__)
     if (de.Type == DT_DIR)
       return true;
     if (de.Type != DT_UNKNOWN)

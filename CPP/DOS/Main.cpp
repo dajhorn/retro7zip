@@ -1,95 +1,45 @@
 // Main.cpp
 
-#include "StdAfx.h"
-
-#include "../../../Common/MyWindows.h"
-
-#ifdef _WIN32
-
-#ifndef Z7_OLD_WIN_SDK
-
-#if defined(__MINGW32__) || defined(__MINGW64__)
-#include <psapi.h>
-#else
-#include <Psapi.h>
-#endif
-
-#else // Z7_OLD_WIN_SDK
-
-typedef struct {
-    DWORD cb;
-    DWORD PageFaultCount;
-    SIZE_T PeakWorkingSetSize;
-    SIZE_T WorkingSetSize;
-    SIZE_T QuotaPeakPagedPoolUsage;
-    SIZE_T QuotaPagedPoolUsage;
-    SIZE_T QuotaPeakNonPagedPoolUsage;
-    SIZE_T QuotaNonPagedPoolUsage;
-    SIZE_T PagefileUsage;
-    SIZE_T PeakPagefileUsage;
-} PROCESS_MEMORY_COUNTERS;
-typedef PROCESS_MEMORY_COUNTERS *PPROCESS_MEMORY_COUNTERS;
-
-#endif // Z7_OLD_WIN_SDK
-
-#else // _WIN32
+#include <time.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/time.h>
-#include <sys/times.h>
-#endif // _WIN32
 
-#include "../../../../C/CpuArch.h"
+#include "StdAfx.h"
+#include "../../C/CpuArch.h"
+#include "../Common/MyWindows.h"
+#include "../Common/MyInitGuid.h"
+#include "../Common/CommandLineParser.h"
+#include "../Common/IntToString.h"
+#include "../Common/MyException.h"
+#include "../Common/StdInStream.h"
+#include "../Common/StdOutStream.h"
+#include "../Common/StringConvert.h"
+#include "../Common/StringToInt.h"
+#include "../Common/UTFConvert.h"
 
-#include "../../../Common/MyInitGuid.h"
+#include "ErrorMsg.h"
+#include "TimeUtils.h"
+#include "FileDir.h"
 
-#include "../../../Common/CommandLineParser.h"
-#include "../../../Common/IntToString.h"
-#include "../../../Common/MyException.h"
-#include "../../../Common/StdInStream.h"
-#include "../../../Common/StdOutStream.h"
-#include "../../../Common/StringConvert.h"
-#include "../../../Common/StringToInt.h"
-#include "../../../Common/UTFConvert.h"
-
-#include "../../../Windows/ErrorMsg.h"
-#include "../../../Windows/TimeUtils.h"
-#include "../../../Windows/FileDir.h"
-
-#include "../Common/ArchiveCommandLine.h"
-#include "../Common/Bench.h"
-#include "../Common/ExitCode.h"
-#include "../Common/Extract.h"
-
-#ifdef Z7_EXTERNAL_CODECS
-#include "../Common/LoadCodecs.h"
-#endif
-
-#include "../../Common/RegisterCodec.h"
-
-#include "BenchCon.h"
-#include "ConsoleClose.h"
-#include "ExtractCallbackConsole.h"
-#include "HashCon.h"
-#include "List.h"
-#include "OpenCallbackConsole.h"
-#include "UpdateCallbackConsole.h"
+#include "../7zip/Common/RegisterCodec.h"
+#include "../7zip/UI/Common/ArchiveCommandLine.h"
+#include "../7zip/UI/Common/ExitCode.h"
+#include "../7zip/UI/Common/Extract.h"
+#include "../7zip/UI/Console/ConsoleClose.h"
+#include "../7zip/UI/Console/ExtractCallbackConsole.h"
+#include "../7zip/UI/Console/HashCon.h"
+#include "../7zip/UI/Console/List.h"
+#include "../7zip/UI/Console/OpenCallbackConsole.h"
+#include "../7zip/UI/Console/UpdateCallbackConsole.h"
 
 #ifdef Z7_PROG_VARIANT_R
-#include "../../../../C/7zVersion.h"
+#include "../../C/7zVersion.h"
 #else
-#include "../../MyVersion.h"
+#include "../7zip/MyVersion.h"
 #endif
 
-using namespace NWindows;
+using namespace NDOS;
 using namespace NFile;
 using namespace NCommandLineParser;
-
-#ifdef _WIN32
-extern
-HINSTANCE g_hInstance;
-HINSTANCE g_hInstance = NULL;
-#endif
 
 extern CStdOutStream *g_StdStream;
 extern CStdOutStream *g_ErrStream;
@@ -99,12 +49,6 @@ extern const CCodecInfo *g_Codecs[];
 
 extern unsigned g_NumHashers;
 extern const CHasherInfo *g_Hashers[];
-
-#ifdef Z7_EXTERNAL_CODECS
-extern
-const CExternalCodecs *g_ExternalCodecs_Ptr;
-const CExternalCodecs *g_ExternalCodecs_Ptr;
-#endif
 
 DECLARE_AND_SET_CLIENT_VERSION_VAR
 
@@ -228,10 +172,6 @@ static void ShowMessageAndThrowException(LPCSTR message, NExitCode::EEnum code)
   throw code;
 }
 
-
-#ifdef _WIN32
-#define ShowProgInfo(so)
-#else
 static void ShowProgInfo(CStdOutStream *so)
 {
   if (!so)
@@ -328,9 +268,9 @@ static void ShowProgInfo(CStdOutStream *so)
   #endif
   
   {
-    const UInt32 numCpus = NWindows::NSystem::GetNumberOfProcessors();
+    const UInt32 numCpus = 1;
     *so << " Threads:" << numCpus;
-    const UInt64 openMAX= NWindows::NSystem::Get_File_OPEN_MAX();
+    const UInt64 openMAX = FOPEN_MAX;
     *so << " OPEN_MAX:" << openMAX;
     {
       FString temp;
@@ -374,7 +314,6 @@ static void ShowProgInfo(CStdOutStream *so)
 
   *so << endl;
 }
-#endif
 
 static void ShowCopyrightAndHelp(CStdOutStream *so, bool needHelp)
 {
@@ -403,17 +342,6 @@ static void PrintUInt32(CStdOutStream &so, UInt32 val, unsigned size)
   ConvertUInt32ToString(val, s);
   PrintStringRight(so, s, size);
 }
-
-#ifdef Z7_EXTERNAL_CODECS
-static void PrintNumber(CStdOutStream &so, UInt32 val, unsigned numDigits)
-{
-  AString s;
-  s.Add_UInt32(val);
-  while (s.Len() < numDigits)
-    s.InsertAtFront('0');
-  so << s;
-}
-#endif
 
 static void PrintLibIndex(CStdOutStream &so, int libIndex)
 {
@@ -542,179 +470,9 @@ static void PrintNum(UInt64 val, unsigned numDigits, char c = ' ')
   *g_StdStream << p;
 }
 
-#ifdef _WIN32
-
-static void PrintTime(const char *s, UInt64 val, UInt64 total)
-{
-  *g_StdStream << endl << s << " Time =";
-  const UInt32 kFreq = 10000000;
-  UInt64 sec = val / kFreq;
-  PrintNum(sec, 6);
-  *g_StdStream << '.';
-  UInt32 ms = (UInt32)(val - (sec * kFreq)) / (kFreq / 1000);
-  PrintNum(ms, 3, '0');
-  
-  while (val > ((UInt64)1 << 56))
-  {
-    val >>= 1;
-    total >>= 1;
-  }
-
-  UInt64 percent = 0;
-  if (total != 0)
-    percent = val * 100 / total;
-  *g_StdStream << " =";
-  PrintNum(percent, 5);
-  *g_StdStream << '%';
-}
-
-#ifndef UNDER_CE
-
-#define SHIFT_SIZE_VALUE(x, num) (((x) + (1 << (num)) - 1) >> (num))
-
-static void PrintMemUsage(const char *s, UInt64 val)
-{
-  *g_StdStream << "    " << s << " Memory =";
-  PrintNum(SHIFT_SIZE_VALUE(val, 20), 7);
-  *g_StdStream << " MB";
-  /*
-  *g_StdStream << " =";
-  PrintNum(SHIFT_SIZE_VALUE(val, 10), 9);
-  *g_StdStream << " KB";
-  */
-  #ifdef Z7_LARGE_PAGES
-  AString lp;
-  Add_LargePages_String(lp);
-  if (!lp.IsEmpty())
-    *g_StdStream << lp;
-  #endif
-}
-
-EXTERN_C_BEGIN
-typedef BOOL (WINAPI *Func_GetProcessMemoryInfo)(HANDLE Process,
-    PPROCESS_MEMORY_COUNTERS ppsmemCounters, DWORD cb);
-typedef BOOL (WINAPI *Func_QueryProcessCycleTime)(HANDLE Process, PULONG64 CycleTime);
-EXTERN_C_END
-
-#endif
-
-static inline UInt64 GetTime64(const FILETIME &t) { return ((UInt64)t.dwHighDateTime << 32) | t.dwLowDateTime; }
-
-static void PrintStat()
-{
-  FILETIME creationTimeFT, exitTimeFT, kernelTimeFT, userTimeFT;
-  if (!
-      #ifdef UNDER_CE
-        ::GetThreadTimes(::GetCurrentThread()
-      #else
-        // NT 3.5
-        ::GetProcessTimes(::GetCurrentProcess()
-      #endif
-      , &creationTimeFT, &exitTimeFT, &kernelTimeFT, &userTimeFT))
-    return;
-  FILETIME curTimeFT;
-  NTime::GetCurUtc_FiTime(curTimeFT);
-
-  #ifndef UNDER_CE
-  
-Z7_DIAGNOSTIC_IGNORE_CAST_FUNCTION
-
-  PROCESS_MEMORY_COUNTERS m;
-  memset(&m, 0, sizeof(m));
-  BOOL memDefined = FALSE;
-  BOOL cycleDefined = FALSE;
-  ULONG64 cycleTime = 0;
-  {
-    /* NT 4.0: GetProcessMemoryInfo() in Psapi.dll
-       Win7: new function K32GetProcessMemoryInfo() in kernel32.dll
-       It's faster to call kernel32.dll code than Psapi.dll code
-       GetProcessMemoryInfo() requires Psapi.lib
-       Psapi.lib in SDK7+ can link to K32GetProcessMemoryInfo in kernel32.dll
-       The program with K32GetProcessMemoryInfo will not work on systems before Win7
-       // memDefined = GetProcessMemoryInfo(GetCurrentProcess(), &m, sizeof(m));
-    */
-    const HMODULE kern = ::GetModuleHandleW(L"kernel32.dll");
-    Func_GetProcessMemoryInfo
-      my_GetProcessMemoryInfo = Z7_GET_PROC_ADDRESS(
-    Func_GetProcessMemoryInfo, kern,
-     "K32GetProcessMemoryInfo");
-    if (!my_GetProcessMemoryInfo)
-    {
-      const HMODULE lib = LoadLibraryW(L"Psapi.dll");
-      if (lib)
-          my_GetProcessMemoryInfo = Z7_GET_PROC_ADDRESS(
-        Func_GetProcessMemoryInfo, lib,
-            "GetProcessMemoryInfo");
-    }
-    if (my_GetProcessMemoryInfo)
-      memDefined = my_GetProcessMemoryInfo(GetCurrentProcess(), &m, sizeof(m));
-    // FreeLibrary(lib);
-    const
-    Func_QueryProcessCycleTime
-      my_QueryProcessCycleTime = Z7_GET_PROC_ADDRESS(
-    Func_QueryProcessCycleTime, kern,
-        "QueryProcessCycleTime");
-    if (my_QueryProcessCycleTime)
-      cycleDefined = my_QueryProcessCycleTime(GetCurrentProcess(), &cycleTime);
-  }
-
-  #endif
-
-  UInt64 curTime = GetTime64(curTimeFT);
-  UInt64 creationTime = GetTime64(creationTimeFT);
-  UInt64 kernelTime = GetTime64(kernelTimeFT);
-  UInt64 userTime = GetTime64(userTimeFT);
-
-  UInt64 totalTime = curTime - creationTime;
-  
-  PrintTime("Kernel ", kernelTime, totalTime);
-
-  const UInt64 processTime = kernelTime + userTime;
-  
-  #ifndef UNDER_CE
-  if (cycleDefined)
-  {
-    *g_StdStream << "    Cnt:";
-    PrintNum(cycleTime / 1000000, 15);
-    *g_StdStream << " MCycles";
-  }
-  #endif
-
-  PrintTime("User   ", userTime, totalTime);
-
-  #ifndef UNDER_CE
-  if (cycleDefined)
-  {
-    *g_StdStream << "    Freq (cnt/ptime):";
-    UInt64 us = processTime / 10;
-    if (us == 0)
-      us = 1;
-    PrintNum(cycleTime / us, 6);
-    *g_StdStream << " MHz";
-  }
-  #endif
-  
-  PrintTime("Process", processTime, totalTime);
-  #ifndef UNDER_CE
-  if (memDefined) PrintMemUsage("Virtual ", m.PeakPagefileUsage);
-  #endif
-  
-  PrintTime("Global ", totalTime, totalTime);
-  #ifndef UNDER_CE
-  if (memDefined) PrintMemUsage("Physical", m.PeakWorkingSetSize);
-  #endif
-  *g_StdStream << endl;
-}
-
-
-#else  // ! _WIN32
-
 static UInt64 Get_timeofday_us()
 {
-  struct timeval now;
-  if (gettimeofday(&now, NULL) == 0)
-    return (UInt64)now.tv_sec * 1000000 + (UInt64)now.tv_usec;
-  return 0;
+  return (UInt64)time(NULL) * 1000000;
 }
 
 static void PrintTime(const char *s, UInt64 val, UInt64 total_us, UInt64 kFreq)
@@ -777,6 +535,8 @@ static void PrintTime(const char *s, UInt64 val, UInt64 total_us, UInt64 kFreq)
 
 static void PrintStat(const UInt64 startTime)
 {
+  *g_StdStream << "@FIXME: PrintStat for DOS" << endl;
+#if 0
   tms t;
   /* clock_t res = */ times(&t);
   const UInt64 totalTime = Get_timeofday_us() - startTime;
@@ -786,13 +546,8 @@ static void PrintStat(const UInt64 startTime)
   PrintTime("Process", (UInt64)t.tms_utime + (UInt64)t.tms_stime, totalTime, kFreq);
   PrintTime("Global ", totalTime, totalTime, 0);
   *g_StdStream << endl;
+#endif
 }
-
-#endif // ! _WIN32
-
-
-
-
 
 static void PrintHexId(CStdOutStream &so, UInt64 id)
 {
@@ -801,27 +556,15 @@ static void PrintHexId(CStdOutStream &so, UInt64 id)
   PrintStringRight(so, s, 8);
 }
 
-#ifndef _WIN32
-void Set_ModuleDirPrefix_From_ProgArg0(const char *s);
-#endif
 
-int Main2(
-  #ifndef _WIN32
-  int numArgs, char *args[]
-  #endif
-);
-int Main2(
-  #ifndef _WIN32
-  int numArgs, char *args[]
-  #endif
-)
+void Set_ModuleDirPrefix_From_ProgArg0(const char *s);
+
+int Main2(int numArgs, char *args[]);
+
+int Main2(int numArgs, char *args[])
 {
   #if defined(MY_CPU_SIZEOF_POINTER)
     { unsigned k = sizeof(void *); if (k != MY_CPU_SIZEOF_POINTER) throw "incorrect MY_CPU_PTR_SIZE"; }
-  #endif
-
-  #if defined(_WIN32) && !defined(UNDER_CE)
-  SetFileApisToOEM();
   #endif
 
   #ifdef ENV_HAVE_LOCALE
@@ -830,29 +573,11 @@ int Main2(
   // printf("\nAfter  SetLocale() : %s\n", IsNativeUtf8() ? "NATIVE UTF-8" : "IS NOT NATIVE UTF-8");
   #endif
 
-  #ifndef _WIN32
   const UInt64 startTime = Get_timeofday_us();
-  #endif
 
-  /*
-  {
-    g_StdOut << "DWORD:" << (unsigned)sizeof(DWORD);
-    g_StdOut << " LONG:" << (unsigned)sizeof(LONG);
-    g_StdOut << " long:" << (unsigned)sizeof(long);
-    #ifdef _WIN64
-    // g_StdOut << " long long:" << (unsigned)sizeof(long long);
-    #endif
-    g_StdOut << " int:" << (unsigned)sizeof(int);
-    g_StdOut << " void*:"  << (unsigned)sizeof(void *);
-    g_StdOut << endl;
-  }
-  */
 
   UStringVector commandStrings;
   
-  #ifdef _WIN32
-  NCommandLineParser::SplitCommandLine(GetCommandLineW(), commandStrings);
-  #else
   {
     if (numArgs > 0)
       Set_ModuleDirPrefix_From_ProgArg0(args[0]);
@@ -871,12 +596,8 @@ int Main2(
     // printf("\n");
   }
 
-  #endif
-
-  #ifndef UNDER_CE
   if (commandStrings.Size() > 0)
     commandStrings.Delete(0);
-  #endif
 
   if (commandStrings.Size() == 0)
   {
@@ -924,33 +645,6 @@ int Main2(
     int stdout_cp = cp;
     int stderr_cp = cp;
     int stdin_cp = cp;
-
-    /*
-    // these cases are complicated.
-    // maybe we must use CRT functions instead of console WIN32.
-    // different Windows/CRT versions also can work different ways.
-    // so the following code was not enabled:
-    if (cp == -1)
-    {
-      // we set CodePage only if stream is attached to terminal
-      // maybe we should set CodePage even if is not terminal?
-      #ifdef _WIN32
-      {
-        UINT ccp = GetConsoleOutputCP();
-        if (ccp != 0)
-        {
-          if (options.IsStdOutTerminal) stdout_cp = ccp;
-          if (options.IsStdErrTerminal) stderr_cp = ccp;
-        }
-      }
-      if (options.IsInTerminal)
-      {
-        UINT ccp = GetConsoleCP();
-        if (ccp != 0) stdin_cp = ccp;
-      }
-      #endif
-    }
-    */
     
     if (stdout_cp != -1) g_StdOut.CodePage = stdout_cp;
     if (stderr_cp != -1) g_StdErr.CodePage = stderr_cp;
@@ -965,45 +659,12 @@ int Main2(
 
   unsigned consoleWidth = 80;
 
-  if (percentsStream)
-  {
-    #ifdef _WIN32
-    
-    #if !defined(UNDER_CE)
-    CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
-    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &consoleInfo))
-      consoleWidth = (USHORT)consoleInfo.dwSize.X;
-    #endif
-    
-    #else
-    
-#if !defined(__sun)
-    struct winsize w;
-    if (ioctl(0, TIOCGWINSZ, &w) == 0)
-      consoleWidth = w.ws_col;
-#endif
-    #endif
-  }
-
   CREATE_CODECS_OBJECT
 
   codecs->CaseSensitive_Change = options.CaseSensitive_Change;
   codecs->CaseSensitive = options.CaseSensitive;
   ThrowException_if_Error(codecs->Load());
   Codecs_AddHashArcHandler(codecs);
-
-  #ifdef Z7_EXTERNAL_CODECS
-  {
-    g_ExternalCodecs_Ptr = &_externalCodecs;
-    UString s;
-    codecs->GetCodecsErrorMessage(s);
-    if (!s.IsEmpty())
-    {
-      CStdOutStream &so = (g_StdStream ? *g_StdStream : g_StdOut);
-      so << endl << s << endl;
-    }
-  }
-  #endif
 
   const bool isExtractGroupCommand = options.Command.IsFromExtractGroup();
 
@@ -1012,14 +673,6 @@ int Main2(
         || options.Command.CommandType == NCommandType::kList
         || options.Command.IsFromUpdateGroup()))
   {
-    #ifdef Z7_EXTERNAL_CODECS
-    if (!codecs->MainDll_ErrorPath.IsEmpty())
-    {
-      UString s ("Can't load module: ");
-      s += fs2us(codecs->MainDll_ErrorPath);
-      throw s;
-    }
-    #endif
     throw kNoFormats;
   }
 
@@ -1028,7 +681,6 @@ int Main2(
   {
     throw kUnsupportedArcTypeMessage;
   }
-
 
   CIntVector excludedFormats;
   FOR_VECTOR (k, options.ExcludedArcTypes)
@@ -1043,44 +695,14 @@ int Main2(
     excludedFormats.AddToUniqueSorted(tempIndices[0]);
     // excludedFormats.Sort();
   }
-  
-  #ifdef Z7_EXTERNAL_CODECS
-  if (isExtractGroupCommand
-      || options.Command.IsFromUpdateGroup()
-      || options.Command.CommandType == NCommandType::kHash
-      || options.Command.CommandType == NCommandType::kBenchmark)
-    ThrowException_if_Error(_externalCodecs.Load());
-  #endif
 
   int retCode = NExitCode::kSuccess;
   HRESULT hresultMain = S_OK;
-
-  // bool showStat = options.ShowTime;
   
-  /*
-  if (!options.EnableHeaders ||
-      options.TechMode)
-    showStat = false;
-  */
-  
-
   if (options.Command.CommandType == NCommandType::kInfo)
   {
     CStdOutStream &so = (g_StdStream ? *g_StdStream : g_StdOut);
     unsigned i;
-
-    #ifdef Z7_EXTERNAL_CODECS
-    so << endl << "Libs:" << endl;
-    for (i = 0; i < codecs->Libs.Size(); i++)
-    {
-      PrintLibIndex(so, (int)i);
-      const CCodecLib &lib = codecs->Libs[i];
-      // if (lib.Version != 0)
-      so << ": " << (lib.Version >> 16) << ".";
-      PrintNumber(so, lib.Version & 0xffff, 2);
-      so << " : " << lib.Path << endl;
-    }
-    #endif
 
     so << endl << "Formats:" << endl;
     
@@ -1092,12 +714,7 @@ int Main2(
     for (i = 0; i < codecs->Formats.Size(); i++)
     {
       const CArcInfoEx &arc = codecs->Formats[i];
-
-      #ifdef Z7_EXTERNAL_CODECS
-      PrintLibIndex(so, arc.LibIndex);
-      #else
       so << "   ";
-      #endif
 
       so << (char)(arc.UpdateEnabled ? 'C' : ' ');
       
@@ -1191,43 +808,7 @@ int Main2(
       PrintHexId(so, cod.Id);
       so << ' ' << cod.Name << endl;
     }
-
-
-    #ifdef Z7_EXTERNAL_CODECS
-
-    UInt32 numMethods;
-    if (_externalCodecs.GetCodecs->GetNumMethods(&numMethods) == S_OK)
-    for (UInt32 j = 0; j < numMethods; j++)
-    {
-      PrintLibIndex(so, codecs->GetCodec_LibIndex(j));
-
-      UInt32 numStreams = codecs->GetCodec_NumStreams(j);
-      if (numStreams == 1)
-        so << ' ';
-      else
-        so << numStreams;
-      
-      so << (char)(codecs->GetCodec_EncoderIsAssigned(j) ? 'E' : ' ');
-      so << (char)(codecs->GetCodec_DecoderIsAssigned(j) ? 'D' : ' ');
-      {
-        bool isFilter_Assigned;
-        const bool isFilter = codecs->GetCodec_IsFilter(j, isFilter_Assigned);
-        so << (char)(isFilter ? 'F' : isFilter_Assigned ? ' ' : '*');
-      }
-
-
-      so << ' ';
-      UInt64 id;
-      HRESULT res = codecs->GetCodec_Id(j, id);
-      if (res != S_OK)
-        id = (UInt64)(Int64)-1;
-      PrintHexId(so, id);
-      so << ' ' << codecs->GetCodec_Name(j) << endl;
-    }
-
-    #endif
     
-
     so << endl << "Hashers:" << endl; //  << " L Size       ID Name" << endl;
 
     for (i = 0; i < g_NumHashers; i++)
@@ -1239,35 +820,11 @@ int Main2(
       PrintHexId(so, codec.Id);
       so << ' ' << codec.Name << endl;
     }
-
-    #ifdef Z7_EXTERNAL_CODECS
-    
-    numMethods = _externalCodecs.GetHashers->GetNumHashers();
-    for (UInt32 j = 0; j < numMethods; j++)
-    {
-      PrintLibIndex(so, codecs->GetHasherLibIndex(j));
-      PrintUInt32(so, codecs->GetHasherDigestSize(j), 4);
-      so << ' ';
-      PrintHexId(so, codecs->GetHasherId(j));
-      so << ' ' << codecs->GetHasherName(j) << endl;
-    }
-
-    #endif
     
   }
   else if (options.Command.CommandType == NCommandType::kBenchmark)
   {
-    CStdOutStream &so = (g_StdStream ? *g_StdStream : g_StdOut);
-    hresultMain = BenchCon(EXTERNAL_CODECS_VARS_L
-        options.Properties, options.NumIterations, (FILE *)so);
-    if (hresultMain == S_FALSE)
-    {
-      so << endl;
-      if (g_ErrStream)
-        *g_ErrStream << "\nDecoding ERROR\n";
-      retCode = NExitCode::kFatalError;
-      hresultMain = S_OK;
-    }
+    throw CArcCmdLineException("Benchmarking is not implemented for DOS.");
   }
   else if (isExtractGroupCommand || options.Command.CommandType == NCommandType::kList)
   {
@@ -1623,11 +1180,7 @@ int Main2(
     ShowMessageAndThrowException(kUserErrorMessage, NExitCode::kUserError);
 
   if (options.ShowTime && g_StdStream)
-    PrintStat(
-      #ifndef _WIN32
-        startTime
-      #endif
-    );
+    PrintStat(startTime);
 
   ThrowException_if_Error(hresultMain);
 

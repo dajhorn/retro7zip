@@ -782,7 +782,9 @@ bool MyGetTempPath(FString &path)
 bool CreateTempFile2(CFSTR prefix, bool addRandom, AString &postfix, NIO::COutFile *outFile)
 {
   UInt32 d =
-    #ifdef _WIN32
+    #if defined(__DOS__)
+      (UInt32)time(NULL);
+    #elif defined(_WIN32)
       (GetTickCount() << 12) ^ (GetCurrentThreadId() << 14) ^ GetCurrentProcessId();
     #else
       (UInt32)(time(NULL) << 12) ^  ((UInt32)getppid() << 14) ^ (UInt32)(getpid());
@@ -995,12 +997,12 @@ bool MyMoveFile(CFSTR oldFile, CFSTR newFile)
 
 bool CreateDir(CFSTR path)
 {
-  return (mkdir(path, 0777) == 0); // change it
+  return (mkdir(path) == 0);
 }
 
 static bool CreateDir2(CFSTR path)
 {
-  return (mkdir(path, 0777) == 0); // change it
+  return (mkdir(path) == 0);
 }
 
 
@@ -1116,11 +1118,16 @@ bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CF
   }
   */
 
+  /* @FIXME: __DOS__ compatibility */
+  return true;
+
+#if 0
   if (!needChange)
     return true;
   const int flags = 0; // follow link
     // = AT_SYMLINK_NOFOLLOW; // don't follow link
   return utimensat(AT_FDCWD, path, times, flags) == 0;
+#endif
 }
 
 
@@ -1155,7 +1162,7 @@ static C_umask g_umask;
 
 int my_chown(CFSTR path, uid_t owner, gid_t group)
 {
-  return chown(path, owner, group);
+  return 0;
 }
 
 bool SetFileAttrib_PosixHighDetect(CFSTR path, DWORD attrib)
@@ -1236,8 +1243,7 @@ bool SetFileAttrib_PosixHighDetect(CFSTR path, DWORD attrib)
 
 bool MyCreateHardLink(CFSTR newFileName, CFSTR existFileName)
 {
-  PRF(printf("\nhard link() %s -> %s\n", newFileName, existFileName);)
-  return (link(existFileName, newFileName) == 0);
+  return false;
 }
 
 #endif // !_WIN32

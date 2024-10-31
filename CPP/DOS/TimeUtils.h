@@ -1,7 +1,9 @@
-// Windows/TimeUtils.h
+// TimeUtils.h for DOS
 
 #ifndef ZIP7_INC_WINDOWS_TIME_UTILS_H
 #define ZIP7_INC_WINDOWS_TIME_UTILS_H
+
+#include <time.h>
 
 #include "../Common/MyTypes.h"
 #include "../Common/MyWindows.h"
@@ -61,15 +63,27 @@ inline bool FILETIME_IsZero(const FILETIME &ft)
     ft.tv_nsec = 0;
   }
 
- #ifdef __APPLE__
+#if defined(__DOS__)
+inline struct timespec dos_time_to_timespec(const time_t & dos_time)
+{
+  struct timespec dos_timespec;
+  dos_timespec.tv_sec = dos_time;
+  dos_timespec.tv_nsec = 0;
+  return dos_timespec;
+}
+#define ST_MTIME(st) dos_time_to_timespec(st.st_mtime)
+#define ST_ATIME(st) dos_time_to_timespec(st.st_atime)
+#define ST_CTIME(st) dos_time_to_timespec(st.st_ctime)
+
+#elif defined(__APPLE__)
   #define ST_MTIME(st) st.st_mtimespec
   #define ST_ATIME(st) st.st_atimespec
   #define ST_CTIME(st) st.st_ctimespec
- #else
+#else
   #define ST_MTIME(st) st.st_mtim
   #define ST_ATIME(st) st.st_atim
   #define ST_CTIME(st) st.st_ctim
- #endif
+#endif
 
 #endif
 

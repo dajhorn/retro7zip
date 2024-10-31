@@ -2,15 +2,12 @@
 
 #include "StdAfx.h"
 
-#ifndef _WIN32
-#include <sys/time.h>
 #include <time.h>
-#endif
 
 #include "Defs.h"
 #include "TimeUtils.h"
 
-namespace NWindows {
+namespace NDOS {
 namespace NTime {
 
 static const UInt32 kNumTimeQuantumsInSecond = 10000000;
@@ -269,7 +266,9 @@ bool GetSecondsSince1601(unsigned year, unsigned month, unsigned day,
 
 void GetCurUtc_FiTime(CFiTime &ft) throw()
 {
- #ifdef _WIN32
+  #if defined(__DOS__)
+  ft = dos_time_to_timespec(time(NULL));
+  #elif defined(_WIN32)
 
   // Both variants provide same low resolution on WinXP: about 15 ms.
   // But GetSystemTimeAsFileTime is much faster.
@@ -319,10 +318,13 @@ void GetCurUtc_FiTime(CFiTime &ft) throw()
 void GetCurUtcFileTime(FILETIME &ft) throw()
 {
   UInt64 v = 0;
-#if defined(ZIP7_USE_timespec_get) || \
+#if defined(__DOS__)                || \
+    defined(ZIP7_USE_timespec_get)  || \
     defined(ZIP7_USE_clock_gettime)
   timespec ts;
-#if defined(ZIP7_USE_timespec_get)
+#if defined(__DOS__)
+  ts = dos_time_to_timespec(time(NULL));
+#elif defined(ZIP7_USE_timespec_get)
   if (timespec_get(&ts, TIME_UTC))
 #else
   if (clock_gettime(CLOCK_REALTIME, &ts) == 0)

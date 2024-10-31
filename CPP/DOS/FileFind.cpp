@@ -1207,9 +1207,15 @@ void CFileInfoBase::SetFrom_stat(const struct stat &st)
   // timespec_To_FILETIME(st.st_ctim, CTime, &CTime_ns100);
   // timespec_To_FILETIME(st.st_mtim, MTime, &MTime_ns100);
   // timespec_To_FILETIME(st.st_atim, ATime, &ATime_ns100);
+#if defined(__DOS__)
+  CTime = dos_time_to_timespec(st.st_ctime);
+  MTime = dos_time_to_timespec(st.st_mtime);
+  ATime = dos_time_to_timespec(st.st_atime);
+#else
   CTime = st.st_ctim;
   MTime = st.st_mtim;
   ATime = st.st_atim;
+#endif // defined(__DOS__)
 
   #endif
 
@@ -1353,7 +1359,7 @@ bool CDirEntry::IsDots() const throw()
   /* some systems (like CentOS 7.x on XFS) have (Type == DT_UNKNOWN)
      we can call fstatat() for that case, but we use only (Name) check here */
 
-#if !defined(_AIX) && !defined(__sun)
+#if !defined(_AIX) && !defined(__sun) && !defined(__DOS__)
   if (Type != DT_DIR && Type != DT_UNKNOWN)
     return false;
 #endif
@@ -1393,7 +1399,7 @@ bool CEnumerator::NextAny(CDirEntry &fi, bool &found)
 
   fi.iNode = de->d_ino;
   
-#if !defined(_AIX) && !defined(__sun)
+#if !defined(_AIX) && !defined(__sun) && !defined(__DOS__)
   fi.Type = de->d_type;
   /* some systems (like CentOS 7.x on XFS) have (Type == DT_UNKNOWN)
      we can set (Type) from fstatat() in that case.
@@ -1468,14 +1474,15 @@ bool CEnumerator::Fill_FileInfo(const CDirEntry &de, CFileInfo &fileInfo, bool f
 {
   // printf("\nCEnumerator::Fill_FileInfo()\n");
   struct stat st;
+#if !defined(__DOS__)
   // probably it's OK to use fstatat() even if it changes file position dirfd(_dir)
   int res = fstatat(dirfd(_dir), de.Name, &st, followLink ? 0 : AT_SYMLINK_NOFOLLOW);
+#else
+  // probably it's OK to use fstatat() even if it changes file position dirfd(_dir)
   // if fstatat() is not supported, we can use stat() / lstat()
-  
-  /*
   const FString path = _wildcard + s;
   int res = MY_lstat(path, &st, followLink);
-  */
+#endif // !defined(__DOS__)
   
   if (res != 0)
     return false;

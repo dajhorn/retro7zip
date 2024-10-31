@@ -892,6 +892,10 @@ ssize_t COutFile::write_full(const void *data, size_t size, size_t &processed) t
 
 bool COutFile::SetLength(UInt64 length) throw()
 {
+  /* @FIXME: __DOS__ implement ftruncate */
+  return false;
+
+#if 0
   const off_t len2 = (off_t)length;
   if ((Int64)length != len2)
   {
@@ -901,6 +905,7 @@ bool COutFile::SetLength(UInt64 length) throw()
   // The value of the seek pointer shall not be modified by a call to ftruncate().
   const int iret = ftruncate(_handle, len2);
   return (iret == 0);
+#endif
 }
 
 bool COutFile::Close()
