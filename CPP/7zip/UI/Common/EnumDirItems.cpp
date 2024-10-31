@@ -712,6 +712,7 @@ static HRESULT EnumerateForItem(
     if (!enterToSubFolders)
       return S_OK;
 
+#if !defined(__DOS__)
    #ifndef _WIN32
     if (fi.IsPosixLink())
     {
@@ -730,6 +731,7 @@ static HRESULT EnumerateForItem(
       return S_OK;
     }
     #endif // !defined(_WIN32)
+#endif // !defined(__DOS__)
     nextNode = &curNode;
   }
   
@@ -967,6 +969,7 @@ static HRESULT EnumerateDirItems(
         }
         else
         {
+#if !defined(__DOS__)
          #ifndef _WIN32
           if (fi.IsPosixLink())
           {
@@ -984,6 +987,7 @@ static HRESULT EnumerateDirItems(
             }
           }
          #endif
+#endif // !defined(__DOS__)
           nextNode = &curNode;
           newParts.Add(name); // don't change it to fi.Name. It's for shortnames support
         }
