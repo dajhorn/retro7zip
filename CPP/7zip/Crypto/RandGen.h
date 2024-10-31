@@ -14,6 +14,14 @@
 #ifdef _WIN32
 #include <ntsecapi.h>
 #define MY_RAND_GEN(data, size) RtlGenRandom(data, size)
+
+#elif defined(__WATCOMC__)
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+size_t owc_getrandom(void *buffer, size_t length);
+#define MY_RAND_GEN(data, size) owc_getrandom(data, size)
+
 #else
 #define MY_RAND_GEN(data, size) getrandom(data, size, 0)
 #endif

@@ -4,6 +4,19 @@
 
 #include "RandGen.h"
 
+#include <time.h>
+
+#if defined(__WATCOMC__)
+size_t owc_getrandom(void *buffer, size_t length)
+{
+  unsigned char *c = (unsigned char *)buffer;
+  srand(time(NULL));
+  for (size_t i = 0; i < length; i++)
+    c[i] = rand() % 256;
+  return length;
+}
+#endif // defined(__WATCOMC__)
+
 #ifndef USE_STATIC_SYSTEM_RAND
 
 #ifndef Z7_ST
@@ -41,8 +54,10 @@ EXTERN_C_END
 #include <sys/stat.h>
 #include <fcntl.h>
 #define USE_POSIX_TIME
+#if !defined(__WATCOMC__)
 #define USE_POSIX_TIME2
-#endif
+#endif // !defined(__WATCOMC__)
+#endif // defined(__WIN32)
 
 #ifdef USE_POSIX_TIME
 #include <time.h>
@@ -118,7 +133,8 @@ void CRandomGenerator::Init()
   #endif
 
   #else
-  
+
+#if !defined(__WATCOMC__)
   pid_t pid = getpid();
   HASH_UPD(pid)
   pid = getppid();
@@ -143,9 +159,9 @@ void CRandomGenerator::Init()
         numIterations = kNumIterations_Small;
     }
   }
-  /*
+#else
   {
-    int n = getrandom(buf, kBufSize, 0);
+    int n = owc_getrandom(buf, kBufSize, 0);
     if (n > 0)
     {
       Sha256_Update(&hash, buf, n);
@@ -153,9 +169,9 @@ void CRandomGenerator::Init()
         numIterations = kNumIterations_Small;
     }
   }
-  */
+#endif // !defined(__WATCOMC__)
 
-  #endif
+  #endif // defined(_WIN32)
   }
 
   #ifdef _DEBUG
