@@ -28,7 +28,11 @@ Z7_DIAGNOSTIC_IGNORE_END_RESERVED_MACRO_IDENTIFIER
 #endif
 #endif
 
+#if defined(__DOS__)
+#include "pthread_dummy.h"
+#else
 #include <pthread.h>
+#endif // defined(__DOS__)
 
 #endif
 
