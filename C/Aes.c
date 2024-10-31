@@ -57,6 +57,7 @@ static Byte InvS[256];
 
 // #define Z7_SHOW_AES_STATUS
 
+#if !defined(__WATCOMC__)
 #ifdef MY_CPU_X86_OR_AMD64
 
   #if defined(__INTEL_COMPILER)
@@ -114,6 +115,7 @@ static Byte InvS[256];
 #endif
 #endif
 
+#endif // !defined(__WATCOMC__)
 
 void AesGenTables(void)
 {

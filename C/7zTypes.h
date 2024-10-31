@@ -51,6 +51,17 @@ typedef int SRes;
   #else
     #define MY_ALIGN(n)
   #endif
+#elif defined(__WATCOMC__)
+  /* @FIXME: For the watcom toolchain, this alignment macro should be:
+   *
+   *   #pragma pack(push, n)
+   *   ...
+   *   #pragma pack(pop)
+   *
+   * But it probably doesn't matter 7-Zip doesn't have assembly optimizations
+   * for 32-bit targets, and the watcom toolchain can't generate 64-bit code.
+   */
+  #define MY_ALIGN(n)
 #else
   /*
   // C11/C++11:

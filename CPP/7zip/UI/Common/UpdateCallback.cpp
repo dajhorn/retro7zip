@@ -35,10 +35,10 @@
 
 #include "UpdateCallback.h"
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 #define Z7_USE_SECURITY_CODE
 #include "../../../Windows/SecurityUtils.h"
-#endif
+#endif // defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 using namespace NWindows;
 using namespace NFile;

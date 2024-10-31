@@ -599,7 +599,7 @@ static void AddToCensorFromNonSwitchesStrings(
   }
 }
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__WATCOMC__)
 
 struct CEventSetEnd
 {
@@ -670,7 +670,7 @@ static const char *ParseMapWithPaths(
   return NULL;
 }
 
-#endif
+#endif // defined(_WIN32) && !defined(__WATCOMC__)
 
 static void AddSwitchWildcardsToCensor(
     NWildcard::CCensor &censor,
@@ -798,14 +798,14 @@ static void AddSwitchWildcardsToCensor(
       AddNameToCensor(censor, nop2, tail);
     else if (c == kFileListID)
       AddToCensorFromListFile(NULL, censor, nop2, tail, codePage);
-    #ifdef _WIN32
+    #if defined(_WIN32) && !defined(__WATCOMC__)
     else if (c == kMapNameID)
     {
       errorMessage = ParseMapWithPaths(censor, tail, nop2);
       if (errorMessage)
         break;
     }
-    #endif
+    #endif // defined(_WIN32) && !defined(__WATCOMC__)
     else
     {
       errorMessage = "Incorrect wildcard type marker";
@@ -1076,12 +1076,13 @@ void CArcCmdLineParser::Parse1(const UStringVector &commandStrings,
   }
 
 
-  #if defined(_WIN32) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
   NSecurity::EnablePrivilege_SymLink();
-  #endif
+#endif // defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
   
   // options.LargePages = false;
 
+#if !defined(__WATCOMC__)
   if (parser[NKey::kLargePages].ThereIs)
   {
     UInt32 slp = 0;
@@ -1116,10 +1117,9 @@ void CArcCmdLineParser::Parse1(const UStringVector &commandStrings,
     }
     #endif
   }
+#endif // !defined(__WATCOMC__)
 
-
-#ifndef UNDER_CE
-
+#if !defined(UNDER_CE) && !defined(__WATCOMC__)
   if (parser[NKey::kAffinity].ThereIs)
   {
     const UString &s = parser[NKey::kAffinity].PostStrings[0];
@@ -1195,8 +1195,7 @@ void CArcCmdLineParser::Parse1(const UStringVector &commandStrings,
       Parse1Log.Add_LF();
     }
   }
-
-#endif
+#endif // !defined(UNDER_CE) && !defined(__WATCOMC__)
 }
 
 
@@ -1481,6 +1480,7 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
     eo.ExcludeDirItems = options.Censor.ExcludeDirItems;
     eo.ExcludeFileItems = options.Censor.ExcludeFileItems;
 
+#if !defined(__WATCOMC__)
     {
       CExtractNtOptions &nt = eo.NtOptions;
       nt.NtSecurity = options.NtSecurity;
@@ -1509,6 +1509,7 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
       if (parser[NKey::kShareForWrite].ThereIs)
         nt.OpenShareForWrite = true;
     }
+#endif // !defined(__WATCOMC__)
 
     if (parser[NKey::kZoneFile].ThereIs)
     {
@@ -1690,6 +1691,7 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
       if (updateOptions.Commands.Size() != 1)
         throw CArcCmdLineException("Only one archive can be created with rename command");
   }
+#if !defined(__WATCOMC__)
   else if (options.Command.CommandType == NCommandType::kBenchmark)
   {
     options.NumIterations = 1;
@@ -1702,6 +1704,7 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
       options.NumIterations_Defined = true;
     }
   }
+#endif // !defined(__WATCOMC__)
   else if (options.Command.CommandType == NCommandType::kHash)
   {
     options.Censor.AddPathsToCensor(censorPathMode);

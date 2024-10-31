@@ -209,6 +209,14 @@ Z7_COM7F_IMF2(UInt32, CAesCtrCoder::Filter(Byte *data, UInt32 size))
   return false; }
 
 
+#if defined(__WATCOMC__)
+#define AesCtr_Code_HW       NULL
+#define AesCtr_Code_HW_256   NULL
+#define AesCbc_Encode_HW     NULL
+#define AesCbc_Encode_HW     NULL
+#define AesCbc_Decode_HW     NULL
+#define AesCbc_Decode_HW_256 NULL
+#endif // defined(__WATCOMC__)
 
 #ifndef Z7_SFX
 SET_AES_FUNCS(

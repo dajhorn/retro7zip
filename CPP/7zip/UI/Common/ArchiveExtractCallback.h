@@ -90,13 +90,13 @@ struct CExtractNtOptions
   }
 };
 
-
+#ifndef __WATCOMC__
 #ifndef Z7_SFX
 #ifndef UNDER_CE
 #define SUPPORT_LINKS
 #endif
 #endif
-
+#endif
 
 #ifdef SUPPORT_LINKS
 

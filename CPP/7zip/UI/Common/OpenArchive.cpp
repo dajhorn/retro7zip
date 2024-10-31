@@ -2,7 +2,7 @@
 
 #include "StdAfx.h"
 
-// #define SHOW_DEBUG_INFO
+#define SHOW_DEBUG_INFO
 
 #ifdef SHOW_DEBUG_INFO
 #include <stdio.h>
@@ -1638,7 +1638,7 @@ static int FindFormatForArchiveType(CCodecs *codecs, CIntVector orderIndices, co
 
 HRESULT CArc::OpenStream2(const COpenOptions &op)
 {
-  // fprintf(stdout, "\nOpen: %S", Path); fflush(stdout);
+  PRF(fprintf(stdout, "\nOpen: %S", Path); fflush(stdout));
 
   Archive.Release();
   GetRawProps.Release();
@@ -1650,8 +1650,8 @@ HRESULT CArc::OpenStream2(const COpenOptions &op)
   IsParseArc = false;
   ArcStreamOffset = 0;
   
-  // OutputDebugStringA("1");
-  // OutputDebugStringW(Path);
+  PRF(OutputDebugStringA("1"));
+  PRF(OutputDebugStringW(Path));
 
   const UString fileName = ExtractFileNameFromPath(Path);
   UString extension;
@@ -2780,10 +2780,10 @@ HRESULT CArc::OpenStream2(const COpenOptions &op)
           PRF(printf("  OK "));
         }
 
-        // fprintf(stderr, "\n %8X  %S", startArcPos, Path);
-        // printf("\nOpen OK: %S", ai.Name);
-        
-        
+#if 0
+        fprintf(stderr, "\n %8X  %S", startArcPos, Path);
+        printf("\nOpen OK: %S", ai.Name);
+#endif 
         NArchive::NParser::CParseItem pi;
         pi.Offset = startArcPos;
 
@@ -3292,7 +3292,16 @@ HRESULT CArchiveLink::Open(COpenOptions &op)
       arc.filePath = op.filePath;
       arc.Path = op.filePath;
       arc.SubfileIndex = (UInt32)(Int32)-1;
+      /* @FIXME: This is a bool casted into an HRESULT. The watcom toolchain mishandles it. */
       HRESULT result = arc.OpenStreamOrFile(op);
+#if 0
+      if (result != 1)
+      {
+          NonOpen_ErrorInfo = arc.NonOpen_ErrorInfo;
+          NonOpen_ArcPath = arc.Path;
+          return S_FALSE;
+      }
+#else
       if (result != S_OK)
       {
         if (result == S_FALSE)
@@ -3303,6 +3312,7 @@ HRESULT CArchiveLink::Open(COpenOptions &op)
         }
         return result;
       }
+#endif // defined(__WATCOMC__)
       Arcs.Add(arc);
       continue;
     }

@@ -27,11 +27,13 @@ void RegisterArc(const CArcInfo *arcInfo) throw()
   // else throw 1;
 }
 
+#if !defined(__WATCOMC__)
 Z7_DEFINE_GUID(CLSID_CArchiveHandler,
     k_7zip_GUID_Data1,
     k_7zip_GUID_Data2,
     k_7zip_GUID_Data3_Common,
     0x10, 0x00, 0x00, 0x01, 0x10, 0x00, 0x00, 0x00);
+#endif // !defined(__WATCOMC__)
 
 #define CLS_ARC_ID_ITEM(cls) ((cls).Data4[5])
 

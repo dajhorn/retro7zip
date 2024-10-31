@@ -118,14 +118,16 @@ int Z7_CDECL main
   }
   // #endif
 
+#if !defined(__WATCOMC__)
   NT_CHECK
+#endif // !defined(__WATCOMC__)
 
   NConsoleClose::CCtrlHandlerSetter ctrlHandlerSetter;
   int res = 0;
   
   try
   {
-    #ifdef _WIN32
+    #if defined(_WIN32) && !defined(__WATCOMC__)
     My_SetDefaultDllDirectories();
     #endif
 

@@ -7,7 +7,7 @@
 
 #include "../Common/MyWindows.h"
 
-#if !defined(_WIN64) && !defined(UNDER_CE)
+#if !defined(_WIN64) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 #if defined(_MSC_VER) && _MSC_VER >= 1900
 #pragma warning(push)
@@ -24,7 +24,7 @@ static inline bool IsItWindowsNT()
 #pragma warning(pop)
 #endif
 
-#endif
+#endif // !defined(_WIN64) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 #ifndef _UNICODE
     extern

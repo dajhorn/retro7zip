@@ -177,11 +177,14 @@ public:
 
   bool IsDir(const CUpdatePair2 &up) const
   {
+    return false;
+    /* @FIXME: __WATCOM__ quirks
     if (up.DirIndex >= 0)
       return DirItems->Items[(unsigned)up.DirIndex].IsDir();
     else if (up.ArcIndex >= 0)
       return (*ArcItems)[(unsigned)up.ArcIndex].IsDir;
     return false;
+    */
   }
 
 private:

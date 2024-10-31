@@ -30,6 +30,16 @@ bool MyGetVolumeInformation(
     UString &fileSystemName)
 {
   BOOL res;
+#if defined(__WATCOMC__)
+    TCHAR v[MAX_PATH + 2]; v[0] = 0;
+    TCHAR f[MAX_PATH + 2]; f[0] = 0;
+    res = GetVolumeInformation(fs2fas(rootPath),
+        v, MAX_PATH,
+        volumeSerialNumber, maximumComponentLength, fileSystemFlags,
+        f, MAX_PATH);
+    volumeName = MultiByteToUnicodeString(v);
+    fileSystemName = MultiByteToUnicodeString(f);
+#else
   #ifndef _UNICODE
   if (!g_IsNT)
   {
@@ -54,11 +64,15 @@ bool MyGetVolumeInformation(
     volumeName = v;
     fileSystemName = f;
   }
+#endif // defined(__WATCOMC__)
   return BOOLToBool(res);
 }
 
 UINT MyGetDriveType(CFSTR pathName)
 {
+#if defined(__WATCOMC__)
+  return GetDriveType(fs2fas(pathName));
+#else
   #ifndef _UNICODE
   if (!g_IsNT)
   {
@@ -69,12 +83,15 @@ UINT MyGetDriveType(CFSTR pathName)
   {
     return GetDriveTypeW(fs2us(pathName));
   }
+#endif // defined(__WATCOMC__)
 }
 
+#if !defined(__WATCOMC__)
 #if !defined(Z7_WIN32_WINNT_MIN) || Z7_WIN32_WINNT_MIN < 0x0400
 // GetDiskFreeSpaceEx requires Windows95-OSR2, NT4
 #define Z7_USE_DYN_GetDiskFreeSpaceEx
 #endif
+#endif // !defined(__WATCOMC__)
 
 #ifdef Z7_USE_DYN_GetDiskFreeSpaceEx
 typedef BOOL (WINAPI * Func_GetDiskFreeSpaceExA)(
@@ -96,6 +113,13 @@ bool MyGetDiskFreeSpace(CFSTR rootPath, UInt64 &clusterSize, UInt64 &totalSize, 
 {
   DWORD numSectorsPerCluster, bytesPerSector, numFreeClusters, numClusters;
   bool sizeIsDetected = false;
+  
+#if defined(__WATCOMC__)
+    ULARGE_INTEGER freeBytesToCaller2, totalSize2, freeSize2;
+    sizeIsDetected = 0;
+    if (!::GetDiskFreeSpace(fs2fas(rootPath), &numSectorsPerCluster, &bytesPerSector, &numFreeClusters, &numClusters))
+      return false;
+#else
   #ifndef _UNICODE
   if (!g_IsNT)
   {
@@ -146,6 +170,7 @@ bool MyGetDiskFreeSpace(CFSTR rootPath, UInt64 &clusterSize, UInt64 &totalSize, 
     if (!::GetDiskFreeSpaceW(fs2us(rootPath), &numSectorsPerCluster, &bytesPerSector, &numFreeClusters, &numClusters))
       return false;
   }
+#endif // defined(__WATCOMC__)
   clusterSize = (UInt64)bytesPerSector * (UInt64)numSectorsPerCluster;
   if (!sizeIsDetected)
   {
@@ -155,7 +180,7 @@ bool MyGetDiskFreeSpace(CFSTR rootPath, UInt64 &clusterSize, UInt64 &totalSize, 
   return true;
 }
 
-#endif
+#endif // defined(_WIN32)
 
 /*
 bool Is_File_LimitedBy_4GB(CFSTR _path, bool &isFsDetected)
@@ -184,4 +209,4 @@ bool Is_File_LimitedBy_4GB(CFSTR _path, bool &isFsDetected)
 
 }}}
 
-#endif
+#endif // defined(UNDER_CE)

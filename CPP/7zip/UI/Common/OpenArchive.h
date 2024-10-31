@@ -3,6 +3,8 @@
 #ifndef ZIP7_INC_OPEN_ARCHIVE_H
 #define ZIP7_INC_OPEN_ARCHIVE_H
 
+#include <iostream>
+
 #include "../../../Windows/PropVariant.h"
 
 #include "ArchiveOpenCallback.h"
@@ -10,11 +12,9 @@
 #include "Property.h"
 #include "DirItem.h"
 
-#ifndef Z7_SFX
-
+#if !defined(Z7_SFX) && !defined(__WATCOMC__)
 #define SUPPORT_ALT_STREAMS
-
-#endif
+#endif // !defined(Z7_SFX) && !defined(__WATCOMC__)
 
 HRESULT Archive_GetItemBoolProp(IInArchive *arc, UInt32 index, PROPID propID, bool &result) throw();
 HRESULT Archive_IsItem_Dir(IInArchive *arc, UInt32 index, bool &result) throw();
@@ -435,7 +435,7 @@ struct CArchiveLink
   HRESULT Open_Strict(COpenOptions &options, IOpenCallbackUI *callbackUI)
   {
     HRESULT result = Open3(options, callbackUI);
-    if (result == S_OK && NonOpen_ErrorInfo.ErrorFormatIndex >= 0)
+ if (result == S_OK && NonOpen_ErrorInfo.ErrorFormatIndex >= 0)
       result = S_FALSE;
     return result;
   }

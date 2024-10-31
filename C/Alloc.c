@@ -3,6 +3,10 @@
 
 #include "Precomp.h"
 
+#if defined(__DOS__)
+#include <stdint.h>
+#endif // defined(__DOS__)
+
 #ifdef _WIN32
 #include "7zWindows.h"
 #endif

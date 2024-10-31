@@ -525,6 +525,18 @@ static inline bool Is86Filter(CMethodId m)
 
 static inline bool IsExeFilter(CMethodId m)
 {
+#if defined(__WATCOMC__)
+  if (m == k_ARM64 ||
+      m == k_ARM64 ||
+      m == k_RISCV ||
+      m == k_BCJ   ||
+      m == k_BCJ2  ||
+      m == k_ARM   ||
+      m == k_ARMT  ||
+      m == k_PPC   ||
+      m == k_SPARC ||
+      m == k_IA64) { return true; }
+#else
   switch (m)
   {
     case k_ARM64:
@@ -539,6 +551,7 @@ static inline bool IsExeFilter(CMethodId m)
       return true;
     default: break;
   }
+#endif // defined(__WATCOMC__)
   return false;
 }
 

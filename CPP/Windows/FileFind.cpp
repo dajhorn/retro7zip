@@ -15,9 +15,11 @@
 #include "FileIO.h"
 #include "FileName.h"
 
+#if !defined(__WATCOMC__)
 #ifndef _UNICODE
 extern bool g_IsNT;
 #endif
+#endif // !defined(__WATCOMC__)
 
 using namespace NWindows;
 using namespace NFile;
@@ -287,6 +289,13 @@ WinXP-64 FindFirstFile():
 
 bool CFindFile::FindFirst(CFSTR path, CFileInfo &fi)
 {
+#if defined(__WATCOMC__)
+    WIN32_FIND_DATAA fd;
+    _handle = ::FindFirstFileA(fs2fas(path), &fd);
+    if (_handle == INVALID_HANDLE_VALUE)
+      return false;
+    Convert_WIN32_FIND_DATA_to_FileInfo(fd, fi);
+#else
   if (!Close())
     return false;
   #ifndef _UNICODE
@@ -317,11 +326,18 @@ bool CFindFile::FindFirst(CFSTR path, CFileInfo &fi)
       return false;
     Convert_WIN32_FIND_DATA_to_FileInfo(fd, fi);
   }
+#endif // defined(__WATCOMC__)
   return true;
 }
 
 bool CFindFile::FindNext(CFileInfo &fi)
 {
+#if defined(__WATCOMC__)
+    WIN32_FIND_DATAA fd;
+    if (!::FindNextFileA(_handle, &fd))
+      return false;
+    Convert_WIN32_FIND_DATA_to_FileInfo(fd, fi);
+#else
   #ifndef _UNICODE
   if (!g_IsNT)
   {
@@ -338,10 +354,11 @@ bool CFindFile::FindNext(CFileInfo &fi)
       return false;
     Convert_WIN32_FIND_DATA_to_FileInfo(fd, fi);
   }
+#endif // defined(__WATCOMC__)
   return true;
 }
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 ////////////////////////////////
 // AltStreams
@@ -488,7 +505,7 @@ bool CStreamEnumerator::Next(CStreamInfo &si, bool &found)
   return (::GetLastError() == ERROR_HANDLE_EOF);
 }
 
-#endif
+#endif // defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 
 /*
@@ -511,6 +528,9 @@ WinXP-64 GetFileAttributes():
 
 DWORD GetFileAttrib(CFSTR path)
 {
+#if defined(__WATCOMC__)
+    return ::GetFileAttributes(fs2fas(path));
+#else
   #ifndef _UNICODE
   if (!g_IsNT)
     return ::GetFileAttributes(fs2fas(path));
@@ -533,6 +553,7 @@ DWORD GetFileAttrib(CFSTR path)
     #endif
     return INVALID_FILE_ATTRIBUTES;
   }
+#endif // defined(__WATCOMC__)
 }
 
 /* if path is "c:" or "c::" then CFileInfo::Find() returns name of current folder for that disk
@@ -603,7 +624,7 @@ bool CFileInfo::Find(CFSTR path, bool followLink)
   }
   #endif
 
-  #if defined(_WIN32) && !defined(UNDER_CE)
+  #if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
   const int colonPos = FindAltStreamColon(path);
   if (colonPos >= 0 && path[(unsigned)colonPos + 1] != 0)
@@ -948,6 +969,9 @@ bool CFindChangeNotification::Close() throw()
            
 HANDLE CFindChangeNotification::FindFirst(CFSTR path, bool watchSubtree, DWORD notifyFilter)
 {
+#if defined(__WATCOMC__)
+    _handle = ::FindFirstChangeNotification(fs2fas(path), BoolToBOOL(watchSubtree), notifyFilter);
+#else
   #ifndef _UNICODE
   if (!g_IsNT)
     _handle = ::FindFirstChangeNotification(fs2fas(path), BoolToBOOL(watchSubtree), notifyFilter);
@@ -965,6 +989,7 @@ HANDLE CFindChangeNotification::FindFirst(CFSTR path, bool watchSubtree, DWORD n
     }
     #endif
   }
+#endif // defined(__WATCOMC__)
   return _handle;
 }
 
@@ -973,6 +998,28 @@ HANDLE CFindChangeNotification::FindFirst(CFSTR path, bool watchSubtree, DWORD n
 bool MyGetLogicalDriveStrings(CObjectVector<FString> &driveStrings)
 {
   driveStrings.Clear();
+#if defined(__WATCOMC__)
+    driveStrings.Clear();
+    UINT32 size = GetLogicalDriveStrings(0, NULL);
+    if (size == 0)
+      return false;
+    CObjArray<char> buf(size);
+    UINT32 newSize = GetLogicalDriveStrings(size, buf);
+    if (newSize == 0 || newSize > size)
+      return false;
+    AString s;
+    UINT32 prev = 0;
+    for (UINT32 i = 0; i < newSize; i++)
+    {
+      if (buf[i] == 0)
+      {
+        s = buf + prev;
+        prev = i + 1;
+        driveStrings.Add(fas2fs(s));
+      }
+    }
+    return prev == newSize;
+#else
   #ifndef _UNICODE
   if (!g_IsNT)
   {
@@ -1020,6 +1067,7 @@ bool MyGetLogicalDriveStrings(CObjectVector<FString> &driveStrings)
     }
     return prev == newSize;
   }
+#endif // defined(__WATCOMC__)
 }
 
 #endif // UNDER_CE

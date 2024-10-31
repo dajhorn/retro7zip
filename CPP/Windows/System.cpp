@@ -13,8 +13,12 @@
 #endif
 #endif
 
+#if defined(__WATCOMC__)
+#include <cstdio>
+#endif // defined(__WATCOMC__)
+
 #include "../Common/Defs.h"
-// #include "../Common/MyWindows.h"
+// #include "../Common/MyWindows.h"dir 
 
 // #include "../../C/CpuArch.h"
 
@@ -38,16 +42,19 @@ UInt32 CountAffinity(DWORD_PTR mask)
 
 BOOL CProcessAffinity::Get()
 {
-  #ifndef UNDER_CE
+  #if !defined(UNDER_CE) && !defined(__WATCOMC__)
   return GetProcessAffinityMask(GetCurrentProcess(), &processAffinityMask, &systemAffinityMask);
   #else
   return FALSE;
-  #endif
+  #endif // !defined(UNDER_CE) && !defined(__WATCOMC__)
 }
 
 
 UInt32 GetNumberOfProcessors()
 {
+#if defined(__WATCOMC__)
+  return 1;
+#else
   // We need to know how many threads we can use.
   // By default the process is assigned to one group.
   // So we get the number of logical processors (threads)
@@ -63,6 +70,7 @@ UInt32 GetNumberOfProcessors()
   GetSystemInfo(&systemInfo);
   // the number of logical processors in the current group
   return (UInt32)systemInfo.dwNumberOfProcessors;
+#endif // defined(__WATCOMC__)
 }
 
 #else
@@ -287,9 +295,11 @@ bool GetRamSize(size_t &size)
 
 unsigned long Get_File_OPEN_MAX()
 {
- #ifdef _WIN32
+#if defined(__WATCOMC__)
+  return FOPEN_MAX;
+#elif defined(_WIN32)
   return (1 << 24) - (1 << 16); // ~16M handles
- #else
+#else
   // some linux versions have default open file limit for user process of 1024 files.
   long n = sysconf(_SC_OPEN_MAX);
   // n = -1; // for debug
@@ -305,7 +315,7 @@ unsigned long Get_File_OPEN_MAX()
    #endif
   }
   return (unsigned long)n;
- #endif
+#endif // defined(__WATCOMC__)
 }
 
 unsigned Get_File_OPEN_MAX_Reduced_for_3_tasks()

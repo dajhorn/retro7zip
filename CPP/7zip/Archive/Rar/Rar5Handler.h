@@ -329,6 +329,16 @@ struct CItem
   UInt32 GetWinAttrib() const
   {
     UInt32 a;
+#if defined(__WATCOMC__)
+    if (HostOS == kHost_Windows) {
+      a = Attrib;
+    } else if (HostOS == kHost_Unix) {
+      a = Attrib << 16;
+      a |= 0x8000; // add posix mode marker
+    } else {
+      a = 0;
+    }
+#else
     switch (HostOS)
     {
       case kHost_Windows:
@@ -341,6 +351,7 @@ struct CItem
       default:
           a = 0;
     }
+#endif // defined(__WATCOMC__)
     if (IsDir()) a |= FILE_ATTRIBUTE_DIRECTORY;
     return a;
   }

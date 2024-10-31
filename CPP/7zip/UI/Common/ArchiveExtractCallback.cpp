@@ -25,10 +25,10 @@
 #include "../../../Windows/PropVariant.h"
 #include "../../../Windows/PropVariantConv.h"
 
-#if defined(_WIN32) && !defined(UNDER_CE)  && !defined(Z7_SFX)
+#if defined(_WIN32) && !defined(UNDER_CE) && !defined(Z7_SFX) && !defined(__WATCOMC__)
 #define Z7_USE_SECURITY_CODE
 #include "../../../Windows/SecurityUtils.h"
-#endif
+#endif //defined(_WIN32) && !defined(UNDER_CE) && !defined(Z7_SFX) && !defined(__WATCOMC__)
 
 #include "../../Common/FilePathAutoRename.h"
 #include "../../Common/StreamUtils.h"
@@ -1970,7 +1970,7 @@ HRESULT CArchiveExtractCallback::CloseFile()
   _curSize = processedSize;
   _curSize_Defined = true;
 
- #if defined(_WIN32) && !defined(UNDER_CE) && !defined(Z7_SFX)
+ #if defined(_WIN32) && !defined(UNDER_CE) && !defined(Z7_SFX) && !defined(__WATCOMC__)
   if (ZoneBuf.Size() != 0
       && !_item.IsAltStream)
   {
@@ -1986,7 +1986,7 @@ HRESULT CArchiveExtractCallback::CloseFile()
       }
     }
   }
- #endif
+ #endif // defined(_WIN32) && !defined(UNDER_CE) && !defined(Z7_SFX) && !defined(__WATCOMC__)
 
   CFiTimesCAM t;
   GetFiTimesCAM(t);
@@ -2136,7 +2136,7 @@ HRESULT CArchiveExtractCallback::SetFromLinkPath(
   }
 
   
-  #ifdef _WIN32
+  #if defined(_WIN32)
   
   CByteBuffer data;
   // printf("\nFillLinkData(): %s\n", GetOemString(existPath).Ptr());
@@ -2164,9 +2164,8 @@ HRESULT CArchiveExtractCallback::SetFromLinkPath(
   linkWasSet = true;
 
   return S_OK;
-  
-  
-  #else // ! _WIN32
+
+  #else
 
   if (!NFile::NIO::SetSymLink(fullProcessedPath, existPath))
   {
@@ -2177,7 +2176,7 @@ HRESULT CArchiveExtractCallback::SetFromLinkPath(
 
   return S_OK;
 
-  #endif // ! _WIN32
+  #endif
 }
 
 

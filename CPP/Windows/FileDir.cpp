@@ -66,7 +66,7 @@ namespace NFile {
 namespace NDir {
 
 #ifdef _WIN32
-
+#ifndef __WATCOMC__
 #ifndef UNDER_CE
 
 bool GetWindowsDir(FString &path)
@@ -122,7 +122,7 @@ bool GetSystemDir(FString &path)
   return (len != 0 && len < kBufSize);
 }
 #endif // UNDER_CE
-
+#endif // __WATCOMC__
 
 bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CFiTime *mTime)
 {
@@ -306,6 +306,7 @@ bool MyMoveFile_with_Progress(CFSTR oldFile, CFSTR newFile,
   return MyMoveFile(oldFile, newFile);
 }
 
+#ifndef __WATCOMC__
 #ifndef UNDER_CE
 #if !defined(Z7_WIN32_WINNT_MIN) || Z7_WIN32_WINNT_MIN < 0x0500  // Win2000
 #define Z7_USE_DYN_CreateHardLink
@@ -321,9 +322,11 @@ typedef BOOL (WINAPI *Func_CreateHardLinkW)(
 EXTERN_C_END
 #endif
 #endif // UNDER_CE
+#endif // __WATCOMC__
 
 bool MyCreateHardLink(CFSTR newFileName, CFSTR existFileName)
 {
+#ifndef__WATCOMC__
   #ifndef _UNICODE
   if (!g_IsNT)
   {
@@ -363,6 +366,7 @@ bool MyCreateHardLink(CFSTR newFileName, CFSTR existFileName)
     }
     #endif
   }
+#endif // __WATCOMC__
   return false;
 }
 

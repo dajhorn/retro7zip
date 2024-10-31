@@ -168,6 +168,12 @@ UString CArchivePath::GetFinalVolPath() const
 
 FString CArchivePath::GetTempPath() const
 {
+#if defined(__WATCOMC__)
+  /* @FIXME: The fullpath must be 8.3 conformant. */
+  FString path = TempPrefix;
+  path += "7z.tmp";
+  return path;
+#else
   FString path = TempPrefix;
   path += us2fs(Name);
   if (!BaseExtension.IsEmpty())
@@ -178,6 +184,7 @@ FString CArchivePath::GetTempPath() const
   path += ".tmp";
   path += TempPostfix;
   return path;
+#endif // defined(__WATCOMC__)
 }
 
 static const char * const kDefaultArcType = "7z";
@@ -557,7 +564,7 @@ static HRESULT Compress(
             else
               stat.NumDirs++;
           }
-         #ifdef _WIN32
+         #if defined(_WIN32) && !defined(__WATCOMC__)
           else if (di.IsAltStream)
           {
             if (up.IsAnti)
@@ -1027,7 +1034,7 @@ static HRESULT EnumerateInArchiveItems(
   return S_OK;
 }
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 #if defined(__MINGW32__) || defined(__MINGW64__)
 #include <mapi.h>
@@ -1093,7 +1100,7 @@ typedef Z7_WIN_MAPISENDMAILW FAR *Z7_WIN_LPMAPISENDMAILW;
 
 #endif // MAPI_FORCE_UNICODE
 }
-#endif // _WIN32
+#endif // defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 
 struct C_CopyFileProgress_to_IUpdateCallbackUI2 Z7_final:
@@ -1166,6 +1173,9 @@ HRESULT UpdateArchive(
 
   if (options.SfxMode)
   {
+#if defined(__WATCOMC__)
+    return E_NOTIMPL;
+#else
     CProperty property;
     property.Name = "rsfx";
     options.MethodMode.Properties.Add(property);
@@ -1189,6 +1199,7 @@ HRESULT UpdateArchive(
       if (!NFind::DoesFileExist_FollowLink(options.SfxModule))
         return errorInfo.SetFromLastError("cannot find specified SFX module", options.SfxModule);
     }
+#endif // defined(__WATCOMC__)
   }
 
   CArchiveLink arcLink;
@@ -1380,7 +1391,7 @@ HRESULT UpdateArchive(
 
       dirItems.SymLinks = options.SymLinks.Val;
 
-      #if defined(_WIN32) && !defined(UNDER_CE)
+      #if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
       dirItems.ReadSecure = options.NtSecurity.Val;
       #endif
 
@@ -1429,7 +1440,7 @@ HRESULT UpdateArchive(
             parentDirItem_Ptr = &parentDirItem;
 
             int secureIndex = -1;
-            #if defined(_WIN32) && !defined(UNDER_CE)
+            #if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
             if (options.NtSecurity.Val)
               dirItems.AddSecurityItem(prefix, secureIndex);
             #endif
@@ -1697,7 +1708,7 @@ HRESULT UpdateArchive(
   }
 
 
-  #if defined(_WIN32) && !defined(UNDER_CE)
+  #if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 Z7_DIAGNOSTIC_IGNORE_CAST_FUNCTION
   

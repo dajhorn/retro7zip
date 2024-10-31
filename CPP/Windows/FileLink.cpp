@@ -109,7 +109,7 @@ static const bool IsVolumeName(const wchar_t *s)
 }
 */
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 #define Set16(p, v) SetUi16(p, v)
 #define Set32(p, v) SetUi32(p, v)
@@ -221,7 +221,7 @@ bool FillLinkData(CByteBuffer &dest, const wchar_t *path, bool isSymLink, bool i
   return true;
 }
 
-#endif // defined(_WIN32) && !defined(UNDER_CE)
+#endif // defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 
 static void GetString(const Byte *p, unsigned len, UString &res)
@@ -442,7 +442,7 @@ bool MyGetDiskFreeSpace(CFSTR rootPath, UInt64 &clusterSize, UInt64 &totalSize, 
 }
 #endif // Z7_DEVICE_FILE
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 namespace NIO {
 
@@ -548,10 +548,10 @@ bool DeleteReparseData(CFSTR path)
 
 }
 
-#endif //  defined(_WIN32) && !defined(UNDER_CE)
+#endif //  defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 
-#ifndef _WIN32
+#if defined(_WIN32) && !defined(__WATCOMC__)
 
 namespace NIO {
 

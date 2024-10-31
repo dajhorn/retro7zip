@@ -6,6 +6,7 @@ Igor Pavlov : Public domain */
 #include "Aes.h"
 #include "CpuArch.h"
 
+#if !defined(__WATCOMC__)
 #ifdef MY_CPU_X86_OR_AMD64
 
   #if defined(__INTEL_COMPILER)
@@ -49,6 +50,7 @@ Igor Pavlov : Public domain */
     #ifndef USE_INTEL_VAES
       // #define Z7_USE_VAES_HW_STUB // for debug
     #endif
+#endif // !defined(__WATCOMC__)
 
 
 #ifdef USE_INTEL_AES

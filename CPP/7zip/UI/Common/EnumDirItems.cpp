@@ -17,7 +17,7 @@
 #include "../../../Windows/FileIO.h"
 #include "../../../Windows/FileName.h"
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 #define Z7_USE_SECURITY_CODE
 #include "../../../Windows/SecurityUtils.h"
 #endif
@@ -76,13 +76,13 @@ void CDirItems::AddDirFileInfo(int phyParent, int logParent, int secureIndex,
   
   if (fi.IsDir())
     Stat.NumDirs++;
- #ifdef _WIN32
+ #if defined(_WIN32) && !defined(__WATCOMC__)
   else if (fi.IsAltStream)
   {
     Stat.NumAltStreams++;
     Stat.AltStreamsSize += fi.Size;
   }
- #endif
+ #endif // defined(_WIN32) && !defined(__WATCOMC__)
   else
   {
     Stat.NumFiles++;
@@ -175,7 +175,9 @@ void CDirItems::DeleteLastPrefix()
   Prefixes.DeleteBack();
 }
 
+#ifdef Z7_USE_SECURITY_CODE
 bool InitLocalPrivileges();
+#endif
 
 CDirItems::CDirItems():
     SymLinks(false),
@@ -410,10 +412,10 @@ HRESULT CDirItems::EnumerateItems2(
   const int phyParent = phyPrefix.IsEmpty() ? -1 : (int)AddPrefix(-1, -1, fs2us(phyPrefix));
   const int logParent = logPrefix.IsEmpty() ? -1 : (int)AddPrefix(-1, -1, logPrefix);
 
- #ifdef _WIN32
+ #if defined(_WIN32) && !defined(__WATCOMC__)
   const bool phyPrefix_isAltStreamPrefix =
       NFile::NName::IsAltStreamPrefixWithColon(fs2us(phyPrefix));
- #endif
+ #endif // defined(_WIN32) && !defined(__WATCOMC__)
 
   FOR_VECTOR (i, filePaths)
   {
@@ -446,14 +448,14 @@ HRESULT CDirItems::EnumerateItems2(
       RINOK(AddSecurityItem(phyPath, secureIndex))
     }
     #endif
-   #ifdef _WIN32
+#if defined(_WIN32) && !defined(__WATCOMC__)
     if (phyPrefix_isAltStreamPrefix && fi.IsAltStream)
     {
       const int pos = fi.Name.Find(FChar(':'));
       if (pos >= 0)
         fi.Name.DeleteFrontal((unsigned)pos + 1);
     }
-   #endif
+#endif // defined(_WIN32) && !defined(__WATCOMC__)
     AddDirFileInfo(phyParentCur, logParent, secureIndex, fi);
     }
     
@@ -512,7 +514,7 @@ static HRESULT EnumerateDirItems_Spec(
 }
 
 
-#ifndef UNDER_CE
+#if !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 #ifdef _WIN32
 
@@ -573,13 +575,14 @@ HRESULT CDirItems::SetLinkInfo(CDirItem &dirItem, const NFind::CFileInfo &fi,
   if (!SymLinks)
     return S_OK;
 
+#if !defined(__WATCOMC__)
   #ifdef _WIN32
     if (!fi.HasReparsePoint() || fi.IsAltStream)
   #else // _WIN32
     if (!fi.IsPosixLink())
   #endif // _WIN32
       return S_OK;
-
+#endif // !defined(__WATCOMC__)
   const FString path = phyPrefix + fi.Name;
   CByteBuffer &buf = dirItem.ReparseData;
   if (NIO::GetReparseData(path, buf))
@@ -594,7 +597,7 @@ HRESULT CDirItems::SetLinkInfo(CDirItem &dirItem, const NFind::CFileInfo &fi,
   return AddError(path, res);
 }
 
-#endif // UNDER_CE
+#endif // !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 
 
@@ -616,10 +619,10 @@ static HRESULT EnumerateForItem(
 
   #if !defined(UNDER_CE)
   int dirItemIndex = -1;
-  #if defined(_WIN32)
+  #if defined(_WIN32) && !defined(__WATCOMC__)
   bool addAllSubStreams = false;
   bool needAltStreams = true;
-  #endif // _WIN32
+  #endif // defined(_WIN32) && !defined(__WATCOMC__)
   #endif // !defined(UNDER_CE)
 
   // check the path in inlcude rules
@@ -627,10 +630,10 @@ static HRESULT EnumerateForItem(
   {
     #if !defined(UNDER_CE)
     // dirItemIndex = (int)dirItems.Items.Size();
-    #if defined(_WIN32)
+    #if defined(_WIN32) && !defined(__WATCOMC__)
     // we will not check include rules for substreams.
     addAllSubStreams = true;
-    #endif // _WIN32
+    #endif // defined(_WIN32) && !defined(__WATCOMC__)
     #endif // !defined(UNDER_CE)
 
     if (dirItems.CanIncludeItem(fi.IsDir()))
@@ -649,7 +652,7 @@ static HRESULT EnumerateForItem(
     }
     else
     {
-      #if defined(_WIN32) && !defined(UNDER_CE)
+      #if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
         needAltStreams = false;
       #endif
     }
@@ -658,7 +661,7 @@ static HRESULT EnumerateForItem(
       enterToSubFolders = true;
   }
 
-  #if !defined(UNDER_CE)
+#if !defined(UNDER_CE) && !defined(__WATCOMC__)
   
   // we don't scan AltStreams for link files
 
@@ -681,7 +684,7 @@ static HRESULT EnumerateForItem(
   }
   #endif
 
-  #endif // !defined(UNDER_CE)
+#endif // !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 
   #ifndef _WIN32
@@ -714,7 +717,6 @@ static HRESULT EnumerateForItem(
       // if the link to dir, then can we follow it
       return S_OK; // we don't follow posix link
     }
-   #else
     if (dirItems.SymLinks && fi.HasReparsePoint())
     {
       /* 20.03: in SymLinks mode: we don't enter to directory that
@@ -725,7 +727,7 @@ static HRESULT EnumerateForItem(
       */
       return S_OK;
     }
-   #endif
+    #endif // !defined(_WIN32)
     nextNode = &curNode;
   }
   
@@ -825,7 +827,7 @@ static HRESULT EnumerateDirItems(
         }
         */
 
-        #if defined(_WIN32) && !defined(UNDER_CE)
+        #if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
         bool needAltStreams = true;
         #endif
 
@@ -843,7 +845,7 @@ static HRESULT EnumerateDirItems(
                So we ignore alt streams for these cases */
             if (name.IsEmpty())
             {
-              #if defined(_WIN32) && !defined(UNDER_CE)
+              #if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
               needAltStreams = false;
               #endif
 
@@ -856,13 +858,13 @@ static HRESULT EnumerateDirItems(
 
               fullPath = CHAR_PATH_SEPARATOR;
             }
-            #if defined(_WIN32) && !defined(UNDER_CE)
+            #if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
             else if (item.IsDriveItem())
             {
               needAltStreams = false;
               fullPath.Add_PathSepar();
             }
-            #endif
+            #endif // defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
           }
         }
 
@@ -920,7 +922,7 @@ static HRESULT EnumerateDirItems(
 
         // we don't scan AltStreams for link files
 
-        #if !defined(UNDER_CE)
+        #if !defined(UNDER_CE) && !defined(__WATCOMC__)
         {
           CDirItem &dirItem = dirItems.Items.Back();
           RINOK(dirItems.SetLinkInfo(dirItem, fi, phyPrefix))
@@ -941,7 +943,7 @@ static HRESULT EnumerateDirItems(
         }
         #endif // defined(_WIN32)
 
-        #endif // !defined(UNDER_CE)
+        #endif // !defined(UNDER_CE) && !defined(__WATCOMC__)
        }
 
 
@@ -970,7 +972,6 @@ static HRESULT EnumerateDirItems(
             // if the link to dir, then can we follow it
             continue; // we don't follow posix link
           }
-         #else
           if (dirItems.SymLinks)
           {
             if (fi.HasReparsePoint())
@@ -1188,7 +1189,7 @@ HRESULT EnumerateItems(
   }
   dirItems.ReserveDown();
 
- #if defined(_WIN32) && !defined(UNDER_CE)
+ #if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
   RINOK(dirItems.FillFixedReparse())
  #endif
 
@@ -1200,7 +1201,7 @@ HRESULT EnumerateItems(
 }
 
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 HRESULT CDirItems::FillFixedReparse()
 {
@@ -1333,7 +1334,7 @@ HRESULT CDirItems::FillFixedReparse()
   return S_OK;
 }
 
-#endif
+#endif // defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 
 #ifndef _WIN32

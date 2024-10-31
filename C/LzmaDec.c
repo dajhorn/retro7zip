@@ -663,8 +663,10 @@ We use early check of (RangeCoder:Code) over kBadRepCode to simplify main decodi
 #define kRange0 0xFFFFFFFF
 #define kBound0 ((kRange0 >> kNumBitModelTotalBits) << (kNumBitModelTotalBits - 1))
 #define kBadRepCode (kBound0 + (((kRange0 - kBound0) >> kNumBitModelTotalBits) << (kNumBitModelTotalBits - 1)))
+#if !defined(__WATCOMC__)
 #if kBadRepCode != (0xC0000000 - 0x400)
   #error Stop_Compiling_Bad_LZMA_Check
+#endif // !defined(__WATCOMC__)
 #endif
 
 

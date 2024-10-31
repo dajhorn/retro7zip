@@ -1187,23 +1187,31 @@ HRESULT ListArchives(
       g_StdOut.NormalizePrint_UString_Path(arcPath);
       g_StdOut << endl << endl;
     }
-    
+
     HRESULT result = arcLink.Open_Strict(options, &openCallback);
 
     if (result != S_OK)
     {
-      if (result == E_ABORT)
+
+      if (result == E_ABORT) {
+
         return result;
-      if (result != S_FALSE)
+      }
+      if (result != S_FALSE) {
+
         lastError = result;
+      }
       g_StdOut.Flush();
       if (g_ErrStream)
       {
+
         *g_ErrStream << endl << kError;
         g_ErrStream->NormalizePrint_UString_Path(arcPath);
         *g_ErrStream << " : ";
+
         if (result == S_FALSE)
         {
+
           Print_OpenArchive_Error(*g_ErrStream, codecs, arcLink);
         }
         else

@@ -430,22 +430,22 @@ void CInFile::CalcDeviceSize(CFSTR s)
 bool CInFile::Open(CFSTR fileName, DWORD shareMode, DWORD creationDisposition, DWORD flagsAndAttributes)
 {
   DWORD desiredAccess = GENERIC_READ;
-  
-  #ifdef _WIN32
+
+#if defined(_WIN32) && !defined(__WATCOMC__)
   if (PreserveATime)
     desiredAccess |= FILE_WRITE_ATTRIBUTES;
-  #endif
-  
+#endif // defined(_WIN32) && !defined(__WATCOMC__)
+
   bool res = Create(fileName, desiredAccess, shareMode, creationDisposition, flagsAndAttributes);
 
-  #ifdef _WIN32
+#if defined(_WIN32) && !defined(__WATCOMC__) 
   if (res && PreserveATime)
   {
     FILETIME ft;
     ft.dwHighDateTime = ft.dwLowDateTime = 0xFFFFFFFF;
     ::SetFileTime(_handle, NULL, &ft, NULL);
   }
-  #endif
+#endif // defined(_WIN32) && !defined(__WATCOMC__)
 
   MY_DEVICE_EXTRA_CODE
   return res;

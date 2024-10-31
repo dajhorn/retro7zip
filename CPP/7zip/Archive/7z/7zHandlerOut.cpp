@@ -143,6 +143,21 @@ HRESULT CHandler::SetMainMethod(CCompressionMethodMode &methodMode)
       needSolid = true;
 
     UInt64 dicSize;
+#if defined(__WATCOMC__)
+    if (methodFull.Id == k_LZMA || methodFull.Id == k_LZMA2)
+      dicSize = oneMethodInfo.Get_Lzma_DicSize();
+    else if (methodFull.Id == k_PPMD)
+      dicSize = oneMethodInfo.Get_Ppmd_MemSize();
+    else if (methodFull.Id == k_Deflate)
+      dicSize = (UInt32)1 << 15;
+    else if (methodFull.Id == k_Deflate64)
+      dicSize = (UInt32)1 << 16;
+    else if (methodFull.Id == k_BZip2)
+      dicSize = oneMethodInfo.Get_BZip2_BlockSize();
+    else
+      continue;
+#else
+    /* Error! E870: implementation restriction: cannot use 64-bit value in switch statement */
     switch (methodFull.Id)
     {
       case k_LZMA:
@@ -154,6 +169,7 @@ HRESULT CHandler::SetMainMethod(CCompressionMethodMode &methodMode)
       // case k_ZSTD: dicSize = 1 << 23; break;
       default: continue;
     }
+#endif // defined(__WATCOMC__)
 
     UInt64 numSolidBytes;
 
