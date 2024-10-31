@@ -40,7 +40,7 @@ Also we need IID_IUnknown that is initialized in some file for linking:
 #define INITGUID
 #include <initguid.h>
 
-#ifdef UNDER_CE
+#if defined(UNDER_CE) || defined(__DOS__)
 DEFINE_GUID(IID_IUnknown,
 0x00000000, 0x0000, 0x0000, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46);
 #endif
