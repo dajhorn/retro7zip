@@ -8,8 +8,13 @@
 // #include <grp.h>
 // #include <pwd.h>
 // for major()/minor():
-#if defined(__APPLE__) || defined(__DragonFly__) || \
-    defined(BSD) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__APPLE__)     || \
+    defined(__DragonFly__) || \
+    defined(__FreeBSD__)   || \
+    defined(__NetBSD__)    || \
+    defined(__OpenBSD__)   || \
+    defined(__WATCOMC__)   || \
+    defined(BSD)
 #include <sys/types.h>
 #else
 #include <sys/sysmacros.h>
