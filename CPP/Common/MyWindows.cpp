@@ -209,7 +209,7 @@ VOID WINAPI GetSystemTimeAsFileTime(FILETIME *ft)
 
 DWORD WINAPI GetTickCount(VOID)
 {
-  #ifndef _WIN32
+  #if !defned(_WIN32) && !defined(__DOS__)
   // gettimeofday() doesn't work in some MINGWs by unknown reason
   timeval tv;
   if (gettimeofday(&tv, NULL) == 0)
