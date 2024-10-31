@@ -122,11 +122,14 @@ DECLARE_AND_SET_CLIENT_VERSION_VAR
   #define PROG_POSTFIX_2  ""
 #endif
 
-
-static const char * const kCopyrightString = "\n7-Zip"
-  PROG_POSTFIX_2
-  " " MY_VERSION_CPU
-  " : " MY_COPYRIGHT_DATE "\n";
+static const char * const kCopyrightString = "\n7-Zip " MY_VERSION
+#if defined(Z7_PROG_VARIANT_A)
+  " aggregate"
+#endif // defined(Z7_PROG_VARIANT_A)
+#if defined(Z7_PROG_VARIANT_R)
+  " reduced"
+#endif // defined(Z7_PROG_VARIANT_R)
+  " for DOS : " MY_COPYRIGHT_DATE "\n";
 
 static const char * const kHelpString =
     "Usage: 7z"
