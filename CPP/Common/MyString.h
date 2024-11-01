@@ -46,7 +46,7 @@ class FString;
               /Zc:wchar_t is on by default
 */
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__DOS__) 
 #define IS_PATH_SEPAR(c) ((c) == '\\' || (c) == '/')
 #else
 #define IS_PATH_SEPAR(c) ((c) == CHAR_PATH_SEPARATOR)

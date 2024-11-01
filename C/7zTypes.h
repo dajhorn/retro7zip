@@ -571,7 +571,7 @@ struct ISzAlloc
 #endif
 
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__DOS__)
 
 #define CHAR_PATH_SEPARATOR '\\'
 #define WCHAR_PATH_SEPARATOR L'\\'
