@@ -15,6 +15,10 @@
 
 #include "OpenArchive.h"
 
+#if defined(__WATCOMC__)
+#include "../../../Common/MyVector.h"
+#endif // defined(__WATCOMC__)
+
 struct CArcToDoStat
 {
   CDirItemsStat2 NewData;
@@ -177,14 +181,18 @@ public:
 
   bool IsDir(const CUpdatePair2 &up) const
   {
-    return false;
-    /* @FIXME: __WATCOM__ quirks
     if (up.DirIndex >= 0)
       return DirItems->Items[(unsigned)up.DirIndex].IsDir();
     else if (up.ArcIndex >= 0)
+#if defined(__WATCOMC__)
+    {
+      const CObjectVector<CArcItem>& owc_shim = *ArcItems;
+      return owc_shim[(unsigned)up.ArcIndex].IsDir;
+    }
+#else
       return (*ArcItems)[(unsigned)up.ArcIndex].IsDir;
+#endif // defined(__WATCOMC__)
     return false;
-    */
   }
 
 private:

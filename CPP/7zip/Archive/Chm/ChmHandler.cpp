@@ -261,7 +261,12 @@ void CChmFolderOutStream::Init(
 
 HRESULT CChmFolderOutStream::OpenFile()
 {
+#if defined(__WATCOMC__)
+  const CRecordVector<bool>& shim = *m_ExtractStatuses;
+  Int32 askMode = shim[m_CurrentIndex] ? m_TestMode ?
+#else
   Int32 askMode = (*m_ExtractStatuses)[m_CurrentIndex] ? m_TestMode ?
+#endif // defined(__WATCOMC__)
       NExtract::NAskMode::kTest :
       NExtract::NAskMode::kExtract :
       NExtract::NAskMode::kSkip;
