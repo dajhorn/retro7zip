@@ -1,4 +1,4 @@
-// PropVariantConv.cpp
+// 7-Zip PropVariantConv.cpp for DOS
 
 #include "StdAfx.h"
 
@@ -12,21 +12,12 @@
 static const unsigned k_TimeStringBufferSize = 64;
 
 bool g_Timestamp_Show_UTC;
-#if 0
-bool g_Timestamp_Show_DisableZ;
-bool g_Timestamp_Show_TDelimeter;
-bool g_Timestamp_Show_ZoneOffset;
-#endif
 
 Z7_NO_INLINE
 bool ConvertUtcFileTimeToString2(const FILETIME &utc, unsigned ns100, char *s, int level, unsigned flags) throw()
 {
   *s = 0;
   FILETIME ft;
-
-#if 0
-  Int64 bias64 = 0;
-#endif
 
   const bool show_utc =
       (flags & kTimestampPrintFlags_Force_UTC) ? true :
@@ -39,14 +30,6 @@ bool ConvertUtcFileTimeToString2(const FILETIME &utc, unsigned ns100, char *s, i
   {
     if (!FileTimeToLocalFileTime(&utc, &ft))
       return false;
-#if 0
-    if (g_Timestamp_Show_ZoneOffset)
-    {
-      const UInt64 utc64 = (((UInt64)utc.dwHighDateTime) << 32) + utc.dwLowDateTime;
-      const UInt64 loc64 = (((UInt64) ft.dwHighDateTime) << 32) +  ft.dwLowDateTime;
-      bias64 = (Int64)utc64 - (Int64)loc64;
-    }
-#endif
   }
 
   SYSTEMTIME st;
@@ -74,11 +57,7 @@ bool ConvertUtcFileTimeToString2(const FILETIME &utc, unsigned ns100, char *s, i
   
   if (level > kTimestampPrintLevel_DAY)
   {
-    const char setChar =
-#if 0
-      g_Timestamp_Show_TDelimeter ? 'T' : // ISO 8601
-#endif
-      ' ';
+    const char setChar = ' ';
     UINT_TO_STR_2(setChar, st.wHour)
     UINT_TO_STR_2(':', st.wMinute)
     
@@ -124,50 +103,10 @@ bool ConvertUtcFileTimeToString2(const FILETIME &utc, unsigned ns100, char *s, i
   
   if (show_utc)
   {
-    if ((flags & kTimestampPrintFlags_DisableZ) == 0
-#if 0
-      && !g_Timestamp_Show_DisableZ
-#endif
-      )
+    if ((flags & kTimestampPrintFlags_DisableZ) == 0)
       *s++ = 'Z';
   }
-#if 0
-  else if (g_Timestamp_Show_ZoneOffset)
-  {
-#if 1
-    {
-      char c;
-      if (bias64 < 0)
-      {
-        bias64 = -bias64;
-        c = '+';
-      }
-      else
-        c = '-';
-      UInt32 bias = (UInt32)((UInt64)bias64 / (10000000 * 60));
-#else
-    TIME_ZONE_INFORMATION zi;
-    const DWORD dw = GetTimeZoneInformation(&zi);
-    if (dw <= TIME_ZONE_ID_DAYLIGHT) // == 2
-    {
-      // UTC = LOCAL + Bias
-      Int32 bias = zi.Bias;
-      char c;
-      if (bias < 0)
-      {
-        bias = -bias;
-        c = '+';
-      }
-      else
-        c = '-';
-#endif
-      const UInt32 hours = (UInt32)bias / 60;
-      const UInt32 mins = (UInt32)bias % 60;
-      UINT_TO_STR_2(c, hours)
-      UINT_TO_STR_2(':', mins)
-    }
-  }
-#endif
+
   *s = 0;
   return true;
 }

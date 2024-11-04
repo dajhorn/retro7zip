@@ -15,7 +15,11 @@
 #include "Common/DummyOutStream.h"
 #include "Common/HandlerOut.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
 using namespace NWindows;
+#endif // defined(__DOS__)
 
 namespace NArchive {
 namespace NBz2 {

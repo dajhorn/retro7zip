@@ -7,7 +7,13 @@
 #include "../../Common/ComTry.h"
 #include "../../Common/IntToString.h"
 
+#if defined(__DOS__)
+#include "../../DOS/PropVariant.h"
+using namespace NDOS;
+#else
 #include "../../Windows/PropVariant.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../Common/FilterCoder.h"
 #include "../Common/ProgressUtils.h"
@@ -18,8 +24,6 @@
 #include "../Compress/LzmaDecoder.h"
 
 #include "Common/DummyOutStream.h"
-
-using namespace NWindows;
 
 namespace NArchive {
 namespace NLzma {

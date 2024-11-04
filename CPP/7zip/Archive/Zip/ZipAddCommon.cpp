@@ -5,7 +5,13 @@
 #include "../../../../C/7zCrc.h"
 #include "../../../../C/Alloc.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/PropVariant.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/PropVariant.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../ICoder.h"
 #include "../../IPassword.h"
@@ -431,7 +437,7 @@ HRESULT CAddCommon::Compress(
           if (optProps)
           {
             const PROPID propID = NCoderPropID::kExpectedDataSize;
-            NWindows::NCOM::CPropVariant prop = (UInt64)expectedDataSize;
+            NCOM::CPropVariant prop = (UInt64)expectedDataSize;
             RINOK(optProps->SetCoderPropertiesOpt(&propID, &prop, 1))
           }
         }

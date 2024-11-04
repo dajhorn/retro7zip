@@ -4,7 +4,13 @@
 
 #include "../../../Common/IntToString.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/FileName.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/FileName.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "ConsoleClose.h"
 #include "HashCon.h"
@@ -43,7 +49,7 @@ HRESULT CHashCallbackConsole::ScanProgress(const CDirItemsStat &st, const FStrin
     _percent.Completed = st.GetTotalBytes();
     _percent.FileName = fs2us(path);
     if (isDir)
-      NWindows::NFile::NName::NormalizeDirPathPrefix(_percent.FileName);
+      NFile::NName::NormalizeDirPathPrefix(_percent.FileName);
     _percent.Print();
   }
   return CheckBreak2();
@@ -230,7 +236,7 @@ HRESULT CHashCallbackConsole::GetStream(const wchar_t *name, bool isDir)
 {
   _fileName = name;
   if (isDir)
-    NWindows::NFile::NName::NormalizeDirPathPrefix(_fileName);
+    NFile::NName::NormalizeDirPathPrefix(_fileName);
 
   if (NeedPercents())
   {

@@ -18,12 +18,23 @@
 #include "../../../Common/UTFConvert.h"
 #include "../../../Common/Wildcard.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/ErrorMsg.h"
+#include "../../../DOS/FileDir.h"
+#include "../../../DOS/FileFind.h"
+#include "../../../DOS/FileName.h"
+#include "../../../DOS/PropVariant.h"
+#include "../../../DOS/PropVariantConv.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/ErrorMsg.h"
 #include "../../../Windows/FileDir.h"
 #include "../../../Windows/FileFind.h"
 #include "../../../Windows/FileName.h"
 #include "../../../Windows/PropVariant.h"
 #include "../../../Windows/PropVariantConv.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #if defined(_WIN32) && !defined(UNDER_CE) && !defined(Z7_SFX) && !defined(__WATCOMC__)
 #define Z7_USE_SECURITY_CODE
@@ -38,7 +49,6 @@
 
 #include "ArchiveExtractCallback.h"
 
-using namespace NWindows;
 using namespace NFile;
 using namespace NDir;
 
@@ -956,7 +966,7 @@ static HRESULT GetOwner(IInArchive *archive,
     UInt32 index, UInt32 pidName, UInt32 pidId, COwnerInfo &res)
 {
   {
-    NWindows::NCOM::CPropVariant prop;
+    NCOM::CPropVariant prop;
     RINOK(archive->GetProperty(index, pidId, &prop))
     if (prop.vt == VT_UI4)
     {
@@ -970,7 +980,7 @@ static HRESULT GetOwner(IInArchive *archive,
       return E_INVALIDARG;
   }
   {
-    NWindows::NCOM::CPropVariant prop;
+    NCOM::CPropVariant prop;
     RINOK(archive->GetProperty(index, pidName, &prop))
     if (prop.vt == VT_BSTR)
     {

@@ -44,7 +44,13 @@ you should undefine it after including <sys/types.h>
 
 #endif // _WIN32
 
+#if defined(__DOS__)
+#include "../../DOS/FileFind.h"
+using namespace NDOS;
+#else
 #include "../../Windows/FileFind.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #ifdef Z7_DEVICE_FILE
 #include "../../../C/Alloc.h"
@@ -490,7 +496,7 @@ Z7_COM7F_IMF(CInFileStream::GetProperty(PROPID propID, PROPVARIANT *value))
   if (!_info_WasLoaded)
     return S_OK;
 
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
 
  #ifdef Z7_DEVICE_FILE
   if (File.IsDeviceFile)
@@ -504,8 +510,7 @@ Z7_COM7F_IMF(CInFileStream::GetProperty(PROPID propID, PROPVARIANT *value))
       // case kpidAttrib: prop = (UInt32)0; break;
       case kpidPosixAttrib:
       {
-        prop = (UInt32)NWindows::NFile::NFind::NAttributes::
-            Get_PosixMode_From_WinAttrib(0);
+        prop = (UInt32)NFile::NFind::NAttributes::Get_PosixMode_From_WinAttrib(0);
         /* GNU TAR by default can't extract file with MY_LIN_S_IFBLK attribute
            so we don't use MY_LIN_S_IFBLK here */
         // prop = (UInt32)(MY_LIN_S_IFBLK | 0600); // for debug
@@ -537,8 +542,7 @@ Z7_COM7F_IMF(CInFileStream::GetProperty(PROPID propID, PROPVARIANT *value))
       case kpidATime:  PropVariant_SetFrom_FiTime(prop, _info.ftLastAccessTime); break;
       case kpidMTime:  PropVariant_SetFrom_FiTime(prop, _info.ftLastWriteTime); break;
       case kpidPosixAttrib:
-        prop = (UInt32)NWindows::NFile::NFind::NAttributes::
-            Get_PosixMode_From_WinAttrib(_info.dwFileAttributes);
+        prop = (UInt32)NFile::NFind::NAttributes::Get_PosixMode_From_WinAttrib(_info.dwFileAttributes);
             // | (UInt32)(1 << 21); // for debug
         break;
     }
@@ -616,7 +620,7 @@ Z7_COM7F_IMF(CInFileStream::GetProps(UInt64 *size, FILETIME *cTime, FILETIME *aT
   if (cTime) FiTime_To_FILETIME (ST_CTIME(st), *cTime);
   if (aTime) FiTime_To_FILETIME (ST_ATIME(st), *aTime);
   if (mTime) FiTime_To_FILETIME (ST_MTIME(st), *mTime);
-  if (attrib) *attrib = NWindows::NFile::NFind::Get_WinAttribPosix_From_PosixMode(st.st_mode);
+  if (attrib) *attrib = NFile::NFind::Get_WinAttribPosix_From_PosixMode(st.st_mode);
 
   return S_OK;
 }
@@ -647,7 +651,7 @@ Z7_COM7F_IMF(CInFileStream::GetProps2(CStreamFileProps *props))
   props->FileID_Low = st.st_ino;
   props->FileID_High = 0;
   props->NumLinks = (UInt32)st.st_nlink; // we reduce to UInt32 from (nlink_t) that is (unsigned long)
-  props->Attrib = NWindows::NFile::NFind::Get_WinAttribPosix_From_PosixMode(st.st_mode);
+  props->Attrib = NFile::NFind::Get_WinAttribPosix_From_PosixMode(st.st_mode);
 
   FiTime_To_FILETIME (ST_CTIME(st), props->CTime);
   FiTime_To_FILETIME (ST_ATIME(st), props->ATime);
@@ -677,13 +681,13 @@ Z7_COM7F_IMF(CInFileStream::GetProperty(PROPID propID, PROPVARIANT *value))
 
   const struct stat &st = _info;
 
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   {
     switch (propID)
     {
       case kpidSize: prop = (UInt64)st.st_size; break;
       case kpidAttrib:
-        prop = (UInt32)NWindows::NFile::NFind::Get_WinAttribPosix_From_PosixMode(st.st_mode);
+        prop = (UInt32)NFile::NFind::Get_WinAttribPosix_From_PosixMode(st.st_mode);
         break;
       case kpidCTime:  PropVariant_SetFrom_FiTime(prop, ST_CTIME(st)); break;
       case kpidATime:  PropVariant_SetFrom_FiTime(prop, ST_ATIME(st)); break;

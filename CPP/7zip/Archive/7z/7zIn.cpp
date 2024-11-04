@@ -29,7 +29,12 @@
 #define FORMAT_7Z_RECOVERY
 #endif
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
 using namespace NWindows;
+#endif // defined(__DOS__)
+
 using namespace NCOM;
 
 unsigned BoolVector_CountSum(const CBoolVector &v);

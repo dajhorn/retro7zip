@@ -1,7 +1,7 @@
-// Windows/PropVariantConv.h
+// 7-Zip PropVariantConv.h for DOS
 
-#ifndef ZIP7_INC_PROP_VARIANT_CONV_H
-#define ZIP7_INC_PROP_VARIANT_CONV_H
+#ifndef ZIP7_INC_DOS_PROP_VARIANT_CONV_H
+#define ZIP7_INC_DOS_PROP_VARIANT_CONV_H
 
 #include "../Common/MyTypes.h"
 
@@ -44,4 +44,4 @@ inline bool ConvertPropVariantToUInt64(const PROPVARIANT &prop, UInt64 &value)
   }
 }
 
-#endif
+#endif // ZIP7_INC_DOS_PROP_VARIANT_CONV_H

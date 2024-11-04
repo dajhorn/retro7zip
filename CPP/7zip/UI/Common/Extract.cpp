@@ -4,11 +4,21 @@
 
 #include "../../../Common/StringConvert.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/FileDir.h"
+#include "../../../DOS/FileName.h"
+#include "../../../DOS/ErrorMsg.h"
+#include "../../../DOS/PropVariant.h"
+#include "../../../DOS/PropVariantConv.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/FileDir.h"
 #include "../../../Windows/FileName.h"
 #include "../../../Windows/ErrorMsg.h"
 #include "../../../Windows/PropVariant.h"
 #include "../../../Windows/PropVariantConv.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../Common/ExtractingFilePath.h"
 #include "../Common/HashCalc.h"
@@ -16,7 +26,6 @@
 #include "Extract.h"
 #include "SetProperties.h"
 
-using namespace NWindows;
 using namespace NFile;
 using namespace NDir;
 

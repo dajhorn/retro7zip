@@ -20,7 +20,11 @@
 #include "EnumDirItems.h"
 #include "HashCalc.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
 using namespace NWindows;
+#endif // defined(__DOS__)
 
 #ifdef Z7_EXTERNAL_CODECS
 extern const CExternalCodecs *g_ExternalCodecs_Ptr;

@@ -13,13 +13,21 @@
 
 #include "../../Common/ComTry.h"
 
+#if defined(__DOS__)
+#include <stdio.h>
+#include "../../DOS/FileDir.h"
+#include "../../DOS/FileFind.h"
+#include "../../DOS/System.h"
+using namespace NDOS;
+#else
 #include "../../Windows/FileDir.h"
 #include "../../Windows/FileFind.h"
 #include "../../Windows/System.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "MultiOutStream.h"
 
-using namespace NWindows;
 using namespace NFile;
 using namespace NDir;
 
@@ -106,7 +114,12 @@ void CMultiOutStream::Init(const CRecordVector<UInt64> &sizes)
   NeedDelete = true;
   MTime_Defined = false;
   FinalVol_WasReopen = false;
+#if defined(__DOS__)
+  // @FIXME: Open Watcom v2 glitch.
+  NumOpenFiles_AllowedMax = FOPEN_MAX;
+#else
   NumOpenFiles_AllowedMax = NSystem::Get_File_OPEN_MAX_Reduced_for_3_tasks();
+#endif // defined(__DOS__)
 
   _streamIndex = 0;
   _offsetPos = 0;

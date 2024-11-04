@@ -4,7 +4,14 @@
 
 #include "../../../../C/7zCrc.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/TimeUtils.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/TimeUtils.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
+
 #include "../../Common/OffsetStream.h"
 
 #include "ZipOut.h"
@@ -153,7 +160,7 @@ void COutArchive::WriteTimeExtra(const CItemOut &item, bool writeNtfs)
     const Byte flags = (Byte)((unsigned)1 << NFileHeader::NUnixTime::kMTime);
     Write8(flags);
     UInt32 unixTime;
-    NWindows::NTime::FileTime_To_UnixTime(item.Ntfs_MTime, unixTime);
+    NTime::FileTime_To_UnixTime(item.Ntfs_MTime, unixTime);
     Write32(unixTime);
   }
 }

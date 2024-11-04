@@ -15,9 +15,17 @@
 
 #include "../../../Common/Wildcard.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/FileDir.h"
+#include "../../../DOS/FileIO.h"
+#include "../../../DOS/FileName.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/FileDir.h"
 #include "../../../Windows/FileIO.h"
 #include "../../../Windows/FileName.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 #define Z7_USE_SECURITY_CODE
@@ -27,7 +35,6 @@
 #include "EnumDirItems.h"
 #include "SortUtils.h"
 
-using namespace NWindows;
 using namespace NFile;
 using namespace NName;
 

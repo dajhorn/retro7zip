@@ -1,12 +1,15 @@
 // FilePathAutoRename.cpp
 
 #include "StdAfx.h"
-
-#include "../../Windows/FileFind.h"
-
 #include "FilePathAutoRename.h"
 
+#if defined(__DOS__)
+#include "../../DOS/FileFind.h"
+using namespace NDOS;
+#else
+#include "../../Windows/FileFind.h"
 using namespace NWindows;
+#endif // defined(__DOS__)
 
 static bool MakeAutoName(const FString &name,
     const FString &extension, UInt32 value, FString &path)

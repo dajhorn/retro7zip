@@ -64,7 +64,7 @@ HRESULT UpdateArchive(IInStream *inStream, ISequentialOutStream *outStream,
 HRESULT GetPropString(IArchiveUpdateCallback *callback, UInt32 index, PROPID propId, AString &res,
     UINT codePage, unsigned utfFlags, bool convertSlash);
 
-HRESULT Prop_To_PaxTime(const NWindows::NCOM::CPropVariant &prop, CPaxTime &pt);
+HRESULT Prop_To_PaxTime(const NCOM::CPropVariant &prop, CPaxTime &pt);
 
 void Get_AString_From_UString(const UString &s, AString &res,
     UINT codePage, unsigned utfFlags);

@@ -6,7 +6,7 @@
 
 #include "PropVariantUtils.h"
 
-using namespace NWindows;
+using namespace NDOS;
 
 static void AddHex(AString &s, UInt32 v)
 {
@@ -16,7 +16,6 @@ static void AddHex(AString &s, UInt32 v)
   ConvertUInt32ToHex(v, sz + 2);
   s += sz;
 }
-
 
 AString TypePairToString(const CUInt32PCharPair *pairs, unsigned num, UInt32 value)
 {
@@ -41,7 +40,6 @@ void PairToProp(const CUInt32PCharPair *pairs, unsigned num, UInt32 value, NCOM:
   prop = TypePairToString(pairs, num, value);
 }
 
-
 AString TypeToString(const char * const table[], unsigned num, UInt32 value)
 {
   char sz[16];
@@ -56,7 +54,7 @@ AString TypeToString(const char * const table[], unsigned num, UInt32 value)
   return (AString)p;
 }
 
-void TypeToProp(const char * const table[], unsigned num, UInt32 value, NWindows::NCOM::CPropVariant &prop)
+void TypeToProp(const char * const table[], unsigned num, UInt32 value, NDOS::NCOM::CPropVariant &prop)
 {
   char sz[16];
   const char *p = NULL;
@@ -69,7 +67,6 @@ void TypeToProp(const char * const table[], unsigned num, UInt32 value, NWindows
   }
   prop = p;
 }
-
 
 AString FlagsToString(const char * const *names, unsigned num, UInt32 flags)
 {
@@ -126,7 +123,6 @@ void FlagsToProp(const CUInt32PCharPair *pairs, unsigned num, UInt32 flags, NCOM
 {
   prop = FlagsToString(pairs, num, flags);
 }
-
 
 static AString Flags64ToString(const CUInt32PCharPair *pairs, unsigned num, UInt64 flags)
 {

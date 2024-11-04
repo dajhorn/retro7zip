@@ -5,6 +5,12 @@
 
 #include "../../Common/MyCom.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
+using namespace NWindows;
+#endif // defined(__DOS__)
+
 #include "MemBlocks.h"
 
 Z7_CLASS_IMP_NOQIB_1(
@@ -19,9 +25,9 @@ Z7_CLASS_IMP_NOQIB_1(
   bool _realStreamMode;
 
   bool _unlockEventWasSent;
-  NWindows::NSynchronization::CAutoResetEvent_WFMO StopWritingEvent;
-  NWindows::NSynchronization::CAutoResetEvent_WFMO WriteToRealStreamEvent;
-  // NWindows::NSynchronization::CAutoResetEvent NoLockEvent;
+  NSynchronization::CAutoResetEvent_WFMO StopWritingEvent;
+  NSynchronization::CAutoResetEvent_WFMO WriteToRealStreamEvent;
+  // NSynchronization::CAutoResetEvent NoLockEvent;
 
   HRESULT StopWriteResult;
   CMemLockBlocks Blocks;

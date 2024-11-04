@@ -17,7 +17,13 @@
 #include "../../../Common/UTFConvert.h"
 #include "../../../Common/Wildcard.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/FileDir.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/FileDir.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../Common/FileStreams.h"
 #include "../../Common/LimitedStreams.h"
@@ -88,11 +94,6 @@ Open:
     - returns only Parser. skip full file archive. And show other sub-archives for each byte pos
 
 */
-
-
-
-
-using namespace NWindows;
 
 /*
 #ifdef Z7_SFX
@@ -1649,9 +1650,11 @@ HRESULT CArc::OpenStream2(const COpenOptions &op)
 
   IsParseArc = false;
   ArcStreamOffset = 0;
-  
+
+#if !defined(__WATCOMC__)  
   PRF(OutputDebugStringA("1"));
   PRF(OutputDebugStringW(Path));
+#endif // !defined(__WATCOMC__)
 
   const UString fileName = ExtractFileNameFromPath(Path);
   UString extension;

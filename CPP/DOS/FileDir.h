@@ -1,13 +1,13 @@
-// Windows/FileDir.h
+// 7-zip FileDir.h for DOS
 
-#ifndef ZIP7_INC_WINDOWS_FILE_DIR_H
-#define ZIP7_INC_WINDOWS_FILE_DIR_H
+#ifndef ZIP7_INC_DOS_FILE_DIR_H
+#define ZIP7_INC_DOS_FILE_DIR_H
 
 #include "../Common/MyString.h"
 
 #include "FileIO.h"
 
-namespace NWindows {
+namespace NDOS {
 namespace NFile {
 namespace NDir {
 
@@ -21,7 +21,7 @@ but linux : allows unix time = 0 in filesystem
 
 bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CFiTime *mTime);
 
-
+// @FIXME:  Use these bits for __DOS__
 #ifdef _WIN32
 
 bool SetFileAttrib(CFSTR path, DWORD attrib);
@@ -42,11 +42,7 @@ bool SetFileAttrib_PosixHighDetect(CFSTR path, DWORD attrib);
 
 
 bool MyMoveFile(CFSTR existFileName, CFSTR newFileName);
-
-#ifndef UNDER_CE
 bool MyCreateHardLink(CFSTR newFileName, CFSTR existFileName);
-#endif
-
 bool RemoveDir(CFSTR path);
 bool CreateDir(CFSTR path);
 
@@ -64,12 +60,8 @@ bool MyGetFullPathName(CFSTR path, FString &resFullPath);
 bool GetFullPathAndSplit(CFSTR path, FString &resDirPrefix, FString &resFileName);
 bool GetOnlyDirPrefix(CFSTR path, FString &resDirPrefix);
 
-#ifndef UNDER_CE
-
 bool SetCurrentDir(CFSTR path);
 bool GetCurrentDir(FString &resultPath);
-
-#endif
 
 bool MyGetTempPath(FString &resultPath);
 
@@ -90,24 +82,6 @@ public:
   bool MoveTo(CFSTR name, bool deleteDestBefore);
 };
 
-
-#ifdef _WIN32
-class CTempDir  MY_UNCOPYABLE
-{
-  bool _mustBeDeleted;
-  FString _path;
-public:
-  CTempDir(): _mustBeDeleted(false) {}
-  ~CTempDir() { Remove();  }
-  const FString &GetPath() const { return _path; }
-  void DisableDeleting() { _mustBeDeleted = false; }
-  bool Create(CFSTR namePrefix) ;
-  bool Remove();
-};
-#endif
-
-
-#if !defined(UNDER_CE)
 class CCurrentDirRestorer  MY_UNCOPYABLE
 {
   FString _path;
@@ -128,8 +102,7 @@ public:
         SetCurrentDir(_path);
   }
 };
-#endif
 
 }}}
 
-#endif
+#endif // ZIP7_INC_DOS_FILE_DIR_H

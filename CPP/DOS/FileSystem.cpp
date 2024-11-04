@@ -1,4 +1,4 @@
-// Windows/FileSystem.cpp
+// 7-Zip FileSystem.cpp for DOS
 
 #include "StdAfx.h"
 
@@ -11,11 +11,7 @@
 #include "FileSystem.h"
 #include "Defs.h"
 
-#ifndef _UNICODE
-extern bool g_IsNT;
-#endif
-
-namespace NWindows {
+namespace NDOS {
 namespace NFile {
 namespace NSystem {
 

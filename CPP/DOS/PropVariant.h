@@ -1,13 +1,13 @@
 // Windows/PropVariant.h
 
-#ifndef ZIP7_INC_WINDOWS_PROP_VARIANT_H
-#define ZIP7_INC_WINDOWS_PROP_VARIANT_H
+#ifndef ZIP7_INC_DOS_PROP_VARIANT_H
+#define ZIP7_INC_DOS_PROP_VARIANT_H
 
 #include "../Common/MyTypes.h"
 #include "../Common/MyWindows.h"
 #include "../Common/MyString.h"
 
-namespace NWindows {
+namespace NDOS {
 namespace NCOM {
 
 BSTR AllocBstrFromAscii(const char *s) throw();
@@ -170,4 +170,4 @@ public:
 
 }}
 
-#endif
+#endif // ZIP7_INC_DOS_PROP_VARIANT_H

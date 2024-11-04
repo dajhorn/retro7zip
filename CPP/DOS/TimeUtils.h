@@ -1,8 +1,9 @@
 // TimeUtils.h for DOS
 
-#ifndef ZIP7_INC_WINDOWS_TIME_UTILS_H
-#define ZIP7_INC_WINDOWS_TIME_UTILS_H
+#ifndef ZIP7_INC_DOS_TIME_UTILS_H
+#define ZIP7_INC_DOS_TIME_UTILS_H
 
+#include <sys/stat.h>
 #include <time.h>
 
 #include "../Common/MyTypes.h"
@@ -25,34 +26,7 @@ inline bool FILETIME_IsZero(const FILETIME &ft)
   return (ft.dwHighDateTime == 0 && ft.dwLowDateTime == 0);
 }
 
-
-#ifdef _WIN32
-  #define CFiTime FILETIME
-  #define Compare_FiTime ::CompareFileTime
-  inline void FiTime_To_FILETIME(const CFiTime &ts, FILETIME &ft)
-  {
-    ft = ts;
-  }
-  /*
-  inline void FILETIME_To_FiTime(const FILETIME &ft, CFiTime &ts)
-  {
-    ts = ft;
-  }
-  */
-  inline void FiTime_Clear(CFiTime &ft)
-  {
-    ft.dwLowDateTime = 0;
-    ft.dwHighDateTime = 0;
-  }
-#else
-
-  #include <sys/stat.h>
-
- #if defined(_AIX)
-   #define CFiTime st_timespec
- #else
-   #define CFiTime timespec
- #endif
+  #define CFiTime timespec
   int Compare_FiTime(const CFiTime *a1, const CFiTime *a2);
   bool FILETIME_To_timespec(const FILETIME &ft, CFiTime &ts);
   void FiTime_To_FILETIME(const CFiTime &ts, FILETIME &ft);
@@ -63,7 +37,6 @@ inline bool FILETIME_IsZero(const FILETIME &ft)
     ft.tv_nsec = 0;
   }
 
-#if defined(__DOS__)
 inline struct timespec dos_time_to_timespec(const time_t & dos_time)
 {
   struct timespec dos_timespec;
@@ -75,21 +48,9 @@ inline struct timespec dos_time_to_timespec(const time_t & dos_time)
 #define ST_ATIME(st) dos_time_to_timespec(st.st_atime)
 #define ST_CTIME(st) dos_time_to_timespec(st.st_ctime)
 
-#elif defined(__APPLE__)
-  #define ST_MTIME(st) st.st_mtimespec
-  #define ST_ATIME(st) st.st_atimespec
-  #define ST_CTIME(st) st.st_ctimespec
-#else
-  #define ST_MTIME(st) st.st_mtim
-  #define ST_ATIME(st) st.st_atim
-  #define ST_CTIME(st) st.st_ctim
-#endif
-
-#endif
-
 // void FiTime_Normalize_With_Prec(CFiTime &ft, unsigned prec);
 
-namespace NWindows {
+namespace NDOS {
 namespace NTime {
 
 bool DosTime_To_FileTime(UInt32 dosTime, FILETIME &fileTime) throw();
@@ -110,46 +71,36 @@ bool FileTime_To_UnixTime(const FILETIME &fileTime, UInt32 &unixTime) throw();
 Int64 FileTime_To_UnixTime64(const FILETIME &ft) throw();
 Int64 FileTime_To_UnixTime64_and_Quantums(const FILETIME &ft, UInt32 &quantums) throw();
 
-bool GetSecondsSince1601(unsigned year, unsigned month, unsigned day,
-  unsigned hour, unsigned min, unsigned sec, UInt64 &resSeconds) throw();
-
+bool GetSecondsSince1601(unsigned year, unsigned month, unsigned day, unsigned hour, unsigned min, unsigned sec, UInt64 &resSeconds) throw();
 void GetCurUtc_FiTime(CFiTime &ft) throw();
-#ifdef _WIN32
-#define GetCurUtcFileTime GetCurUtc_FiTime
-#else
 void GetCurUtcFileTime(FILETIME &ft) throw();
-#endif
 
 }}
 
-inline void PropVariant_SetFrom_UnixTime(NWindows::NCOM::CPropVariant &prop, UInt32 unixTime)
+inline void PropVariant_SetFrom_UnixTime(NDOS::NCOM::CPropVariant &prop, UInt32 unixTime)
 {
   FILETIME ft;
-  NWindows::NTime::UnixTime_To_FileTime(unixTime, ft);
+  NDOS::NTime::UnixTime_To_FileTime(unixTime, ft);
   prop.SetAsTimeFrom_FT_Prec(ft, k_PropVar_TimePrec_Unix);
 }
 
-inline void PropVariant_SetFrom_NtfsTime(NWindows::NCOM::CPropVariant &prop, const FILETIME &ft)
+inline void PropVariant_SetFrom_NtfsTime(NDOS::NCOM::CPropVariant &prop, const FILETIME &ft)
 {
   prop.SetAsTimeFrom_FT_Prec(ft, k_PropVar_TimePrec_100ns);
 }
 
-inline void PropVariant_SetFrom_FiTime(NWindows::NCOM::CPropVariant &prop, const CFiTime &fts)
+inline void PropVariant_SetFrom_FiTime(NDOS::NCOM::CPropVariant &prop, const CFiTime &fts)
 {
- #ifdef _WIN32
-  PropVariant_SetFrom_NtfsTime(prop, fts);
- #else
   unsigned ns100;
   FILETIME ft;
   FiTime_To_FILETIME_ns100(fts, ft, ns100);
   prop.SetAsTimeFrom_FT_Prec_Ns100(ft, k_PropVar_TimePrec_1ns, ns100);
- #endif
 }
 
-inline bool PropVariant_SetFrom_DosTime(NWindows::NCOM::CPropVariant &prop, UInt32 dosTime)
+inline bool PropVariant_SetFrom_DosTime(NDOS::NCOM::CPropVariant &prop, UInt32 dosTime)
 {
   FILETIME localFileTime, utc;
-  if (!NWindows::NTime::DosTime_To_FileTime(dosTime, localFileTime))
+  if (!NDOS::NTime::DosTime_To_FileTime(dosTime, localFileTime))
     return false;
   if (!LocalFileTimeToFileTime(&localFileTime, &utc))
     return false;
@@ -157,4 +108,4 @@ inline bool PropVariant_SetFrom_DosTime(NWindows::NCOM::CPropVariant &prop, UInt
   return true;
 }
 
-#endif
+#endif // ZIP7_INC_DOS_TIME_UTILS_H

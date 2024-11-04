@@ -6,10 +6,15 @@
 #include "../../Common/MyString.h"
 #include "../../Common/Defs.h"
 
+#if defined(__DOS__)
+#include "../../DOS/Defs.h"
+#include "../../DOS/PropVariant.h"
+using namespace NDOS;
+#else
 #include "../../Windows/Defs.h"
-
 #include "../../Windows/PropVariant.h"
-
+using namespace NWindows;
+#endif // defined(__DOS__)
 #include "../ICoder.h"
 
 // UInt64 GetMemoryUsage_LZMA(UInt32 dict, bool isBt, UInt32 numThreads);
@@ -49,7 +54,7 @@ struct CProp
 {
   PROPID Id;
   bool IsOptional;
-  NWindows::NCOM::CPropVariant Value;
+  NCOM::CPropVariant Value;
   CProp(): IsOptional(false) {}
 };
 
@@ -93,7 +98,7 @@ public:
     const int i = FindProp(NCoderPropID::kNumThreads);
     if (i >= 0)
     {
-      const NWindows::NCOM::CPropVariant &val = Props[(unsigned)i].Value;
+      const NCOM::CPropVariant &val = Props[(unsigned)i].Value;
       if (val.vt == VT_UI4)
         return (int)val.ulVal;
     }
@@ -106,7 +111,7 @@ public:
     const int i = FindProp(NCoderPropID::kDictionarySize);
     if (i >= 0)
     {
-      const NWindows::NCOM::CPropVariant &val = Props[(unsigned)i].Value;
+      const NCOM::CPropVariant &val = Props[(unsigned)i].Value;
       if (val.vt == VT_UI4)
       {
         res = val.ulVal;
@@ -128,7 +133,7 @@ public:
     const int i = FindProp(NCoderPropID::kAlgorithm);
     if (i >= 0)
     {
-      const NWindows::NCOM::CPropVariant &val = Props[(unsigned)i].Value;
+      const NCOM::CPropVariant &val = Props[(unsigned)i].Value;
       if (val.vt == VT_UI4)
         return val.ulVal;
     }
@@ -154,7 +159,7 @@ public:
     const int i = FindProp(NCoderPropID::kMatchFinder);
     if (i >= 0)
     {
-      const NWindows::NCOM::CPropVariant &val = Props[(unsigned)i].Value;
+      const NCOM::CPropVariant &val = Props[(unsigned)i].Value;
       if (val.vt == VT_BSTR)
         return ((val.bstrVal[0] | 0x20) != 'h'); // check for "hc"
     }
@@ -166,7 +171,7 @@ public:
     const int i = FindProp(NCoderPropID::kEndMarker);
     if (i >= 0)
     {
-      const NWindows::NCOM::CPropVariant &val = Props[(unsigned)i].Value;
+      const NCOM::CPropVariant &val = Props[(unsigned)i].Value;
       if (val.vt == VT_BOOL)
         return VARIANT_BOOLToBool(val.boolVal);
     }
@@ -210,7 +215,7 @@ public:
     const int i = FindProp(id);
     if (i >= 0)
     {
-      const NWindows::NCOM::CPropVariant &val = Props[(unsigned)i].Value;
+      const NCOM::CPropVariant &val = Props[(unsigned)i].Value;
       if (val.vt == VT_UI4) { return val.ulVal; }
       if (val.vt == VT_UI8) { return val.uhVal.QuadPart; }
     }
@@ -263,7 +268,7 @@ public:
     const int i = FindProp(NCoderPropID::kDictionarySize);
     if (i >= 0)
     {
-      const NWindows::NCOM::CPropVariant &val = Props[(unsigned)i].Value;
+      const NCOM::CPropVariant &val = Props[(unsigned)i].Value;
       if (val.vt == VT_UI4)
       {
         UInt32 blockSize = val.ulVal;
@@ -283,7 +288,7 @@ public:
     const int i = FindProp(NCoderPropID::kUsedMemorySize);
     if (i >= 0)
     {
-      const NWindows::NCOM::CPropVariant &val = Props[(unsigned)i].Value;
+      const NCOM::CPropVariant &val = Props[(unsigned)i].Value;
       if (val.vt == VT_UI4)
         return val.ulVal;
       if (val.vt == VT_UI8)

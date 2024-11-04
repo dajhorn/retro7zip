@@ -8,6 +8,15 @@
 
 #include "../../../Common/StringConvert.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/FileDir.h"
+#include "../../../DOS/FileFind.h"
+#include "../../../DOS/FileName.h"
+#include "../../../DOS/PropVariant.h"
+#include "../../../DOS/PropVariantConv.h"
+#include "../../../DOS/TimeUtils.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/DLL.h"
 #include "../../../Windows/FileDir.h"
 #include "../../../Windows/FileFind.h"
@@ -15,6 +24,8 @@
 #include "../../../Windows/PropVariant.h"
 #include "../../../Windows/PropVariantConv.h"
 #include "../../../Windows/TimeUtils.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../Common/FileStreams.h"
 #include "../../Common/LimitedStreams.h"
@@ -39,7 +50,6 @@ static const char * const kUpdateIsNotSupoorted =
 static const char * const kUpdateIsNotSupported_MultiVol =
   "Updating for multivolume archives is not implemented";
 
-using namespace NWindows;
 using namespace NCOM;
 using namespace NFile;
 using namespace NDir;
@@ -196,8 +206,7 @@ static const char * const kSFXExtension =
     "";
   #endif
 
-bool CUpdateOptions::InitFormatIndex(const CCodecs *codecs,
-    const CObjectVector<COpenType> &types, const UString &arcPath)
+bool CUpdateOptions::InitFormatIndex(const CCodecs *codecs, const CObjectVector<COpenType> &types, const UString &arcPath)
 {
   if (types.Size() > 1)
     return false;

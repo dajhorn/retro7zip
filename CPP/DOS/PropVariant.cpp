@@ -6,7 +6,7 @@
 
 #include "PropVariant.h"
 
-namespace NWindows {
+namespace NDOS {
 namespace NCOM {
 
 BSTR AllocBstrFromAscii(const char *s) throw()

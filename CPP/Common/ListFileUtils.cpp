@@ -9,9 +9,15 @@
 #include "StringConvert.h"
 #include "UTFConvert.h"
 
+#if defined(__DOS__)
+#include "../DOS/FileIO.h"
+using namespace NDOS;
+#else
 #include "../Windows/FileIO.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
-#define CSysInFile NWindows::NFile::NIO::CInFile
+#define CSysInFile NFile::NIO::CInFile
 #define MY_GET_LAST_ERROR ::GetLastError()
 
 

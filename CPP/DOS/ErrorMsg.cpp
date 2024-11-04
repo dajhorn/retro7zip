@@ -1,20 +1,12 @@
-// Windows/ErrorMsg.h
+// 7-Zip ErrorMsg.h for DOS
 
 #include "StdAfx.h"
 
-#if !defined(_UNICODE) || !defined(_WIN32)
 #include "../Common/StringConvert.h"
-#endif
 
 #include "ErrorMsg.h"
 
-#ifdef _WIN32
-#if !defined(_UNICODE)
-extern bool g_IsNT;
-#endif
-#endif
-
-namespace NWindows {
+namespace NDOS {
 namespace NError {
 
 static bool MyFormatMessage(DWORD errorCode, UString &message)
@@ -26,32 +18,6 @@ static bool MyFormatMessage(DWORD errorCode, UString &message)
     return true;
   }
   #endif
-
-  #ifdef _WIN32
-  
-  LPVOID msgBuf;
-  #ifndef _UNICODE
-  if (!g_IsNT)
-  {
-    if (::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL, errorCode, 0, (LPTSTR) &msgBuf, 0, NULL) == 0)
-      return false;
-    message = GetUnicodeString((LPCTSTR)msgBuf);
-  }
-  else
-  #endif
-  {
-    if (::FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL, errorCode, 0, (LPWSTR) &msgBuf, 0, NULL) == 0)
-      return false;
-    message = (LPCWSTR)msgBuf;
-  }
-  ::LocalFree(msgBuf);
-  return true;
-  
-  #else // _WIN32
 
   AString m;
 
@@ -102,10 +68,7 @@ static bool MyFormatMessage(DWORD errorCode, UString &message)
 
   MultiByteToUnicodeString2(message, m);
   return true;
-
-  #endif
 }
-
 
 UString MyFormatMessage(DWORD errorCode)
 {

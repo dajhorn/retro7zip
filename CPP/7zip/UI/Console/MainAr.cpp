@@ -10,15 +10,20 @@
 #include "../../../Common/MyException.h"
 #include "../../../Common/StdOutStream.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/ErrorMsg.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/ErrorMsg.h"
 #include "../../../Windows/NtCheck.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../Common/ArchiveCommandLine.h"
 #include "../Common/ExitCode.h"
 
 #include "ConsoleClose.h"
 
-using namespace NWindows;
 
 extern
 CStdOutStream *g_StdStream;

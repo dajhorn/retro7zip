@@ -6,7 +6,11 @@
 
 #include "MethodProps.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
 using namespace NWindows;
+#endif defined(__DOS__)
 
 UInt64 Calc_From_Val_Percents(UInt64 val, UInt64 percents)
 {

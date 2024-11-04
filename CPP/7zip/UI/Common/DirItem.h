@@ -9,9 +9,17 @@
 
 #include "../../../Common/MyString.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/FileFind.h"
+#include "../../../DOS/PropVariant.h"
+#include "../../../DOS/TimeUtils.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/FileFind.h"
 #include "../../../Windows/PropVariant.h"
 #include "../../../Windows/TimeUtils.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../Common/UniqBlocks.h"
 
@@ -143,7 +151,7 @@ struct CArcTime
     UInt32 dosTime;
     // we use simplified code with utctime->dos.
     // do we need local time instead here?
-    NWindows::NTime::FileTime_To_DosTime(ft2, dosTime);
+    NTime::FileTime_To_DosTime(ft2, dosTime);
     return dosTime;
   }
 
@@ -228,7 +236,7 @@ struct CArcTime
 };
 
 
-struct CDirItem: public NWindows::NFile::NFind::CFileInfoBase
+struct CDirItem: public NFile::NFind::CFileInfoBase
 {
   UString Name;
   
@@ -245,9 +253,9 @@ struct CDirItem: public NWindows::NFile::NFind::CFileInfoBase
 
  #endif // !UNDER_CE
   
-  void Copy_From_FileInfoBase(const NWindows::NFile::NFind::CFileInfoBase &fi)
+  void Copy_From_FileInfoBase(const NFile::NFind::CFileInfoBase &fi)
   {
-    (NWindows::NFile::NFind::CFileInfoBase &)*this = fi;
+    (NFile::NFind::CFileInfoBase &)*this = fi;
   }
 
   int PhyParent;
@@ -276,7 +284,7 @@ struct CDirItem: public NWindows::NFile::NFind::CFileInfoBase
   }
 
 
-  CDirItem(const NWindows::NFile::NFind::CFileInfo &fi,
+  CDirItem(const NFile::NFind::CFileInfo &fi,
       int phyParent, int logParent, int secureIndex):
     CFileInfoBase(fi)
     , Name(fs2us(fi.Name))
@@ -325,7 +333,7 @@ public:
   CDirItemsStat Stat;
 
   #if !defined(UNDER_CE)
-  HRESULT SetLinkInfo(CDirItem &dirItem, const NWindows::NFile::NFind::CFileInfo &fi,
+  HRESULT SetLinkInfo(CDirItem &dirItem, const NFile::NFind::CFileInfo &fi,
       const FString &phyPrefix);
   #endif
 
@@ -356,7 +364,7 @@ public:
   CDirItems();
 
   void AddDirFileInfo(int phyParent, int logParent, int secureIndex,
-      const NWindows::NFile::NFind::CFileInfo &fi);
+      const NFile::NFind::CFileInfo &fi);
 
   HRESULT AddError(const FString &path, DWORD errorCode);
   HRESULT AddError(const FString &path);
@@ -370,8 +378,7 @@ public:
   unsigned AddPrefix(int phyParent, int logParent, const UString &prefix);
   void DeleteLastPrefix();
 
-  // HRESULT EnumerateOneDir(const FString &phyPrefix, CObjectVector<NWindows::NFile::NFind::CDirEntry> &files);
-  HRESULT EnumerateOneDir(const FString &phyPrefix, CObjectVector<NWindows::NFile::NFind::CFileInfo> &files);
+  HRESULT EnumerateOneDir(const FString &phyPrefix, CObjectVector<NFile::NFind::CFileInfo> &files);
   
   HRESULT EnumerateItems2(
     const FString &phyPrefix,

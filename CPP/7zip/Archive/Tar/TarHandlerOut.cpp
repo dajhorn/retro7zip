@@ -8,14 +8,18 @@
 #include "../../../Common/MyLinux.h"
 #include "../../../Common/StringConvert.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/TimeUtils.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/TimeUtils.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../Common/ItemNameUtils.h"
 
 #include "TarHandler.h"
 #include "TarUpdate.h"
-
-using namespace NWindows;
 
 namespace NArchive {
 namespace NTar {
@@ -124,7 +128,7 @@ static HRESULT GetDevice(IArchiveUpdateCallback *callback, UInt32 i,
     UInt32 pid, UInt32 &id, bool &defined)
 {
   defined = false;
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   RINOK(callback->GetProperty(i, pid, &prop))
   if (prop.vt == VT_EMPTY)
     return S_OK;
@@ -146,7 +150,7 @@ static HRESULT GetUser(IArchiveUpdateCallback *callback, UInt32 i,
    
   bool isSet = false;
   {
-    NWindows::NCOM::CPropVariant prop;
+    NCOM::CPropVariant prop;
     RINOK(callback->GetProperty(i, pidId, &prop))
     if (prop.vt == VT_UI4)
     {
@@ -159,7 +163,7 @@ static HRESULT GetUser(IArchiveUpdateCallback *callback, UInt32 i,
       return E_INVALIDARG;
   }
   {
-    NWindows::NCOM::CPropVariant prop;
+    NCOM::CPropVariant prop;
     RINOK(callback->GetProperty(i, pidName, &prop))
     if (prop.vt == VT_BSTR)
     {

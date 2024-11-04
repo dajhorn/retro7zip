@@ -111,7 +111,12 @@ Z7_COM7F_IMF(CMtEncMultiProgress::SetRatioInfo(const UInt64 *inSize, const UInt6
   UInt64 outSize2;
   {
     #ifndef Z7_ST
+#if defined(__DOS__)
+    // @FIXME: redundant no-op for DOS
+    NDOS::NSynchronization::CCriticalSectionLock lock(CriticalSection);
+#else
     NWindows::NSynchronization::CCriticalSectionLock lock(CriticalSection);
+#endif // defined(__DOS__)
     #endif
     outSize2 = OutSize;
   }
@@ -428,7 +433,11 @@ HRESULT CEncoder::Encode1(
       if (optProps)
       {
         const PROPID propID = NCoderPropID::kExpectedDataSize;
+#if defined(__DOS__)
+        NDOS::NCOM::CPropVariant prop = (UInt64)expectedDataSize;
+#else
         NWindows::NCOM::CPropVariant prop = (UInt64)expectedDataSize;
+#endif
         RINOK(optProps->SetCoderPropertiesOpt(&propID, &prop, 1))
       }
     }

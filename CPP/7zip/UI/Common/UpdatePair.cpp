@@ -7,12 +7,17 @@
 
 #include "../../../Common/Wildcard.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/TimeUtils.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/TimeUtils.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "SortUtils.h"
 #include "UpdatePair.h"
 
-using namespace NWindows;
 using namespace NTime;
 
 

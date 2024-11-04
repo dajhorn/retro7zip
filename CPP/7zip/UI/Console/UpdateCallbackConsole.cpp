@@ -4,20 +4,24 @@
 
 #include "../../../Common/IntToString.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/ErrorMsg.h"
+#include "../../../DOS/FileName.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/ErrorMsg.h"
 #include "../../../Windows/FileName.h"
-
 #ifndef Z7_ST
 #include "../../../Windows/Synchronization.h"
-#endif
+#endif // Z7_ST
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 // #include "../Common/PropIDUtils.h"
 
 #include "ConsoleClose.h"
 #include "UserInputUtils.h"
 #include "UpdateCallbackConsole.h"
-
-using namespace NWindows;
 
 #ifndef Z7_ST
 static NSynchronization::CCriticalSection g_CriticalSection;
@@ -628,7 +632,7 @@ HRESULT CCallbackConsoleBase::PrintProgress(const wchar_t *name, bool isDir, con
     {
       _tempU = name;
       if (isDir)
-        NWindows::NFile::NName::NormalizeDirPathPrefix(_tempU);
+        NFile::NName::NormalizeDirPathPrefix(_tempU);
       _so->Normalize_UString_Path(_tempU);
     }
     _so->PrintUString(_tempU, _tempA);

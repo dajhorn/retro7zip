@@ -2,8 +2,15 @@
 
 #include "StdAfx.h"
 
+#if defined(__DOS__)
+#include "../../DOS/Defs.h"
+#include "../../DOS/PropVariant.h"
+using namespace NDOS;
+#else
 #include "../../Windows/Defs.h"
 #include "../../Windows/PropVariant.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "CreateCoder.h"
 
@@ -54,7 +61,7 @@ void RegisterHasher(const CHasherInfo *hashInfo) throw()
 
 static HRESULT ReadNumberOfStreams(ICompressCodecsInfo *codecsInfo, UInt32 index, PROPID propID, UInt32 &res)
 {
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   RINOK(codecsInfo->GetProperty(index, propID, &prop))
   if (prop.vt == VT_EMPTY)
     res = 1;
@@ -67,7 +74,7 @@ static HRESULT ReadNumberOfStreams(ICompressCodecsInfo *codecsInfo, UInt32 index
 
 static HRESULT ReadIsAssignedProp(ICompressCodecsInfo *codecsInfo, UInt32 index, PROPID propID, bool &res)
 {
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   RINOK(codecsInfo->GetProperty(index, propID, &prop))
   if (prop.vt == VT_EMPTY)
     res = true;
@@ -93,7 +100,7 @@ HRESULT CExternalCodecs::Load()
     
     for (UInt32 i = 0; i < num; i++)
     {
-      NWindows::NCOM::CPropVariant prop;
+      NCOM::CPropVariant prop;
       
       RINOK(GetCodecs->GetProperty(i, NMethodPropID::kID, &prop))
       if (prop.vt != VT_UI8)
@@ -131,7 +138,7 @@ HRESULT CExternalCodecs::Load()
     
     for (UInt32 i = 0; i < num; i++)
     {
-      NWindows::NCOM::CPropVariant prop;
+      NCOM::CPropVariant prop;
 
       RINOK(GetHashers->GetHasherProp(i, NMethodPropID::kID, &prop))
       if (prop.vt != VT_UI8)

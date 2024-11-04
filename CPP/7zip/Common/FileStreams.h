@@ -10,7 +10,13 @@
 #include "../../Common/MyCom.h"
 #include "../../Common/MyString.h"
 
+#if defined(__DOS__)
+#include "../../DOS/FileIO.h"
+using namespace NDOS;
+#else
 #include "../../Windows/FileIO.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../IStream.h"
 
@@ -65,7 +71,7 @@ public:
   Z7_IFACE_COM7_IMP(IStreamGetProp)
 
 private:
-  NWindows::NFile::NIO::CInFile File;
+  NFile::NIO::CInFile File;
 public:
 
   #ifdef Z7_FILE_STREAMS_USE_WIN_FILE
@@ -142,8 +148,7 @@ Z7_CLASS_IMP_COM_1(
 )
   Z7_IFACE_COM7_IMP(ISequentialOutStream)
 public:
-
-  NWindows::NFile::NIO::COutFile File;
+  NFile::NIO::COutFile File;
 
   bool Create_NEW(CFSTR fileName)
   {

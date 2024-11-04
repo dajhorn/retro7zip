@@ -1,31 +1,20 @@
-// Windows/FileFind.h
+// 7-Zip FileFind.h for DOS
 
-#ifndef ZIP7_INC_WINDOWS_FILE_FIND_H
-#define ZIP7_INC_WINDOWS_FILE_FIND_H
+#ifndef ZIP7_INC_DOS_FILE_FIND_H
+#define ZIP7_INC_DOS_FILE_FIND_H
 
-#if defined(__DOS__)
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <direct.h>
-#elif defined(_WIN32)
-#include <sys/stat.h>
-#include <sys/types.h>
-#if defined(__WATCOMC__)
-#include <direct.h>
-#else
-#include <dirent.h>
-#endif // defined(__WATCOM__)
-#endif
 
 #include "../Common/MyLinux.h"
 #include "../Common/MyString.h"
 #include "../Common/MyWindows.h"
 
 #include "Defs.h"
-
 #include "FileIO.h"
 
-namespace NWindows {
+namespace NDOS {
 namespace NFile {
 namespace NFind {
 
@@ -43,6 +32,8 @@ inline bool DoesDirExist_FollowLink(CFSTR name)
 bool DoesFileOrDirExist(CFSTR name);
 
 DWORD GetFileAttrib(CFSTR path);
+
+// @FIXME:  Prefer attrib over mode in __DOS__
 
 #ifdef _WIN32
 
@@ -272,9 +263,7 @@ public:
   bool FindNext() { return BOOLToBool(::FindNextChangeNotification(_handle)); }
 };
 
-#ifndef UNDER_CE
 bool MyGetLogicalDriveStrings(CObjectVector<FString> &driveStrings);
-#endif
 
 typedef CFileInfo CDirEntry;
 
@@ -289,16 +278,6 @@ struct CDirEntry
   Byte Type;
 #endif
   FString Name;
-
-  /*
-#if !defined(_AIX) && !defined(__sun)
-  bool IsDir() const
-  {
-    // (Type == DT_UNKNOWN) on some systems
-    return Type == DT_DIR;
-  }
-#endif
-  */
 
   bool IsDots() const throw();
 };
@@ -318,12 +297,6 @@ public:
   bool Fill_FileInfo(const CDirEntry &de, CFileInfo &fileInfo, bool followLink) const;
   bool DirEntry_IsDir(const CDirEntry &de, bool followLink) const
   {
-#if !defined(_AIX) && !defined(__sun) && !defined(__DOS__)
-    if (de.Type == DT_DIR)
-      return true;
-    if (de.Type != DT_UNKNOWN)
-      return false;
-#endif
     CFileInfo fileInfo;
     if (Fill_FileInfo(de, fileInfo, followLink))
     {
@@ -352,4 +325,4 @@ inline UInt32 Get_WinAttrib_From_PosixMode(UInt32 mode)
 
 }}}
 
-#endif
+#endif // ZIP7_INC_DOS_FILE_FIND_H

@@ -3,7 +3,13 @@
 #ifndef ZIP7_INC_HANDLER_OUT_H
 #define ZIP7_INC_HANDLER_OUT_H
 
+#if defined(__DOS__)
+#include "../../../DOS/System.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/System.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../Common/MethodProps.h"
 
@@ -18,7 +24,7 @@ protected:
   {
     // _Write_MTime = true;
     #ifndef Z7_ST
-    _numProcessors = _numThreads = NWindows::NSystem::GetNumberOfProcessors();
+    _numProcessors = _numThreads = NSystem::GetNumberOfProcessors();
     _numThreads_WasForced = false;
     #endif
 
@@ -26,7 +32,7 @@ protected:
     _memAvail = memAvail;
     _memUsage_Compress = memAvail;
     _memUsage_Decompress = memAvail;
-    _memUsage_WasSet = NWindows::NSystem::GetRamSize(memAvail);
+    _memUsage_WasSet = NSystem::GetRamSize(memAvail);
     if (_memUsage_WasSet)
     {
       _memAvail = memAvail;

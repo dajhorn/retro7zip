@@ -5,7 +5,13 @@
 
 #include "../../Common/MyVector.h"
 
+#if defined(__DOS__)
+#include "../../DOS/Synchronization.h"
+using namespace NDOS;
+#else
 #include "../../Windows/Synchronization.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../IStream.h"
 
@@ -28,10 +34,10 @@ public:
 
 class CMemBlockManagerMt: public CMemBlockManager
 {
-  NWindows::NSynchronization::CCriticalSection _criticalSection;
+  NSynchronization::CCriticalSection _criticalSection;
 public:
   SYNC_OBJ_DECL(Synchro)
-  NWindows::NSynchronization::CSemaphore_WFMO Semaphore;
+  NSynchronization::CSemaphore_WFMO Semaphore;
 
   CMemBlockManagerMt(size_t blockSize = (1 << 20)): CMemBlockManager(blockSize) {}
   ~CMemBlockManagerMt() { FreeSpace(); }

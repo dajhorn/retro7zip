@@ -10,8 +10,15 @@
 #include "../../Common/MyBuffer.h"
 #include "../../Common/StringToInt.h"
 
+#if defined(__DOS__)
+#include "../../DOS/PropVariant.h"
+#include "../../DOS/System.h"
+using namespace NDOS;
+#else
 #include "../../Windows/PropVariant.h"
 #include "../../Windows/System.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../Common/CWrappers.h"
 #include "../Common/ProgressUtils.h"
@@ -25,8 +32,6 @@
 #include "IArchive.h"
 
 #include "Common/HandlerOut.h"
-
-using namespace NWindows;
 
 namespace NArchive {
 namespace NXz {

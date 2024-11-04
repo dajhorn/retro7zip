@@ -8,10 +8,19 @@
 #include "../../../Common/StringConvert.h"
 #include "../../../Common/UTFConvert.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/ErrorMsg.h"
+#include "../../../DOS/FileDir.h"
+#include "../../../DOS/PropVariant.h"
+#include "../../../DOS/PropVariantConv.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/ErrorMsg.h"
 #include "../../../Windows/FileDir.h"
 #include "../../../Windows/PropVariant.h"
 #include "../../../Windows/PropVariantConv.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../Common/OpenArchive.h"
 #include "../Common/PropIDUtils.h"
@@ -20,7 +29,6 @@
 #include "List.h"
 #include "OpenCallbackConsole.h"
 
-using namespace NWindows;
 using namespace NCOM;
 
 extern CStdOutStream *g_StdStream;
