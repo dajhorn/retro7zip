@@ -28,7 +28,11 @@
 
 #include "../../../C/CpuArch.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
 using namespace NWindows;
+#endif
 
 namespace NArchive {
 namespace NZstd {
@@ -1084,7 +1088,7 @@ Z7_COM7F_IMF(CHandler::UpdateItems(ISequentialOutStream *outStream, UInt32 numIt
         if (optProps)
         {
           PROPID propID = NCoderPropID::kExpectedDataSize;
-          NWindows::NCOM::CPropVariant prop = (UInt64)size;
+          NCOM::CPropVariant prop = (UInt64)size;
           // RINOK(optProps->SetCoderPropertiesOpt(&propID, &prop, 1))
           RINOK(encoderSpec->SetCoderPropertiesOpt(&propID, &prop, 1))
         }

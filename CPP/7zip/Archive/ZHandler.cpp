@@ -4,8 +4,6 @@
 
 #include "../../Common/ComTry.h"
 
-#include "../../Windows/PropVariant.h"
-
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
 #include "../Common/StreamUtils.h"
@@ -13,6 +11,14 @@
 #include "../Compress/ZDecoder.h"
 
 #include "Common/DummyOutStream.h"
+
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  using namespace NWindows;
+#endif
 
 namespace NArchive {
 namespace NZ {
@@ -41,7 +47,7 @@ Z7_COM7F_IMF(CHandler::GetNumberOfItems(UInt32 *numItems))
 
 Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 {
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case kpidPhySizeCantBeDetected: prop = true; break;
@@ -52,7 +58,7 @@ Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 /* index */, PROPID propID, PROPVARIANT *value))
 {
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     // case kpidSize: if (_unpackSize_Defined) prop = _unpackSize; break;

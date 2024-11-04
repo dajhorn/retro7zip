@@ -24,16 +24,26 @@
 #include "../../../Common/StringConvert.h"
 #include "../../../Common/StringToInt.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/ErrorMsg.h"
+#include "../../../DOS/FileDir.h"
+#include "../../../DOS/FileName.h"
+#include "../../../DOS/PropVariantConv.h"
+#include "../../../DOS/System.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/ErrorMsg.h"
 #include "../../../Windows/FileDir.h"
 #include "../../../Windows/FileName.h"
 #include "../../../Windows/PropVariantConv.h"
 #include "../../../Windows/System.h"
-#ifdef _WIN32
+#if defined(_WIN32)
 #include "../../../Windows/FileMapping.h"
 #include "../../../Windows/MemoryLock.h"
 #include "../../../Windows/Synchronization.h"
-#endif
+#endif // defined(_WIN32)
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "ArchiveCommandLine.h"
 #include "EnumDirItems.h"
@@ -79,7 +89,6 @@ static inline bool MY_IS_TERMINAL(FILE *x)
 #endif
 
 using namespace NCommandLineParser;
-using namespace NWindows;
 using namespace NFile;
 
 static bool StringToUInt32(const wchar_t *s, UInt32 &v)
@@ -1736,7 +1745,7 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
 
 
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__DOS__)
 
 static AString g_ModuleDirPrefix;
 

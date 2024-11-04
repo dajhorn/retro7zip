@@ -7,8 +7,15 @@
 #include "../../../Common/IntToString.h"
 #include "../../../Common/StringConvert.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/FileIO.h"
+#include "../../../DOS/PropVariantConv.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/FileIO.h"
 #include "../../../Windows/PropVariantConv.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../PropID.h"
 
@@ -18,8 +25,6 @@
 #define Get16(x) GetUi16(x)
 #define Get32(x) GetUi32(x)
 #endif
-
-using namespace NWindows;
 
 static const unsigned kNumWinAtrribFlags = 30;
 static const char g_WinAttribChars[kNumWinAtrribFlags + 1] = "RHS8DAdNTsLCOIEVvX.PU.M......B";

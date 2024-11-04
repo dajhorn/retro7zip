@@ -3,7 +3,11 @@
 #ifndef ZIP7_INC_EXTRACT_H
 #define ZIP7_INC_EXTRACT_H
 
+#if defined(__DOS__)
+#include "../../../DOS/FileFind.h"
+#else
 #include "../../../Windows/FileFind.h"
+#endif // defined(__DOS__)
 
 #include "../../Archive/IArchive.h"
 

@@ -9,8 +9,6 @@
 #include "../../Common/StringConvert.h"
 #include "../../Common/IntToString.h"
 
-#include "../../Windows/PropVariantUtils.h"
-
 #include "../Common/LimitedStreams.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -21,7 +19,14 @@
 static UInt32 Get32(const Byte *p, bool be) { if (be) return GetBe32(p); return GetUi32(p); }
 static UInt64 Get64(const Byte *p, bool be) { if (be) return GetBe64(p); return GetUi64(p); }
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariantUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariantUtils.h"
+  using namespace NWindows;
+#endif
+
 using namespace NCOM;
 
 namespace NArchive {

@@ -7,6 +7,12 @@
 #include "MemBlocks.h"
 #include "StreamUtils.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
+using namespace NWindows;
+#endif
+
 bool CMemBlockManager::AllocateSpace_bool(size_t numBlocks)
 {
   FreeSpace();
@@ -113,7 +119,7 @@ void CMemBlockManagerMt::FreeSpace()
 void *CMemBlockManagerMt::AllocateBlock()
 {
   // Semaphore.Lock();
-  NWindows::NSynchronization::CCriticalSectionLock lock(_criticalSection);
+  NSynchronization::CCriticalSectionLock lock(_criticalSection);
   return CMemBlockManager::AllocateBlock();
 }
 
@@ -122,7 +128,7 @@ void CMemBlockManagerMt::FreeBlock(void *p, bool lockMode)
   if (!p)
     return;
   {
-    NWindows::NSynchronization::CCriticalSectionLock lock(_criticalSection);
+    NSynchronization::CCriticalSectionLock lock(_criticalSection);
     CMemBlockManager::FreeBlock(p);
   }
   if (lockMode)

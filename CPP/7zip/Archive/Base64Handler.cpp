@@ -9,12 +9,19 @@
 #include "../../Common/IntToString.h"
 #include "../../Common/MyVector.h"
 
-#include "../../Windows/PropVariant.h"
-
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
 #include "../Common/StreamUtils.h"
 #include "../Common/InBuffer.h"
+
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  using namespace NWindows;
+#endif
+
 
 /*
 spaces:
@@ -305,7 +312,7 @@ Z7_COM7F_IMF(CHandler::GetNumberOfItems(UInt32 *numItems))
 
 Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 {
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case kpidPhySize: if (_phySize != 0) prop = _phySize; break;
@@ -326,7 +333,7 @@ Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 /* index */, PROPID propID, PROPVARIANT *value))
 {
   // COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case kpidSize: prop = (UInt64)_size; break;

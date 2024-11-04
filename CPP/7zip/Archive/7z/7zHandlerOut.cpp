@@ -15,7 +15,11 @@
 
 #ifndef Z7_EXTRACT_ONLY
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
 using namespace NWindows;
+#endif // defined(__DOS__)
 
 namespace NArchive {
 namespace N7z {

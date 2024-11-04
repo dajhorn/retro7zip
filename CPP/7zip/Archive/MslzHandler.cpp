@@ -7,14 +7,20 @@
 #include "../../Common/ComTry.h"
 #include "../../Common/MyString.h"
 
-#include "../../Windows/PropVariant.h"
-
 #include "../Common/InBuffer.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
 #include "../Common/StreamUtils.h"
 
 #include "Common/DummyOutStream.h"
+
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  using namespace NWindows;
+#endif
 
 namespace NArchive {
 namespace NMslz {
@@ -62,7 +68,7 @@ Z7_COM7F_IMF(CHandler::GetNumberOfItems(UInt32 *numItems))
 Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case kpidExtension: prop = "mslz"; break;
@@ -87,7 +93,7 @@ Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 /* index */, PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case kpidPath: if (!_name.IsEmpty()) prop = _name; break;
@@ -124,7 +130,7 @@ void CHandler::ParseName(Byte replaceByte, IArchiveOpenCallback *callback)
   if (!volumeCallback)
     return;
 
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   if (volumeCallback->GetProperty(kpidName, &prop) != S_OK || prop.vt != VT_BSTR)
     return;
 

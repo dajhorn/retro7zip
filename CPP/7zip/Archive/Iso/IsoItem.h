@@ -8,7 +8,13 @@
 #include "../../../Common/MyString.h"
 #include "../../../Common/MyBuffer.h"
 
-#include "../../../Windows/TimeUtils.h"
+#if defined(__DOS__)
+  #include "../../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
 
 #include "IsoHeader.h"
 
@@ -25,10 +31,10 @@ struct CRecordingDateTime
   Byte Second;
   signed char GmtOffset; // min intervals from -48 (West) to +52 (East) recorded.
   
-  bool GetFileTime(NWindows::NCOM::CPropVariant &prop) const
+  bool GetFileTime(NCOM::CPropVariant &prop) const
   {
     UInt64 v;
-    const bool res = NWindows::NTime::GetSecondsSince1601(Year + 1900, Month, Day, Hour, Minute, Second, v);
+    const bool res = NTime::GetSecondsSince1601(Year + 1900, Month, Day, Hour, Minute, Second, v);
     if (res)
     {
       v = (UInt64)((Int64)v - (Int64)((Int32)GmtOffset * 15 * 60));

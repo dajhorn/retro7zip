@@ -35,15 +35,6 @@
 #include "../../../../C/RotateDefs.h"
 #include "../../../../C/CpuArch.h"
 
-#ifndef Z7_ST
-#include "../../../Windows/Synchronization.h"
-#include "../../../Windows/Thread.h"
-#endif
-
-#include "../../../Windows/FileFind.h"
-#include "../../../Windows/FileIO.h"
-#include "../../../Windows/SystemInfo.h"
-
 #include "../../../Common/MyBuffer2.h"
 #include "../../../Common/IntToString.h"
 #include "../../../Common/StringConvert.h"
@@ -56,7 +47,21 @@
 
 #include "Bench.h"
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../../DOS/FileFind.h"
+  #include "../../../DOS/FileIO.h"
+  #include "../../../DOS/SystemInfo.h"
+  using namespace NDOS;
+#else
+  #ifndef Z7_ST
+    #include "../../../Windows/Synchronization.h"
+    #include "../../../Windows/Thread.h"
+  #endif
+  #include "../../../Windows/FileFind.h"
+  #include "../../../Windows/FileIO.h"
+  #include "../../../Windows/SystemInfo.h"
+  using namespace NWindows;
+#endif
 
 #ifndef Z7_ST
 static const UInt32 k_LZMA = 0x030101;
@@ -877,7 +882,7 @@ struct CAffinityMode
   DWORD_PTR GetAffinityMask(UInt32 bundleIndex, CCpuSet *cpuSet) const;
   bool NeedAffinity() const { return NumBundleThreads != 0; }
 
-  WRes CreateThread_WithAffinity(NWindows::CThread &thread, THREAD_FUNC_TYPE startAddress, LPVOID parameter, UInt32 bundleIndex) const
+  WRes CreateThread_WithAffinity(CThread &thread, THREAD_FUNC_TYPE startAddress, LPVOID parameter, UInt32 bundleIndex) const
   {
     if (NeedAffinity())
     {
@@ -1015,7 +1020,7 @@ class CEncoderInfo Z7_final
 public:
 
   #ifndef Z7_ST
-  NWindows::CThread thread[2];
+  CThread thread[2];
   NSynchronization::CManualResetEvent ReadyEvent;
   UInt32 NumDecoderSubThreads;
   CBenchSyncCommon *Common;
@@ -1760,7 +1765,7 @@ WRes CBenchThreadsFlusher::StartAndWait(bool exitMode)
 
   for (unsigned i = 0; i < NumThreads; i++)
   {
-    NWindows::CThread &t = EncodersSpec->encoders[i].thread[0];
+    CThread &t = EncodersSpec->encoders[i].thread[0];
     if (t.IsCreated())
     {
       WRes res2 = t.Wait_Close();
@@ -2416,7 +2421,7 @@ EXTERN_C_END
 
 struct CBaseThreadInfo
 {
-  NWindows::CThread Thread;
+  CThread Thread;
   IBenchPrintCallback *Callback;
   HRESULT CallbackRes;
 

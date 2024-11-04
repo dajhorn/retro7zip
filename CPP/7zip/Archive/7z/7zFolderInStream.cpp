@@ -2,7 +2,13 @@
 
 #include "StdAfx.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/TimeUtils.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/TimeUtils.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "7zFolderInStream.h"
 
@@ -107,11 +113,11 @@ HRESULT ReportItemProps(IArchiveUpdateCallbackArcProp *reportArcProp,
   prop.vt = VT_EMPTY;
   prop.wReserved1 = 0;
   
-  NWindows::NCOM::PropVarEm_Set_UInt64(&prop, size);
+  NCOM::PropVarEm_Set_UInt64(&prop, size);
   RINOK(reportArcProp->ReportProp(NEventIndexType::kOutArcIndex, index, kpidSize, &prop));
   if (crc)
   {
-    NWindows::NCOM::PropVarEm_Set_UInt32(&prop, *crc);
+    NCOM::PropVarEm_Set_UInt32(&prop, *crc);
     RINOK(reportArcProp->ReportProp(NEventIndexType::kOutArcIndex, index, kpidCRC, &prop));
   }
   return reportArcProp->ReportFinished(NEventIndexType::kOutArcIndex, index, NUpdate::NOperationResult::kOK);

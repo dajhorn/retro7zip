@@ -1,21 +1,15 @@
-// Windows/FileName.cpp
+// 7-Zip FileName.cpp for DOS
 
 #include "StdAfx.h"
 
-#ifndef _WIN32
 #include <limits.h>
 #include <unistd.h>
 #include "../Common/StringConvert.h"
-#endif
 
 #include "FileDir.h"
 #include "FileName.h"
 
-#ifndef _UNICODE
-extern bool g_IsNT;
-#endif
-
-namespace NWindows {
+namespace NDOS {
 namespace NFile {
 namespace NName {
 
@@ -64,30 +58,6 @@ void NormalizeDirPathPrefix(UString &dirPath)
   if (!IsPathSepar(dirPath.Back()))
     dirPath.Add_PathSepar();
 }
-
-#ifdef _WIN32
-
-#ifndef USE_UNICODE_FSTRING
-#ifdef Z7_LONG_PATH
-static void NormalizeDirSeparators(UString &s)
-{
-  const unsigned len = s.Len();
-  for (unsigned i = 0; i < len; i++)
-    if (s[i] == '/')
-      s.ReplaceOneCharAtPos(i, WCHAR_PATH_SEPARATOR);
-}
-#endif
-#endif
-
-void NormalizeDirSeparators(FString &s)
-{
-  const unsigned len = s.Len();
-  for (unsigned i = 0; i < len; i++)
-    if (s[i] == '/')
-      s.ReplaceOneCharAtPos(i, FCHAR_PATH_SEPARATOR);
-}
-
-#endif
 
 
 #define IS_LETTER_CHAR(c) ((((unsigned)(int)(c) | 0x20) - (unsigned)'a' <= (unsigned)('z' - 'a')))
@@ -804,18 +774,6 @@ bool GetFullPath(CFSTR dirPrefix, CFSTR s, FString &res)
 {
   res = s;
 
-  #ifdef UNDER_CE
-
-  if (!IS_SEPAR(s[0]))
-  {
-    if (!dirPrefix)
-      return false;
-    res = dirPrefix;
-    res += s;
-  }
-
-  #else
-
   const unsigned prefixSize = GetRootPrefixSize(s);
   if (prefixSize != 0)
 #ifdef _WIN32
@@ -824,7 +782,7 @@ bool GetFullPath(CFSTR dirPrefix, CFSTR s, FString &res)
   {
     if (!AreThereDotsFolders(s + prefixSize))
       return true;
-    
+
     UString rem = fs2us(s + prefixSize);
     if (!ResolveDotsFolders(rem))
       return true; // maybe false;
@@ -879,8 +837,6 @@ bool GetFullPath(CFSTR dirPrefix, CFSTR s, FString &res)
   // (curDir) now contains only absolute prefix part
   res = us2fs(curDir);
   res += us2fs(temp);
-  
-  #endif // UNDER_CE
 
   return true;
 }

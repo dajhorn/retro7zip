@@ -6,9 +6,17 @@
 
 #include "../../Common/ComTry.h"
 
-#include "../../Windows/PropVariant.h"
 
 #include "../Common/RegisterArc.h"
+
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  using namespace NWindows;
+#endif
+
 
 static const unsigned kNumArcsMax = 72;
 static unsigned g_NumArcs = 0;
@@ -97,11 +105,11 @@ STDAPI GetHandlerProperty2(UInt32 formatIndex, PROPID propID, PROPVARIANT *value
 STDAPI GetHandlerProperty2(UInt32 formatIndex, PROPID propID, PROPVARIANT *value)
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::PropVariant_Clear(value);
+  NCOM::PropVariant_Clear(value);
   if (formatIndex >= g_NumArcs)
     return E_INVALIDARG;
   const CArcInfo &arc = *g_Arcs[formatIndex];
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case NArchive::NHandlerPropID::kName: prop = arc.Name; break;

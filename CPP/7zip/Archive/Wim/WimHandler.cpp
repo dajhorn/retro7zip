@@ -17,7 +17,12 @@
 #define Get32(p) GetUi32(p)
 #define Get64(p) GetUi64(p)
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
 using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace NWim {

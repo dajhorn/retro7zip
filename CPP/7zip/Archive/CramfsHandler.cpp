@@ -11,8 +11,6 @@
 #include "../../Common/MyLinux.h"
 #include "../../Common/StringConvert.h"
 
-#include "../../Windows/PropVariantUtils.h"
-
 #include "../Common/LimitedStreams.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -21,6 +19,15 @@
 
 #include "../Compress/CopyCoder.h"
 #include "../Compress/ZlibDecoder.h"
+
+#if defined(__DOS__)
+  #include "../../DOS/PropVariantUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariantUtils.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace NCramfs {
@@ -487,7 +494,7 @@ Z7_COM7F_IMF(CHandler::GetNumberOfItems(UInt32 *numItems))
 Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case kpidVolumeName:
@@ -523,7 +530,7 @@ Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   const CItem &item = _items[index];
   const Byte *p = _data + item.Offset;
   bool be = _h.be;

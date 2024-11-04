@@ -6,6 +6,13 @@
 
 #include "StreamBinder.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
+using namespace NWindows;
+#endif
+
+
 Z7_CLASS_IMP_COM_1(
   CBinderInStream
   , ISequentialInStream
@@ -34,7 +41,7 @@ Z7_COM7F_IMF(CBinderOutStream::Write(const void *data, UInt32 size, UInt32 *proc
   { return _binder->Write(data, size, processedSize); }
 
 
-static HRESULT Event_Create_or_Reset(NWindows::NSynchronization::CAutoResetEvent &event)
+static HRESULT Event_Create_or_Reset(NSynchronization::CAutoResetEvent &event)
 {
   const WRes wres = event.CreateIfNotCreated_Reset();
   return HRESULT_FROM_WIN32(wres);

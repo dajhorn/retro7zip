@@ -20,6 +20,12 @@
 #include "HuffmanDecoder.h"
 #include "Mtf8.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
+using namespace NWindows;
+#endif
+
 namespace NCompress {
 namespace NBZip2 {
 
@@ -284,9 +290,9 @@ public:
   bool NeedWaitScout;
   bool MtMode;
 
-  NWindows::CThread Thread;
-  NWindows::NSynchronization::CAutoResetEvent DecoderEvent;
-  NWindows::NSynchronization::CAutoResetEvent ScoutEvent;
+  CThread Thread;
+  NSynchronization::CAutoResetEvent DecoderEvent;
+  NSynchronization::CAutoResetEvent ScoutEvent;
   // HRESULT ScoutRes;
   
   Byte MtPad[1 << 7]; // It's pad for Multi-Threading. Must be >= Cache_Line_Size.

@@ -11,8 +11,6 @@
 #include "../../Common/MyBuffer.h"
 #include "../../Common/MyString.h"
 
-#include "../../Windows/PropVariant.h"
-
 #include "../Common/LimitedStreams.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -22,6 +20,15 @@
 
 #define Get16(p) GetUi16(p)
 #define Get32(p) GetUi32(p)
+
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace NCom {
@@ -685,7 +692,7 @@ IMP_IInArchive_ArcProps
 Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case kpidExtension: prop = kExtensions[(unsigned)_db.Type]; break;
@@ -703,7 +710,7 @@ Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   const CRef &ref = _db.Refs[index];
   const CItem &item = _db.Items[ref.Did];
     

@@ -3011,22 +3011,22 @@ HRESULT Update(
         prop.vt = VT_EMPTY;
         prop.wReserved1 = 0;
         {
-          NWindows::NCOM::PropVarEm_Set_UInt32(&prop, numProcessedFiles);
+          NCOM::PropVarEm_Set_UInt32(&prop, numProcessedFiles);
           RINOK(reportArcProp->ReportProp(
               NEventIndexType::kBlockIndex, (UInt32)folderIndex, kpidNumSubFiles, &prop));
         }
         {
-          NWindows::NCOM::PropVarEm_Set_UInt64(&prop, curFolderUnpackSize);
+          NCOM::PropVarEm_Set_UInt64(&prop, curFolderUnpackSize);
           RINOK(reportArcProp->ReportProp(
               NEventIndexType::kBlockIndex, (UInt32)folderIndex, kpidSize, &prop));
         }
         {
-          NWindows::NCOM::PropVarEm_Set_UInt64(&prop, packSize);
+          NCOM::PropVarEm_Set_UInt64(&prop, packSize);
           RINOK(reportArcProp->ReportProp(
               NEventIndexType::kBlockIndex, (UInt32)folderIndex, kpidPackSize, &prop));
         }
         {
-          NWindows::NCOM::PropVarEm_Set_UInt32(&prop, numStreams);
+          NCOM::PropVarEm_Set_UInt32(&prop, numStreams);
           RINOK(reportArcProp->ReportProp(
               NEventIndexType::kBlockIndex, (UInt32)folderIndex, kpidNumStreams, &prop));
         }

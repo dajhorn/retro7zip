@@ -5,7 +5,13 @@
 
 #include <iostream>
 
+#if defined(__DOS__)
+#include "../../../DOS/PropVariant.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/PropVariant.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "ArchiveOpenCallback.h"
 #include "LoadCodecs.h"
@@ -144,7 +150,7 @@ struct COpenOptions
 
 };
 
-UInt32 GetOpenArcErrorFlags(const NWindows::NCOM::CPropVariant &prop, bool *isDefinedProp = NULL);
+UInt32 GetOpenArcErrorFlags(const NCOM::CPropVariant &prop, bool *isDefinedProp = NULL);
 
 struct CArcErrorInfo
 {

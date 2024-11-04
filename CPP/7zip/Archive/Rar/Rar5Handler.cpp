@@ -10,9 +10,6 @@
 #include "../../../Common/MyBuffer2.h"
 #include "../../../Common/UTFConvert.h"
 
-#include "../../../Windows/PropVariantUtils.h"
-#include "../../../Windows/TimeUtils.h"
-
 #include "../../IPassword.h"
 
 #include "../../Common/FilterCoder.h"
@@ -38,7 +35,15 @@
 #include "../../Archive/Rar/RarVol.h"
 #include "Rar5Handler.h"
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../../DOS/PropVariantUtils.h"
+  #include "../../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../../Windows/PropVariantUtils.h"
+  #include "../../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
 
 #define Get32(p) GetUi32(p)
 
@@ -387,7 +392,7 @@ bool CItem::Is_CopyLink_or_HardLink() const
   return FindExtra_Link(link) && (link.Type == NLinkType::kFileCopy || link.Type == NLinkType::kHardLink);
 }
 
-void CItem::Link_to_Prop(unsigned linkType, NWindows::NCOM::CPropVariant &prop) const
+void CItem::Link_to_Prop(unsigned linkType, NCOM::CPropVariant &prop) const
 {
   CLinkInfo link;
   if (!FindExtra_Link(link))
@@ -3352,7 +3357,7 @@ Z7_COM7F_IMF(CHandler::SetProperties(const wchar_t * const *names, const PROPVAR
     else if (name.IsPrefixedBy_Ascii_NoCase("memx"))
     {
       size_t memAvail;
-      if (!NWindows::NSystem::GetRamSize(memAvail))
+      if (!NSystem::GetRamSize(memAvail))
         memAvail = (size_t)sizeof(size_t) << 28;
       UInt64 v;
       if (!ParseSizeString(name.Ptr(4), prop, memAvail, v))

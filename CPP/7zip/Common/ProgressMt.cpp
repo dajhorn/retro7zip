@@ -4,9 +4,15 @@
 
 #include "ProgressMt.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
+using namespace NWindows;
+#endif
+
 void CMtCompressProgressMixer::Init(unsigned numItems, ICompressProgressInfo *progress)
 {
-  NWindows::NSynchronization::CCriticalSectionLock lock(CriticalSection);
+  NSynchronization::CCriticalSectionLock lock(CriticalSection);
   InSizes.Clear();
   OutSizes.Clear();
   for (unsigned i = 0; i < numItems; i++)
@@ -21,14 +27,14 @@ void CMtCompressProgressMixer::Init(unsigned numItems, ICompressProgressInfo *pr
 
 void CMtCompressProgressMixer::Reinit(unsigned index)
 {
-  NWindows::NSynchronization::CCriticalSectionLock lock(CriticalSection);
+  NSynchronization::CCriticalSectionLock lock(CriticalSection);
   InSizes[index] = 0;
   OutSizes[index] = 0;
 }
 
 HRESULT CMtCompressProgressMixer::SetRatioInfo(unsigned index, const UInt64 *inSize, const UInt64 *outSize)
 {
-  NWindows::NSynchronization::CCriticalSectionLock lock(CriticalSection);
+  NSynchronization::CCriticalSectionLock lock(CriticalSection);
   if (inSize)
   {
     const UInt64 diff = *inSize - InSizes[index];

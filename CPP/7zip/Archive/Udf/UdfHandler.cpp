@@ -4,9 +4,6 @@
 
 #include "../../../Common/ComTry.h"
 
-#include "../../../Windows/PropVariant.h"
-#include "../../../Windows/TimeUtils.h"
-
 #include "../../Common/LimitedStreams.h"
 #include "../../Common/ProgressUtils.h"
 #include "../../Common/RegisterArc.h"
@@ -16,14 +13,24 @@
 
 #include "UdfHandler.h"
 
+#if defined(__DOS__)
+  #include "../../../DOS/PropVariant.h"
+  #include "../../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../../Windows/PropVariant.h"
+  #include "../../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
+
 namespace NArchive {
 namespace NUdf {
 
-static void UdfTimeToFileTime(const CTime &t, NWindows::NCOM::CPropVariant &prop)
+static void UdfTimeToFileTime(const CTime &t, NCOM::CPropVariant &prop)
 {
   UInt64 numSecs;
   const Byte *d = t.Data;
-  if (!NWindows::NTime::GetSecondsSince1601(t.GetYear(), d[4], d[5], d[6], d[7], d[8], numSecs))
+  if (!NTime::GetSecondsSince1601(t.GetYear(), d[4], d[5], d[6], d[7], d[8], numSecs))
     return;
   if (t.IsLocal())
     numSecs = (UInt64)((Int64)numSecs - (Int64)((Int32)t.GetMinutesOffset() * 60));
@@ -72,7 +79,7 @@ IMP_IInArchive_ArcProps
 Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case kpidPhySize: prop = _archive.PhySize; break;
@@ -226,7 +233,7 @@ Z7_COM7F_IMF(CHandler::GetNumberOfItems(UInt32 *numItems))
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   {
     const CRef2 &ref2 = _refs2[index];
     const CLogVol &vol = _archive.LogVols[ref2.Vol];

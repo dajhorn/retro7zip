@@ -9,9 +9,6 @@
 #include "../../Common/StringConvert.h"
 #include "../../Common/StringToInt.h"
 
-#include "../../Windows/PropVariant.h"
-#include "../../Windows/TimeUtils.h"
-
 #include "../Common/LimitedStreams.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -22,7 +19,16 @@
 
 #include "Common/ItemNameUtils.h"
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  #include "../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  #include "../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
+
 using namespace NTime;
 
 namespace NArchive {
@@ -705,7 +711,7 @@ Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   const CItem &item = _items[index];
   switch (propID)
   {

@@ -9,13 +9,19 @@
 #include "../../../Common/MyBuffer.h"
 #include "../../../Common/MyXml.h"
 
-#include "../../../Windows/PropVariant.h"
-
 #include "../../Compress/CopyCoder.h"
 #include "../../Compress/LzmsDecoder.h"
 #include "../../Compress/LzxDecoder.h"
 
 #include "../IArchive.h"
+
+#if defined(__DOS__)
+  #include "../../../DOS/PropVariant.h"
+  using namespace NDOS;
+#else
+  #include "../../../Windows/PropVariant.h"
+  using namespace NWindows;
+#endif
 
 namespace NArchive {
 namespace NWim {
@@ -550,9 +556,9 @@ public:
     HeadersError(false)
     {}
 
-  void GetShortName(unsigned index, NWindows::NCOM::CPropVariant &res) const;
-  void GetItemName(unsigned index1, NWindows::NCOM::CPropVariant &res) const;
-  void GetItemPath(unsigned index, bool showImageNumber, NWindows::NCOM::CPropVariant &res) const;
+  void GetShortName(unsigned index, NCOM::CPropVariant &res) const;
+  void GetItemName(unsigned index1, NCOM::CPropVariant &res) const;
+  void GetItemPath(unsigned index, bool showImageNumber, NCOM::CPropVariant &res) const;
 
   HRESULT OpenXml(IInStream *inStream, const CHeader &h, CByteBuffer &xml);
   HRESULT Open(IInStream *inStream, const CHeader &h, unsigned numItemsReserve, IArchiveOpenCallback *openCallback);

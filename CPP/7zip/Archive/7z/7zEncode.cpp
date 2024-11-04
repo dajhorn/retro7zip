@@ -111,7 +111,7 @@ Z7_COM7F_IMF(CMtEncMultiProgress::SetRatioInfo(const UInt64 *inSize, const UInt6
   UInt64 outSize2;
   {
     #ifndef Z7_ST
-    NWindows::NSynchronization::CCriticalSectionLock lock(CriticalSection);
+    NSynchronization::CCriticalSectionLock lock(CriticalSection);
     #endif
     outSize2 = OutSize;
   }
@@ -428,7 +428,7 @@ HRESULT CEncoder::Encode1(
       if (optProps)
       {
         const PROPID propID = NCoderPropID::kExpectedDataSize;
-        NWindows::NCOM::CPropVariant prop = (UInt64)expectedDataSize;
+        NCOM::CPropVariant prop = (UInt64)expectedDataSize;
         RINOK(optProps->SetCoderPropertiesOpt(&propID, &prop, 1))
       }
     }

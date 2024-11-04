@@ -8,12 +8,19 @@
 #include "../../Common/ComTry.h"
 #include "../../Common/MyCom.h"
 
-#include "../../Windows/Defs.h"
-#include "../../Windows/PropVariant.h"
-
 #include "../ICoder.h"
 
 #include "../Common/RegisterCodec.h"
+
+#if defined(__DOS__)
+  #include "../../DOS/Defs.h"
+  #include "../../DOS/PropVariant.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/Defs.h"
+  #include "../../Windows/PropVariant.h"
+  using namespace NWindows;
+#endif
 
 extern unsigned g_NumCodecs;
 extern const CCodecInfo *g_Codecs[];
@@ -365,12 +372,12 @@ STDAPI GetModuleProp(PROPID propID, PROPVARIANT *value)
   {
     case NModulePropID::kInterfaceType:
     {
-      NWindows::NCOM::PropVarEm_Set_UInt32(value, NModuleInterfaceType::k_IUnknown_VirtDestructor_ThisModule);
+      NCOM::PropVarEm_Set_UInt32(value, NModuleInterfaceType::k_IUnknown_VirtDestructor_ThisModule);
       break;
     }
     case NModulePropID::kVersion:
     {
-      NWindows::NCOM::PropVarEm_Set_UInt32(value, (MY_VER_MAJOR << 16) | MY_VER_MINOR);
+      NCOM::PropVarEm_Set_UInt32(value, (MY_VER_MAJOR << 16) | MY_VER_MINOR);
       break;
     }
   }

@@ -1,12 +1,10 @@
-// Windows/FileLink.cpp
+// 7-Zip FileLink.cpp for DOS
 
 #include "StdAfx.h"
 
 #include "../../C/CpuArch.h"
 
-#ifndef _WIN32
 #include <unistd.h>
-#endif
 
 #ifdef Z7_DEVICE_FILE
 #include "../../C/Alloc.h"
@@ -20,20 +18,7 @@
 #include "FileIO.h"
 #include "FileName.h"
 
-#ifdef Z7_OLD_WIN_SDK
-#ifndef ERROR_INVALID_REPARSE_DATA
-#define ERROR_INVALID_REPARSE_DATA       4392L
-#endif
-#ifndef ERROR_REPARSE_TAG_INVALID
-#define ERROR_REPARSE_TAG_INVALID        4393L
-#endif
-#endif
-
-#ifndef _UNICODE
-extern bool g_IsNT;
-#endif
-
-namespace NWindows {
+namespace NDOS {
 namespace NFile {
 
 using namespace NName;
@@ -442,180 +427,5 @@ bool MyGetDiskFreeSpace(CFSTR rootPath, UInt64 &clusterSize, UInt64 &totalSize, 
 }
 #endif // Z7_DEVICE_FILE
 
-#if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
-
-namespace NIO {
-
-bool GetReparseData(CFSTR path, CByteBuffer &reparseData, BY_HANDLE_FILE_INFORMATION *fileInfo)
-{
-  reparseData.Free();
-  CInFile file;
-  if (!file.OpenReparse(path))
-    return false;
-
-  if (fileInfo)
-    file.GetFileInformation(fileInfo);
-
-  const unsigned kBufSize = MAXIMUM_REPARSE_DATA_BUFFER_SIZE;
-  CByteArr buf(kBufSize);
-  DWORD returnedSize;
-  if (!file.DeviceIoControlOut(my_FSCTL_GET_REPARSE_POINT, buf, kBufSize, &returnedSize))
-    return false;
-  reparseData.CopyFrom(buf, returnedSize);
-  return true;
-}
-
-static bool CreatePrefixDirOfFile(CFSTR path)
-{
-  FString path2 (path);
-  int pos = path2.ReverseFind_PathSepar();
-  if (pos < 0)
-    return true;
-  #ifdef _WIN32
-  if (pos == 2 && path2[1] == L':')
-    return true; // we don't create Disk folder;
-  #endif
-  path2.DeleteFrom((unsigned)pos);
-  return NDir::CreateComplexDir(path2);
-}
-
-
-static bool OutIoReparseData(DWORD controlCode, CFSTR path, void *data, DWORD size)
-{
-  COutFile file;
-  if (!file.Open(path,
-      FILE_SHARE_WRITE,
-      OPEN_EXISTING,
-      FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS))
-    return false;
-
-  DWORD returnedSize;
-  return file.DeviceIoControl(controlCode, data, size, NULL, 0, &returnedSize);
-}
-
-
-// If there is Reparse data already, it still writes new Reparse data
-bool SetReparseData(CFSTR path, bool isDir, const void *data, DWORD size)
-{
-  NFile::NFind::CFileInfo fi;
-  if (fi.Find(path))
-  {
-    if (fi.IsDir() != isDir)
-    {
-      ::SetLastError(ERROR_DIRECTORY);
-      return false;
-    }
-  }
-  else
-  {
-    if (isDir)
-    {
-      if (!NDir::CreateComplexDir(path))
-        return false;
-    }
-    else
-    {
-      CreatePrefixDirOfFile(path);
-      COutFile file;
-      if (!file.Create_NEW(path))
-        return false;
-    }
-  }
-
-  return OutIoReparseData(my_FSCTL_SET_REPARSE_POINT, path, (void *)(const Byte *)(data), size);
-}
-
-
-bool DeleteReparseData(CFSTR path)
-{
-  CByteBuffer reparseData;
-  if (!GetReparseData(path, reparseData, NULL))
-    return false;
-  /* MSDN: The tag specified in the ReparseTag member of this structure
-     must match the tag of the reparse point to be deleted,
-     and the ReparseDataLength member must be zero */
-  #define my_REPARSE_DATA_BUFFER_HEADER_SIZE 8
-  if (reparseData.Size() < my_REPARSE_DATA_BUFFER_HEADER_SIZE)
-  {
-    SetLastError(ERROR_INVALID_REPARSE_DATA);
-    return false;
-  }
-  BYTE buf[my_REPARSE_DATA_BUFFER_HEADER_SIZE];
-  memset(buf, 0, sizeof(buf));
-  memcpy(buf, reparseData, 4); // tag
-  return OutIoReparseData(my_FSCTL_DELETE_REPARSE_POINT, path, buf, sizeof(buf));
-}
-
-}
-
-#endif //  defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
-
-
-#if defined(_WIN32) && !defined(__WATCOMC__)
-
-namespace NIO {
-
-bool GetReparseData(CFSTR path, CByteBuffer &reparseData)
-{
-  reparseData.Free();
-
-  #define MAX_PATHNAME_LEN 1024
-  char buf[MAX_PATHNAME_LEN + 2];
-  const size_t request = sizeof(buf) - 1;
-
-  // printf("\nreadlink() path = %s \n", path);
-  const ssize_t size = readlink(path, buf, request);
-  // there is no tail zero
-
-  if (size < 0)
-    return false;
-  if ((size_t)size >= request)
-  {
-    SetLastError(EINVAL); // check it: ENAMETOOLONG
-    return false;
-  }
-
-  // printf("\nreadlink() res = %s size = %d \n", buf, (int)size);
-  reparseData.CopyFrom((const Byte *)buf, (size_t)size);
-  return true;
-}
-
-
-/*
-// If there is Reparse data already, it still writes new Reparse data
-bool SetReparseData(CFSTR path, bool isDir, const void *data, DWORD size)
-{
-  // AString s;
-  // s.SetFrom_CalcLen(data, size);
-  // return (symlink(s, path) == 0);
-  UNUSED_VAR(path)
-  UNUSED_VAR(isDir)
-  UNUSED_VAR(data)
-  UNUSED_VAR(size)
-  SetLastError(ENOSYS);
-  return false;
-}
-*/
-
-bool SetSymLink(CFSTR from, CFSTR to)
-{
-  // printf("\nsymlink() %s -> %s\n", from, to);
-  int ir;
-  // ir = unlink(path);
-  // if (ir == 0)
-  ir = symlink(to, from);
-  return (ir == 0);
-}
-
-bool SetSymLink_UString(CFSTR from, const UString &to)
-{
-  AString utf;
-  ConvertUnicodeToUTF8(to, utf);
-  return SetSymLink(from, utf);
-}
-
-}
-
-#endif // !_WIN32
 
 }}

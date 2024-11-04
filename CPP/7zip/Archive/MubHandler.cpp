@@ -9,15 +9,20 @@
 #include "../../Common/IntToString.h"
 #include "../../Common/MyString.h"
 
-#include "../../Windows/PropVariant.h"
-
 #include "../Common/RegisterArc.h"
 #include "../Common/StreamUtils.h"
 
 #include "HandlerCont.h"
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  using namespace NWindows;
+#endif
 using namespace NCOM;
+
 
 namespace NArchive {
 namespace NMub {

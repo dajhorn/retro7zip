@@ -12,8 +12,6 @@
 #include "../../Common/MyXml.h"
 #include "../../Common/UTFConvert.h"
 
-#include "../../Windows/PropVariant.h"
-
 #include "../Common/LimitedStreams.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -59,6 +57,15 @@
 #define Get64a(p) GetBe64a(p)
 
 Byte *Base64ToBin(Byte *dest, const char *src);
+
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace NDmg {
@@ -501,7 +508,7 @@ static const Byte kArcProps[] =
 Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case kpidMethod:
@@ -1458,7 +1465,7 @@ Z7_COM7F_IMF(CHandler::GetNumberOfItems(UInt32 *numItems))
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   
 #ifdef DMG_SHOW_RAW
   if (index >= _files.Size())

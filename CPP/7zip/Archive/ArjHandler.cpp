@@ -8,10 +8,6 @@
 #include "../../Common/ComTry.h"
 #include "../../Common/StringConvert.h"
 
-#include "../../Windows/PropVariant.h"
-#include "../../Windows/PropVariantUtils.h"
-#include "../../Windows/TimeUtils.h"
-
 #include "../Common/LimitedStreams.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -23,6 +19,18 @@
 
 #include "Common/ItemNameUtils.h"
 #include "Common/OutStreamWithCRC.h"
+
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  #include "../../DOS/PropVariantUtils.h"
+  #include "../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  #include "../../Windows/PropVariantUtils.h"
+  #include "../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
 
 namespace NCompress {
 namespace NArj {
@@ -169,10 +177,6 @@ HRESULT CCoder::Code(ISequentialInStream *inStream, ISequentialOutStream *outStr
 
 }}}
 
-
-
-
-using namespace NWindows;
 
 #define Get16(p) GetUi16(p)
 #define Get32(p) GetUi32(p)

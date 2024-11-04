@@ -1,7 +1,7 @@
-// Windows/FileIO.h
+// 7-Zip FileIO.h for DOS
 
-#ifndef ZIP7_INC_WINDOWS_FILE_IO_H
-#define ZIP7_INC_WINDOWS_FILE_IO_H
+#ifndef ZIP7_INC_DOS_FILE_IO_H
+#define ZIP7_INC_DOS_FILE_IO_H
 
 #include "../Common/MyWindows.h"
 
@@ -14,23 +14,13 @@
 // what the meaning of that FLAG or field (2)?
 #define Z7_WIN_LX_SYMLINK_FLAG 2
 
-#ifdef _WIN32
-
-#if defined(_WIN32) && !defined(UNDER_CE)
-#include <winioctl.h>
-#endif
-
-#else
-
 #include <sys/types.h>
 #include <sys/stat.h>
-
-#endif
 
 #include "../Common/MyString.h"
 #include "../Common/MyBuffer.h"
 
-#include "../Windows/TimeUtils.h"
+#include "../DOS/TimeUtils.h"
 
 #include "Defs.h"
 
@@ -40,12 +30,8 @@ HRESULT GetLastError_noZero_HRESULT();
 #define my_FSCTL_GET_REPARSE_POINT     CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 42, METHOD_BUFFERED, FILE_ANY_ACCESS)     // REPARSE_DATA_BUFFER
 #define my_FSCTL_DELETE_REPARSE_POINT  CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 43, METHOD_BUFFERED, FILE_SPECIAL_ACCESS) // REPARSE_DATA_BUFFER
 
-namespace NWindows {
+namespace NDOS {
 namespace NFile {
-
-#if defined(_WIN32) && !defined(UNDER_CE)
-bool FillLinkData(CByteBuffer &dest, const wchar_t *path, bool isSymLink, bool isWSL);
-#endif
 
 struct CReparseShortInfo
 {
@@ -96,228 +82,7 @@ struct CReparseAttr
   UString GetPath() const;
 };
 
-#ifdef _WIN32
-#define CFiInfo BY_HANDLE_FILE_INFORMATION
-#define ST_MTIME(st) (st).ftLastWriteTime
-#else
 #define CFiInfo stat
-#endif
-
-#ifdef _WIN32
-
-namespace NIO {
-
-bool GetReparseData(CFSTR path, CByteBuffer &reparseData, BY_HANDLE_FILE_INFORMATION *fileInfo = NULL);
-bool SetReparseData(CFSTR path, bool isDir, const void *data, DWORD size);
-bool DeleteReparseData(CFSTR path);
-
-class CFileBase  MY_UNCOPYABLE
-{
-protected:
-  HANDLE _handle;
-  
-  bool Create(CFSTR path, DWORD desiredAccess,
-      DWORD shareMode, DWORD creationDisposition, DWORD flagsAndAttributes);
-
-public:
-
-  bool DeviceIoControl(DWORD controlCode, LPVOID inBuffer, DWORD inSize,
-      LPVOID outBuffer, DWORD outSize, LPDWORD bytesReturned, LPOVERLAPPED overlapped = NULL) const
-  {
-    return BOOLToBool(::DeviceIoControl(_handle, controlCode, inBuffer, inSize,
-        outBuffer, outSize, bytesReturned, overlapped));
-  }
-
-  bool DeviceIoControlOut(DWORD controlCode, LPVOID outBuffer, DWORD outSize, LPDWORD bytesReturned) const
-  {
-    return DeviceIoControl(controlCode, NULL, 0, outBuffer, outSize, bytesReturned);
-  }
-
-  bool DeviceIoControlOut(DWORD controlCode, LPVOID outBuffer, DWORD outSize) const
-  {
-    DWORD bytesReturned;
-    return DeviceIoControlOut(controlCode, outBuffer, outSize, &bytesReturned);
-  }
-
-public:
-  bool PreserveATime;
-#if 0
-  bool IsStdStream;
-  bool IsStdPipeStream;
-#endif
-#ifdef Z7_DEVICE_FILE
-  bool IsDeviceFile;
-  bool SizeDefined;
-  UInt64 Size; // it can be larger than real available size
-#endif
-
-  CFileBase():
-    _handle(INVALID_HANDLE_VALUE),
-    PreserveATime(false)
-#if 0
-    , IsStdStream(false),
-    , IsStdPipeStream(false)
-#endif
-    {}
-  ~CFileBase() { Close(); }
-
-  HANDLE GetHandle() const { return _handle; }
-
-  // void Detach() { _handle = INVALID_HANDLE_VALUE; }
-
-  bool Close() throw();
-
-  bool GetPosition(UInt64 &position) const throw();
-  bool GetLength(UInt64 &length) const throw();
-
-  bool Seek(Int64 distanceToMove, DWORD moveMethod, UInt64 &newPosition) const throw();
-  bool Seek(UInt64 position, UInt64 &newPosition) const throw();
-  bool SeekToBegin() const throw();
-  bool SeekToEnd(UInt64 &newPosition) const throw();
-  
-  bool GetFileInformation(BY_HANDLE_FILE_INFORMATION *info) const
-    { return BOOLToBool(GetFileInformationByHandle(_handle, info)); }
-
-  static bool GetFileInformation(CFSTR path, BY_HANDLE_FILE_INFORMATION *info)
-  {
-    // probably it can work for complex paths: unsupported by another things
-    NIO::CFileBase file;
-    if (!file.Create(path, 0, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS))
-      return false;
-    return file.GetFileInformation(info);
-  }
-};
-
-#ifndef UNDER_CE
-#define IOCTL_CDROM_BASE  FILE_DEVICE_CD_ROM
-#define IOCTL_CDROM_GET_DRIVE_GEOMETRY  CTL_CODE(IOCTL_CDROM_BASE, 0x0013, METHOD_BUFFERED, FILE_READ_ACCESS)
-// #define IOCTL_CDROM_MEDIA_REMOVAL  CTL_CODE(IOCTL_CDROM_BASE, 0x0201, METHOD_BUFFERED, FILE_READ_ACCESS)
-
-// IOCTL_DISK_GET_DRIVE_GEOMETRY_EX works since WinXP
-#define my_IOCTL_DISK_GET_DRIVE_GEOMETRY_EX  CTL_CODE(IOCTL_DISK_BASE, 0x0028, METHOD_BUFFERED, FILE_ANY_ACCESS)
-
-struct my_DISK_GEOMETRY_EX
-{
-  DISK_GEOMETRY Geometry;
-  LARGE_INTEGER DiskSize;
-  BYTE Data[1];
-};
-#endif
-
-class CInFile: public CFileBase
-{
-  #ifdef Z7_DEVICE_FILE
-
-  #ifndef UNDER_CE
-  
-  bool GetGeometry(DISK_GEOMETRY *res) const
-    { return DeviceIoControlOut(IOCTL_DISK_GET_DRIVE_GEOMETRY, res, sizeof(*res)); }
-
-  bool GetGeometryEx(my_DISK_GEOMETRY_EX *res) const
-    { return DeviceIoControlOut(my_IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, res, sizeof(*res)); }
-
-  bool GetCdRomGeometry(DISK_GEOMETRY *res) const
-    { return DeviceIoControlOut(IOCTL_CDROM_GET_DRIVE_GEOMETRY, res, sizeof(*res)); }
-  
-  bool GetPartitionInfo(PARTITION_INFORMATION *res)
-    { return DeviceIoControlOut(IOCTL_DISK_GET_PARTITION_INFO, LPVOID(res), sizeof(*res)); }
-  
-  #endif
-
-  void CorrectDeviceSize();
-  void CalcDeviceSize(CFSTR name);
-  
-  #endif
-
-public:
-  bool Open(CFSTR fileName, DWORD shareMode, DWORD creationDisposition, DWORD flagsAndAttributes);
-  bool OpenShared(CFSTR fileName, bool shareForWrite);
-  bool Open(CFSTR fileName);
-
-#if 0
-  bool AttachStdIn()
-  {
-    IsDeviceFile = false;
-    const HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
-    if (h == INVALID_HANDLE_VALUE || !h)
-      return false;
-    IsStdStream = true;
-    IsStdPipeStream = true;
-    _handle = h;
-    return true;
-  }
-#endif
-
-  #ifndef UNDER_CE
-
-  bool Open_for_ReadAttributes(CFSTR fileName)
-  {
-    return Create(fileName, FILE_READ_ATTRIBUTES,
-        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-        OPEN_EXISTING,
-        FILE_FLAG_BACKUP_SEMANTICS);
-    // we must use (FILE_FLAG_BACKUP_SEMANTICS) to open handle of directory.
-  }
-
-  bool Open_for_FileRenameInformation(CFSTR fileName)
-  {
-    return Create(fileName, DELETE | SYNCHRONIZE | GENERIC_READ,
-        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL);
-    // we must use (FILE_FLAG_BACKUP_SEMANTICS) to open handle of directory.
-  }
-
-  bool OpenReparse(CFSTR fileName)
-  {
-    // 17.02 fix: to support Windows XP compatibility junctions:
-    //   we use Create() with (desiredAccess = 0) instead of Open() with GENERIC_READ
-    return
-        Create(fileName, 0,
-        // Open(fileName,
-        FILE_SHARE_READ, OPEN_EXISTING,
-        FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS);
-  }
-  
-  #endif
-
-  bool Read1(void *data, UInt32 size, UInt32 &processedSize) throw();
-  bool ReadPart(void *data, UInt32 size, UInt32 &processedSize) throw();
-  bool Read(void *data, UInt32 size, UInt32 &processedSize) throw();
-  bool ReadFull(void *data, size_t size, size_t &processedSize) throw();
-};
-
-class COutFile: public CFileBase
-{
-  bool Open_Disposition(CFSTR fileName, DWORD creationDisposition);
-public:
-  bool Open(CFSTR fileName, DWORD shareMode, DWORD creationDisposition, DWORD flagsAndAttributes);
-  bool Open_EXISTING(CFSTR fileName)
-    { return Open_Disposition(fileName, OPEN_EXISTING); }
-  bool Create_ALWAYS_or_Open_ALWAYS(CFSTR fileName, bool createAlways)
-    { return Open_Disposition(fileName, createAlways ? CREATE_ALWAYS : OPEN_ALWAYS); }
-  bool Create_ALWAYS_or_NEW(CFSTR fileName, bool createAlways)
-    { return Open_Disposition(fileName, createAlways ? CREATE_ALWAYS : CREATE_NEW); }
-  bool Create_ALWAYS(CFSTR fileName)
-    { return Open_Disposition(fileName, CREATE_ALWAYS); }
-  bool Create_NEW(CFSTR fileName)
-    { return Open_Disposition(fileName, CREATE_NEW); }
-  
-  bool Create_ALWAYS_with_Attribs(CFSTR fileName, DWORD flagsAndAttributes);
-
-  bool SetTime(const CFiTime *cTime, const CFiTime *aTime, const CFiTime *mTime) throw();
-  bool SetMTime(const CFiTime *mTime) throw();
-  bool WritePart(const void *data, UInt32 size, UInt32 &processedSize) throw();
-  bool Write(const void *data, UInt32 size, UInt32 &processedSize) throw();
-  bool WriteFull(const void *data, size_t size) throw();
-  bool SetEndOfFile() throw();
-  bool SetLength(UInt64 length) throw();
-  bool SetLength_KeepPosition(UInt64 length) throw();
-};
-
-}
-
-
-#else // _WIN32
 
 namespace NIO {
 
@@ -440,9 +205,7 @@ public:
 
 }
 
-#endif  // _WIN32
-
 }}
 
 
-#endif
+#endif // ZIP7_INC_DOS_FILE_IO_H

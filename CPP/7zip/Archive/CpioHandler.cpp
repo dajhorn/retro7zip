@@ -10,9 +10,6 @@
 #include "../../Common/StringToInt.h"
 #include "../../Common/UTFConvert.h"
 
-#include "../../Windows/PropVariant.h"
-#include "../../Windows/TimeUtils.h"
-
 #include "../Common/LimitedStreams.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -22,7 +19,16 @@
 
 #include "Common/ItemNameUtils.h"
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  #include "../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  #include "../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace NCpio {

@@ -20,10 +20,6 @@
 #include "../../Common/MyLinux.h"
 #include "../../Common/UTFConvert.h"
 
-#include "../../Windows/PropVariantConv.h"
-#include "../../Windows/PropVariantUtils.h"
-#include "../../Windows/TimeUtils.h"
-
 #include "../Common/LimitedStreams.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -1712,7 +1708,7 @@ static void ApfsTimeToFileTime(UInt64 apfsTime, FILETIME &ft, UInt32 &ns100)
   const UInt64 s = apfsTime / 1000000000;
   const UInt32 ns = (UInt32)(apfsTime % 1000000000);
   ns100 = (ns % 100);
-  const UInt64 v = NWindows::NTime::UnixTime64_To_FileTime64((Int64)s) + ns / 100;
+  const UInt64 v = NTime::UnixTime64_To_FileTime64((Int64)s) + ns / 100;
   ft.dwLowDateTime = (DWORD)v;
   ft.dwHighDateTime = (DWORD)(v >> 32);
 }
@@ -2004,7 +2000,7 @@ struct CDatabase
   }
 
   HRESULT SeekReadBlock_FALSE(UInt64 oid, void *data);
-  void GetItemPath(unsigned index, const CNode *inode, NWindows::NCOM::CPropVariant &path) const;
+  void GetItemPath(unsigned index, const CNode *inode, NCOM::CPropVariant &path) const;
   HRESULT ReadMap(UInt64 oid, bool noHeader, CVol *vol, const Byte *hash,
       CMap &map, unsigned recurseLevel);
   HRESULT ReadObjectMap(UInt64 oid, CVol *vol, CObjectMap &map);
@@ -3521,7 +3517,7 @@ IMP_IInArchive_Props_WITH_NAME
 IMP_IInArchive_ArcProps
 
 
-static void ApfsTimeToProp(UInt64 hfsTime, NWindows::NCOM::CPropVariant &prop)
+static void ApfsTimeToProp(UInt64 hfsTime, NCOM::CPropVariant &prop)
 {
   if (hfsTime == 0)
     return;
@@ -3535,7 +3531,7 @@ static void ApfsTimeToProp(UInt64 hfsTime, NWindows::NCOM::CPropVariant &prop)
 Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   const CApfs *apfs = NULL;
   if (Vols.Size() == 1)
     apfs = &Vols[0].apfs;
@@ -3703,7 +3699,7 @@ static void AddNodeName(UString &s, const CNode &inode, UInt64 id)
 }
 
 
-void CDatabase::GetItemPath(unsigned index, const CNode *inode, NWindows::NCOM::CPropVariant &path) const
+void CDatabase::GetItemPath(unsigned index, const CNode *inode, NCOM::CPropVariant &path) const
 {
   const unsigned kNumLevelsMax = (1 << 10);
   const unsigned kLenMax = (1 << 12);
@@ -3769,7 +3765,7 @@ void CDatabase::GetItemPath(unsigned index, const CNode *inode, NWindows::NCOM::
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
 
   const CRef2 &ref2 = Refs2[index];
   const CVol &vol = Vols[ref2.VolIndex];

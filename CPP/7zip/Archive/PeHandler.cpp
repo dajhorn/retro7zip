@@ -11,9 +11,6 @@
 #include "../../Common/IntToString.h"
 #include "../../Common/StringConvert.h"
 
-#include "../../Windows/PropVariantUtils.h"
-#include "../../Windows/TimeUtils.h"
-
 #include "../Common/LimitedStreams.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -33,7 +30,16 @@
 
 #define RINOZ(x) { int _tt_ = (x); if (_tt_ != 0) return _tt_; }
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariantUtils.h"
+  #include "../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariantUtils.h"
+  #include "../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace NPe {

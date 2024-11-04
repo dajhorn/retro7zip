@@ -5,7 +5,13 @@
 
 #include "../../../Common/MyCom.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/FileFind.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/FileFind.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../Common/FileStreams.h"
 
@@ -158,8 +164,8 @@ public:
 private:
   FString _folderPrefix;
   UString _subArchiveName;
-  NWindows::NFile::NFind::CFileInfo _fileInfo;
-
+  NFile::NFind::CFileInfo _fileInfo;
+  
 public:
   CMultiStreams Volumes;
   

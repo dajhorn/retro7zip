@@ -7,6 +7,24 @@
 #ifndef ZIP7_INC_COMMON_H
 #define ZIP7_INC_COMMON_H
 
+#if defined(__DOS__)
+#include "../DOS/Defs.h"
+#include "../DOS/ErrorMsg.h"
+#include "../DOS/FileDir.h"
+#include "../DOS/FileFind.h"
+#include "../DOS/FileIO.h"
+#include "../DOS/FileName.h"
+#include "../DOS/FileSystem.h"
+#include "../DOS/PropVariant.h"
+#include "../DOS/PropVariantConv.h"
+#include "../DOS/PropVariantUtils.h"
+#include "../DOS/System.h"
+#include "../DOS/TimeUtils.h"
+//using namespace NDOS;
+#else
+//using namespace NWindows;
+#endif
+
 #include "../../C/Precomp.h"
 #include "Common0.h"
 #include "MyWindows.h"

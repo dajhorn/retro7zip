@@ -12,6 +12,12 @@
 
 #include "../../../C/7zCrc.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
+using namespace NWindows;
+#endif
+
 #define kTempFilePrefixString FTEXT("7zt")
 /*
   Total buffer size limit, if we use temp file scheme:
@@ -190,7 +196,7 @@ HRESULT CInOutTempBuffer::WriteToStream(ISequentialOutStream *stream)
     hres = E_OUTOFMEMORY;
   else
   {
-    NWindows::NFile::NIO::CInFile inFile;
+    NFile::NIO::CInFile inFile;
     if (!inFile.Open(_tempFile.GetPath()))
       hres = GetLastError_noZero_HRESULT();
     else

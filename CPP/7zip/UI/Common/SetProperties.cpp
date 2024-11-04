@@ -6,13 +6,18 @@
 #include "../../../Common/MyString.h"
 #include "../../../Common/StringToInt.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/PropVariant.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/PropVariant.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../Archive/IArchive.h"
 
 #include "SetProperties.h"
 
-using namespace NWindows;
 using namespace NCOM;
 
 static void ParseNumberString(const UString &s, NCOM::CPropVariant &prop)

@@ -17,8 +17,15 @@
 #include "../../../Common/Defs.h"
 #include "../../../Common/StringConvert.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/TimeUtils.h"
+#include "../../../DOS/Thread.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/TimeUtils.h"
 #include "../../../Windows/Thread.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../Common/CreateCoder.h"
 #include "../../Common/LimitedStreams.h"
@@ -36,7 +43,6 @@
 #include "ZipOut.h"
 #include "ZipUpdate.h"
 
-using namespace NWindows;
 using namespace NSynchronization;
 
 namespace NArchive {
@@ -47,7 +53,7 @@ static const Byte kHostOS =
   NFileHeader::NHostOS::kFAT;
   #else
   NFileHeader::NHostOS::kUnix;
-  #endif
+  #endif // defined(_WIN32) || defined(__DOS__)
 
 static const Byte kMadeByHostOS = kHostOS;
 
@@ -170,8 +176,8 @@ static void SetItemInfoFromCompressingResult(const CCompressingResult &compressi
 
 struct CMtSem
 {
-  NWindows::NSynchronization::CSemaphore Semaphore;
-  NWindows::NSynchronization::CCriticalSection CS;
+  NSynchronization::CSemaphore Semaphore;
+  NSynchronization::CCriticalSection CS;
   CIntVector Indexes;
   int Head;
 
@@ -203,8 +209,8 @@ struct CThreadInfo
 {
   DECL_EXTERNAL_CODECS_LOC_VARS_DECL
 
-  NWindows::CThread Thread;
-  NWindows::NSynchronization::CAutoResetEvent CompressEvent;
+  CThread Thread;
+  NSynchronization::CAutoResetEvent CompressEvent;
   CMtSem *MtSem;
   unsigned ThreadIndex;
 
@@ -349,7 +355,7 @@ Z7_CLASS_IMP_NOQIB_1(
   CMyComPtr<ICompressProgressInfo> RatioProgress;
   bool _inSizeIsMain;
 public:
-  NWindows::NSynchronization::CCriticalSection CriticalSection;
+  NSynchronization::CCriticalSection CriticalSection;
   void Create(IProgress *progress, bool inSizeIsMain);
   void SetProgressOffset(UInt64 progressOffset);
   void SetProgressOffset_NoLock(UInt64 progressOffset);
@@ -379,7 +385,7 @@ void CMtProgressMixer2::SetProgressOffset(UInt64 progressOffset)
 
 HRESULT CMtProgressMixer2::SetRatioInfo(unsigned index, const UInt64 *inSize, const UInt64 *outSize)
 {
-  NWindows::NSynchronization::CCriticalSectionLock lock(CriticalSection);
+  NSynchronization::CCriticalSectionLock lock(CriticalSection);
   if (index == 0 && RatioProgress)
   {
     RINOK(RatioProgress->SetRatioInfo(inSize, outSize))
@@ -606,12 +612,12 @@ static HRESULT ReportArcProps(IArchiveUpdateCallbackArcProp *reportArcProp,
   prop.vt = VT_EMPTY;
   prop.wReserved1 = 0;
   {
-    NWindows::NCOM::PropVarEm_Set_UInt64(&prop, st.Size);
+    NCOM::PropVarEm_Set_UInt64(&prop, st.Size);
     RINOK(reportArcProp->ReportProp(
       NEventIndexType::kArcProp, 0, kpidSize, &prop));
   }
   {
-    NWindows::NCOM::PropVarEm_Set_UInt64(&prop, st.PackSize);
+    NCOM::PropVarEm_Set_UInt64(&prop, st.PackSize);
     RINOK(reportArcProp->ReportProp(
       NEventIndexType::kArcProp, 0, kpidPackSize, &prop));
   }
@@ -1309,7 +1315,7 @@ static HRESULT Update2(
       CMemBlocks2 &memRef2 = refs.Refs[mtItemIndex - 1];
 
       {
-        NWindows::NSynchronization::CCriticalSectionLock lock(mtProgressMixerSpec->Mixer2->CriticalSection);
+        NSynchronization::CCriticalSectionLock lock(mtProgressMixerSpec->Mixer2->CriticalSection);
         const HRESULT res = updateCallback->GetStream(ui.IndexInClient, &fileInStream);
         if (res == S_FALSE)
         {

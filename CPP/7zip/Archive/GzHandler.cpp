@@ -10,8 +10,15 @@
 #include "../../Common/Defs.h"
 #include "../../Common/StringConvert.h"
 
+#if defined(__DOS__)
+#include "../../DOS/PropVariantUtils.h"
+#include "../../DOS/TimeUtils.h"
+using namespace NDOS;
+#else
 #include "../../Windows/PropVariantUtils.h"
 #include "../../Windows/TimeUtils.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -26,8 +33,6 @@
 #include "Common/OutStreamWithCRC.h"
 
 #define Get32(p) GetUi32(p)
-
-using namespace NWindows;
 
 using namespace NCompress;
 using namespace NDeflate;

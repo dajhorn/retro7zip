@@ -9,10 +9,6 @@
 #include "../../Common/MyBuffer.h"
 #include "../../Common/StringConvert.h"
 
-#include "../../Windows/PropVariant.h"
-#include "../../Windows/PropVariantUtils.h"
-#include "../../Windows/TimeUtils.h"
-
 #include "../ICoder.h"
 
 #include "../Common/LimitedStreams.h"
@@ -27,7 +23,18 @@
 
 #include "Common/ItemNameUtils.h"
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  #include "../../DOS/PropVariantUtils.h"
+  #include "../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  #include "../../Windows/PropVariantUtils.h"
+  #include "../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
+
 using namespace NTime;
 
 #define Get16(p) GetUi16(p)

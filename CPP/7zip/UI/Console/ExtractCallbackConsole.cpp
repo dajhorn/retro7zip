@@ -5,11 +5,21 @@
 #include "../../../Common/IntToString.h"
 #include "../../../Common/Wildcard.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/FileDir.h"
+#include "../../../DOS/FileFind.h"
+#include "../../../DOS/TimeUtils.h"
+#include "../../../DOS/ErrorMsg.h"
+#include "../../../DOS/PropVariantConv.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/FileDir.h"
 #include "../../../Windows/FileFind.h"
 #include "../../../Windows/TimeUtils.h"
 #include "../../../Windows/ErrorMsg.h"
 #include "../../../Windows/PropVariantConv.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #ifndef Z7_ST
 #include "../../../Windows/Synchronization.h"
@@ -23,7 +33,6 @@
 #include "ExtractCallbackConsole.h"
 #include "UserInputUtils.h"
 
-using namespace NWindows;
 using namespace NFile;
 using namespace NDir;
 

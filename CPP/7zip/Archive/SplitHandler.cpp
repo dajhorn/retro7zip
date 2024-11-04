@@ -5,7 +5,13 @@
 #include "../../Common/ComTry.h"
 #include "../../Common/MyString.h"
 
+#if defined(__DOS__)
+#include "../../DOS/PropVariant.h"
+using namespace NDOS;
+#else
 #include "../../Windows/PropVariant.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -14,8 +20,6 @@
 #include "../Compress/CopyCoder.h"
 
 #include "Common/MultiStream.h"
-
-using namespace NWindows;
 
 namespace NArchive {
 namespace NSplit {

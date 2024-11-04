@@ -7,8 +7,6 @@
 #include "../../Common/ComTry.h"
 #include "../../Common/MyBuffer.h"
 
-#include "../../Windows/PropVariant.h"
-
 #include "../Common/RegisterArc.h"
 #include "../Common/StreamUtils.h"
 
@@ -20,7 +18,14 @@
 #define G32(_offs_, dest) dest = Get32(p + (_offs_))
 #define G64(_offs_, dest) dest = Get64(p + (_offs_))
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 

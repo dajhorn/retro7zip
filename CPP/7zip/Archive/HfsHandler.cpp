@@ -7,14 +7,21 @@
 #include "../../Common/ComTry.h"
 #include "../../Common/MyString.h"
 
-#include "../../Windows/PropVariantUtils.h"
-
 #include "../Common/LimitedStreams.h"
 #include "../Common/RegisterArc.h"
 #include "../Common/StreamObjects.h"
 #include "../Common/StreamUtils.h"
 
 #include "HfsHandler.h"
+
+#if defined(__DOS__)
+  #include "../../DOS/PropVariantUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariantUtils.h"
+  using namespace NWindows;
+#endif
+
 
 /* if HFS_SHOW_ALT_STREAMS is defined, the handler will show attribute files
    and resource forks. In most cases it looks useless. So we disable it. */
@@ -327,7 +334,7 @@ void CCompressHeader::Parse(const Byte *p, size_t dataSize)
 }
 
 
-void CCompressHeader::MethodToProp(NWindows::NCOM::CPropVariant &prop) const
+void CCompressHeader::MethodToProp(NCOM::CPropVariant &prop) const
 {
   if (!IsCorrect)
     return;
@@ -344,7 +351,7 @@ void CCompressHeader::MethodToProp(NWindows::NCOM::CPropVariant &prop) const
   prop = s;
 }
 
-void MethodsMaskToProp(UInt32 methodsMask, NWindows::NCOM::CPropVariant &prop)
+void MethodsMaskToProp(UInt32 methodsMask, NCOM::CPropVariant &prop)
 {
   FLAGS_TO_PROP(g_Methods, methodsMask, prop);
 }
@@ -503,7 +510,7 @@ public:
     return item.DataFork.Size;
   }
 
-  void GetItemPath(unsigned index, NWindows::NCOM::CPropVariant &path) const;
+  void GetItemPath(unsigned index, NCOM::CPropVariant &path) const;
   HRESULT Open2(IInStream *inStream, IArchiveOpenCallback *progress);
 };
 
@@ -522,7 +529,7 @@ enum
   kHfsID_FirstUserCatalogNode  = 16
 };
 
-void CDatabase::GetItemPath(unsigned index, NWindows::NCOM::CPropVariant &path) const
+void CDatabase::GetItemPath(unsigned index, NCOM::CPropVariant &path) const
 {
   unsigned len = 0;
   const unsigned kNumLevelsMax = (1 << 10);
@@ -1605,7 +1612,7 @@ static const Byte kArcProps[] =
 IMP_IInArchive_Props
 IMP_IInArchive_ArcProps
 
-static void HfsTimeToProp(UInt32 hfsTime, NWindows::NCOM::CPropVariant &prop)
+static void HfsTimeToProp(UInt32 hfsTime, NCOM::CPropVariant &prop)
 {
   if (hfsTime == 0)
     return;
@@ -1617,7 +1624,7 @@ static void HfsTimeToProp(UInt32 hfsTime, NWindows::NCOM::CPropVariant &prop)
 Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case kpidExtension: prop = Header.IsHfsX() ? "hfsx" : "hfs"; break;
@@ -1716,7 +1723,7 @@ Z7_COM7F_IMF(CHandler::GetRawProp(UInt32 index, PROPID propID, const void **data
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   const CRef &ref = Refs[index];
   const CItem &item = Items[ref.ItemIndex];
   switch (propID)

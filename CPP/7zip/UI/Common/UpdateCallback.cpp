@@ -32,9 +32,17 @@
 #include "../../../Common/Wildcard.h"
 #include "../../../Common/UTFConvert.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/FileDir.h"
+#include "../../../DOS/FileName.h"
+#include "../../../DOS/PropVariant.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/FileDir.h"
 #include "../../../Windows/FileName.h"
 #include "../../../Windows/PropVariant.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../Common/StreamObjects.h"
 
@@ -45,7 +53,6 @@
 #include "../../../Windows/SecurityUtils.h"
 #endif // defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
-using namespace NWindows;
 using namespace NFile;
 
 #ifndef Z7_ST

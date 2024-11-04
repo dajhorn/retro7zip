@@ -18,7 +18,7 @@ Z7_CLASS_IMP_COM_1(
 )
   CMyComPtr<ICompressProgressInfo> _progress;
   #ifndef Z7_ST
-  NWindows::NSynchronization::CCriticalSection CriticalSection;
+  NSynchronization::CCriticalSection CriticalSection;
   #endif
 
 public:
@@ -31,7 +31,7 @@ public:
   void AddOutSize(UInt64 addOutSize)
   {
     #ifndef Z7_ST
-    NWindows::NSynchronization::CCriticalSectionLock lock(CriticalSection);
+    NSynchronization::CCriticalSectionLock lock(CriticalSection);
     #endif
     OutSize += addOutSize;
   }

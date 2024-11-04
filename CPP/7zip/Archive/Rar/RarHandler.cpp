@@ -9,9 +9,6 @@
 #include "../../../Common/MyBuffer2.h"
 #include "../../../Common/UTFConvert.h"
 
-#include "../../../Windows/PropVariantUtils.h"
-#include "../../../Windows/TimeUtils.h"
-
 #include "../../IPassword.h"
 
 #include "../../Common/CreateCoder.h"
@@ -36,7 +33,15 @@
 #include "RarVol.h"
 #include "RarHandler.h"
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../../DOS/PropVariantUtils.h"
+  #include "../../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../../Windows/PropVariantUtils.h"
+  #include "../../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
 
 #define Get16(p) GetUi16(p)
 #define Get32(p) GetUi32(p)

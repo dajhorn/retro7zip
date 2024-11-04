@@ -126,7 +126,7 @@ public:
   UInt64 Pos;
 
   #ifdef USE_MIXER_MT
-  NWindows::NSynchronization::CCriticalSection CriticalSection;
+  NSynchronization::CCriticalSection CriticalSection;
   #endif
 };
 
@@ -151,7 +151,7 @@ public:
 
 Z7_COM7F_IMF(CLockedSequentialInStreamMT::Read(void *data, UInt32 size, UInt32 *processedSize))
 {
-  NWindows::NSynchronization::CCriticalSectionLock lock(_glob->CriticalSection);
+  NSynchronization::CCriticalSectionLock lock(_glob->CriticalSection);
 
   if (_pos != _glob->Pos)
   {

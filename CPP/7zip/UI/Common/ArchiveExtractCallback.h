@@ -404,7 +404,7 @@ private:
   CObjectVector<CDirPathTime> _extractedFolders;
   
   #ifndef _WIN32
-  // CObjectVector<NWindows::NFile::NDir::CDelayedSymLink> _delayedSymLinks;
+  // CObjectVector<NFile::NDir::CDelayedSymLink> _delayedSymLinks;
   #endif
 
   void CreateComplexDirectory(const UStringVector &dirPathParts, FString &fullPath);

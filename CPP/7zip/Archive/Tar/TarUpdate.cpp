@@ -4,7 +4,13 @@
 
 // #include <stdio.h>
 
+#if defined(__DOS__)
+#include "../../../DOS/TimeUtils.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/TimeUtils.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../Common/LimitedStreams.h"
 #include "../../Common/ProgressUtils.h"
@@ -21,13 +27,13 @@ namespace NTar {
 static void FILETIME_To_PaxTime(const FILETIME &ft, CPaxTime &pt)
 {
   UInt32 ns;
-  pt.Sec = NWindows::NTime::FileTime_To_UnixTime64_and_Quantums(ft, ns);
+  pt.Sec = NTime::FileTime_To_UnixTime64_and_Quantums(ft, ns);
   pt.Ns = ns * 100;
   pt.NumDigits = 7;
 }
 
 
-HRESULT Prop_To_PaxTime(const NWindows::NCOM::CPropVariant &prop, CPaxTime &pt)
+HRESULT Prop_To_PaxTime(const NCOM::CPropVariant &prop, CPaxTime &pt)
 {
   pt.Clear();
   if (prop.vt == VT_EMPTY)
@@ -39,7 +45,7 @@ HRESULT Prop_To_PaxTime(const NWindows::NCOM::CPropVariant &prop, CPaxTime &pt)
     return E_INVALIDARG;
   {
     UInt32 ns;
-    pt.Sec = NWindows::NTime::FileTime_To_UnixTime64_and_Quantums(prop.filetime, ns);
+    pt.Sec = NTime::FileTime_To_UnixTime64_and_Quantums(prop.filetime, ns);
     ns *= 100;
     pt.NumDigits = 7;
     const unsigned prec = prop.wReserved1;
@@ -58,7 +64,7 @@ HRESULT Prop_To_PaxTime(const NWindows::NCOM::CPropVariant &prop, CPaxTime &pt)
 static HRESULT GetTime(IStreamGetProp *getProp, UInt32 pid, CPaxTime &pt)
 {
   pt.Clear();
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   RINOK(getProp->GetProperty(pid, &prop))
   return Prop_To_PaxTime(prop, pt);
 }
@@ -73,7 +79,7 @@ static HRESULT GetUser(IStreamGetProp *getProp,
   // we clear old values, if any of GetProperty() returns non-VT_EMPTY;
   bool isSet = false;
   {
-    NWindows::NCOM::CPropVariant prop;
+    NCOM::CPropVariant prop;
     RINOK(getProp->GetProperty(pidId, &prop))
     if (prop.vt == VT_UI4)
     {
@@ -85,7 +91,7 @@ static HRESULT GetUser(IStreamGetProp *getProp,
       return E_INVALIDARG;
   }
   {
-    NWindows::NCOM::CPropVariant prop;
+    NCOM::CPropVariant prop;
     RINOK(getProp->GetProperty(pidName, &prop))
     if (prop.vt == VT_BSTR)
     {
@@ -111,7 +117,7 @@ static HRESULT GetUser(IStreamGetProp *getProp,
 static HRESULT GetDevice(IStreamGetProp *getProp,
     UInt32 &majo, UInt32 &mino, bool &majo_defined, bool &mino_defined)
 {
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   RINOK(getProp->GetProperty(kpidDevice, &prop));
   if (prop.vt == VT_EMPTY)
     return S_OK;
@@ -133,7 +139,7 @@ static HRESULT GetDevice(IStreamGetProp *getProp,
     UInt32 pid, UInt32 &id, bool &defined)
 {
   defined = false;
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   RINOK(getProp->GetProperty(pid, &prop))
   if (prop.vt == VT_EMPTY)
     return S_OK;
@@ -331,7 +337,7 @@ HRESULT UpdateArchive(IInStream *inStream, ISequentialOutStream *outStream,
               RINOK(GetUser(getProp, kpidGroup, kpidGroupId, item.Group, item.GID, options.CodePage, options.UtfFlags))
 
               {
-                NWindows::NCOM::CPropVariant prop;
+                NCOM::CPropVariant prop;
                 RINOK(getProp->GetProperty(kpidPosixAttrib, &prop))
                 if (prop.vt == VT_EMPTY)
                   item.Mode =
@@ -349,7 +355,7 @@ HRESULT UpdateArchive(IInStream *inStream, ISequentialOutStream *outStream,
               }
 
               {
-                NWindows::NCOM::CPropVariant prop;
+                NCOM::CPropVariant prop;
                 RINOK(getProp->GetProperty(kpidSize, &prop))
                 if (prop.vt != VT_UI8)
                   return E_INVALIDARG;

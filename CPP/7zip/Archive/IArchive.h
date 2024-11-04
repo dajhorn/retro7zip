@@ -647,7 +647,7 @@ BSTR AllocBstrFromAscii(const char *s) throw();
     const CStatProp &prop = k[index]; \
     *propID = (PROPID)prop.PropID; \
     *varType = prop.vt; \
-    *name = NWindows::NCOM::AllocBstrFromAscii(prop.Name); return S_OK; } \
+    *name = NCOM::AllocBstrFromAscii(prop.Name); return S_OK; } \
 
 
 #define IMP_IInArchive_Props \

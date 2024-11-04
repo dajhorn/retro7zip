@@ -10,9 +10,6 @@
 #include "../../Common/IntToString.h"
 #include "../../Common/MyBuffer2.h"
 
-#include "../../Windows/PropVariant.h"
-#include "../../Windows/PropVariantUtils.h"
-
 #include "../Common/RegisterArc.h"
 #include "../Common/StreamObjects.h"
 #include "../Common/StreamUtils.h"
@@ -24,7 +21,16 @@
 #define Get32(p) GetBe32a(p)
 #define Get64(p) GetBe64a(p)
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  #include "../../DOS/PropVariantUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  #include "../../Windows/PropVariantUtils.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace NQcow {

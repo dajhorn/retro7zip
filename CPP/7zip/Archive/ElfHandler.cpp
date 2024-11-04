@@ -8,8 +8,6 @@
 #include "../../Common/IntToString.h"
 #include "../../Common/MyBuffer.h"
 
-#include "../../Windows/PropVariantUtils.h"
-
 #include "../Common/LimitedStreams.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -19,7 +17,13 @@
 
 // #define Z7_ELF_SHOW_DETAILS
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariantUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariantUtils.h"
+  using namespace NWindows;
+#endif
 
 static UInt16 Get16(const Byte *p, bool be) { if (be) return GetBe16a(p); return GetUi16a(p); }
 static UInt32 Get32(const Byte *p, bool be) { if (be) return GetBe32a(p); return GetUi32a(p); }

@@ -3,7 +3,19 @@
 #ifndef ZIP7_INC_HFS_HANDLER_H
 #define ZIP7_INC_HFS_HANDLER_H
 
-#include "../../Windows/PropVariant.h"
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  #include "../../DOS/PropVariantConv.h"
+  #include "../../DOS/PropVariantUtils.h"
+  #include "../../DOS/TimeUtils.h"
+  using namespace NDOS; 
+#else
+  #include "../../Windows/PropVariant.h"
+  #include "../../Windows/PropVariantConv.h"
+  #include "../../Windows/PropVariantUtils.h"
+  #include "../../Windows/TimeUtils.h"
+  using namespace NWindows; 
+#endif
 
 #include "../Compress/LzfseDecoder.h"
 #include "../Compress/ZlibDecoder.h"
@@ -40,10 +52,10 @@ struct CCompressHeader
 
   CCompressHeader() { Clear(); }
 
-  void MethodToProp(NWindows::NCOM::CPropVariant &prop) const;
+  void MethodToProp(NCOM::CPropVariant &prop) const;
 };
 
-void MethodsMaskToProp(UInt32 methodsMask, NWindows::NCOM::CPropVariant &prop);
+void MethodsMaskToProp(UInt32 methodsMask, NCOM::CPropVariant &prop);
 
 
 class CDecoder

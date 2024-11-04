@@ -10,6 +10,7 @@
 #include "IsoHeader.h"
 #include "IsoItem.h"
 
+
 namespace NArchive {
 namespace NIso {
 
@@ -127,10 +128,10 @@ struct CDateTime
   bool NotSpecified() const { return Year == 0 && Month == 0 && Day == 0 &&
       Hour == 0 && Minute == 0 && Second == 0 && GmtOffset == 0; }
 
-  bool GetFileTime(NWindows::NCOM::CPropVariant &prop) const
+  bool GetFileTime(NCOM::CPropVariant &prop) const
   {
     UInt64 v;
-    const bool res = NWindows::NTime::GetSecondsSince1601(Year, Month, Day, Hour, Minute, Second, v);
+    const bool res = NTime::GetSecondsSince1601(Year, Month, Day, Hour, Minute, Second, v);
     if (res)
     {
       v = (UInt64)((Int64)v - (Int64)((Int32)GmtOffset * 15 * 60));

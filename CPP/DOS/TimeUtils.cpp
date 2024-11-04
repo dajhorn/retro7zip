@@ -349,83 +349,6 @@ void GetCurUtcFileTime(FILETIME &ft) throw()
 
 }}
 
-
-#ifdef _WIN32
-
-/*
-void FiTime_Normalize_With_Prec(CFiTime &ft, unsigned prec)
-{
-  if (prec == k_PropVar_TimePrec_0
-      || prec == k_PropVar_TimePrec_HighPrec
-      || prec >= k_PropVar_TimePrec_100ns)
-    return;
-  UInt64 v = (((UInt64)ft.dwHighDateTime) << 32) + ft.dwLowDateTime;
-
-  int numDigits = (int)prec - (int)k_PropVar_TimePrec_Base;
-  UInt32 d;
-  if (prec == k_PropVar_TimePrec_DOS)
-  {
-    // we round up as windows DosDateTimeToFileTime()
-    v += NWindows::NTime::kNumTimeQuantumsInSecond * 2 - 1;
-    d = NWindows::NTime::kNumTimeQuantumsInSecond * 2;
-  }
-  else
-  {
-    if (prec == k_PropVar_TimePrec_Unix)
-      numDigits = 0;
-    else if (numDigits < 0)
-      return;
-    d = 1;
-    for (unsigned k = numDigits; k < 7; k++)
-      d *= 10;
-  }
-  v /= d;
-  v *= d;
-  ft.dwLowDateTime = (DWORD)v;
-  ft.dwHighDateTime = (DWORD)(v >> 32);
-}
-*/
-
-#else
-
-/*
-void FiTime_Normalize_With_Prec(CFiTime &ft, unsigned prec)
-{
-  if (prec >= k_PropVar_TimePrec_1ns
-      || prec == k_PropVar_TimePrec_HighPrec)
-    return;
-
-  int numDigits = (int)prec - (int)k_PropVar_TimePrec_Base;
-  UInt32 d;
-  if (prec == k_PropVar_TimePrec_Unix ||
-      prec == (int)k_PropVar_TimePrec_Base)
-  {
-    ft.tv_nsec = 0;
-    return;
-  }
-  if (prec == k_PropVar_TimePrec_DOS)
-  {
-    // we round up as windows DosDateTimeToFileTime()
-    const unsigned sec1 = (ft.tv_sec & 1);
-    if (ft.tv_nsec == 0 && sec1 == 0)
-      return;
-    ft.tv_nsec = 0;
-    ft.tv_sec += 2 - sec1;
-    return;
-  }
-  {
-    if (prec == k_PropVar_TimePrec_0
-        || numDigits < 0)
-      numDigits = 7;
-    d = 1;
-    for (unsigned k = numDigits; k < 9; k++)
-      d *= 10;
-    ft.tv_nsec /= d;
-    ft.tv_nsec *= d;
-  }
-}
-*/
-
 int Compare_FiTime(const CFiTime *a1, const CFiTime *a2)
 {
   if (a1->tv_sec < a2->tv_sec) return -1;
@@ -438,7 +361,7 @@ int Compare_FiTime(const CFiTime *a1, const CFiTime *a2)
 bool FILETIME_To_timespec(const FILETIME &ft, CFiTime &ts)
 {
   UInt32 quantums;
-  const Int64 sec = NWindows::NTime::FileTime_To_UnixTime64_and_Quantums(ft, quantums);
+  const Int64 sec = NDOS::NTime::FileTime_To_UnixTime64_and_Quantums(ft, quantums);
   // time_t is long
   const time_t sec2 = (time_t)sec;
   if (sec2 == sec)
@@ -452,7 +375,7 @@ bool FILETIME_To_timespec(const FILETIME &ft, CFiTime &ts)
 
 void FiTime_To_FILETIME_ns100(const CFiTime &ts, FILETIME &ft, unsigned &ns100)
 {
-  const UInt64 v = NWindows::NTime::UnixTime64_To_FileTime64(ts.tv_sec) + ((UInt64)ts.tv_nsec / 100);
+  const UInt64 v = NDOS::NTime::UnixTime64_To_FileTime64(ts.tv_sec) + ((UInt64)ts.tv_nsec / 100);
   ns100 = (unsigned)((UInt64)ts.tv_nsec % 100);
   ft.dwLowDateTime = (DWORD)v;
   ft.dwHighDateTime = (DWORD)(v >> 32);
@@ -460,9 +383,7 @@ void FiTime_To_FILETIME_ns100(const CFiTime &ts, FILETIME &ft, unsigned &ns100)
 
 void FiTime_To_FILETIME(const CFiTime &ts, FILETIME &ft)
 {
-  const UInt64 v = NWindows::NTime::UnixTime64_To_FileTime64(ts.tv_sec) + ((UInt64)ts.tv_nsec / 100);
+  const UInt64 v = NDOS::NTime::UnixTime64_To_FileTime64(ts.tv_sec) + ((UInt64)ts.tv_nsec / 100);
   ft.dwLowDateTime = (DWORD)v;
   ft.dwHighDateTime = (DWORD)(v >> 32);
 }
-
-#endif

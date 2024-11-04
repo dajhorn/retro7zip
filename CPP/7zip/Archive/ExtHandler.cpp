@@ -25,9 +25,6 @@
 #include "../../Common/StringConvert.h"
 #include "../../Common/UTFConvert.h"
 
-#include "../../Windows/PropVariantUtils.h"
-#include "../../Windows/TimeUtils.h"
-
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
 #include "../Common/StreamObjects.h"
@@ -35,7 +32,16 @@
 
 #include "../Compress/CopyCoder.h"
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariantUtils.h"
+  #include "../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariantUtils.h"
+  #include "../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
+
 
 UInt32 LzhCrc16Update(UInt32 crc, const void *data, size_t size);
 

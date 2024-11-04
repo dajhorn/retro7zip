@@ -19,8 +19,6 @@
 #include "../../Common/MyBuffer.h"
 #include "../../Common/StringConvert.h"
 
-#include "../../Windows/PropVariantUtils.h"
-
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
 #include "../Common/StreamObjects.h"
@@ -39,6 +37,15 @@
 #define Get32(p) GetUi32(p)
 #define Get64(p) GetUi64(p)
 #define Get24(p) (Get32(p) & 0xFFFFFF)
+
+#if defined(__DOS__)
+  #include "../../DOS/PropVariantUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariantUtils.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace NUefi {
@@ -759,7 +766,7 @@ IMP_IInArchive_ArcProps
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   const CItem2 &item2 = _items2[index];
   const CItem &item = _items[item2.MainIndex];
   switch (propID)
@@ -827,7 +834,7 @@ void CHandler::AddCommentString(const char *name, UInt32 pos)
 Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case kpidMethod:

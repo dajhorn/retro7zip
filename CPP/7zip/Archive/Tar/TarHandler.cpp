@@ -7,7 +7,13 @@
 #include "../../../Common/StringConvert.h"
 #include "../../../Common/UTFConvert.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/TimeUtils.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/TimeUtils.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../Common/LimitedStreams.h"
 #include "../../Common/MethodProps.h"
@@ -18,8 +24,6 @@
 #include "../Common/ItemNameUtils.h"
 
 #include "TarHandler.h"
-
-using namespace NWindows;
 
 namespace NArchive {
 namespace NTar {
@@ -400,7 +404,7 @@ HRESULT CHandler::SkipTo(UInt32 index)
   return S_OK;
 }
 
-void CHandler::TarStringToUnicode(const AString &s, NWindows::NCOM::CPropVariant &prop, bool toOs) const
+void CHandler::TarStringToUnicode(const AString &s, NCOM::CPropVariant &prop, bool toOs) const
 {
   UString dest;
   if (_curCodePage == CP_UTF8)
@@ -415,7 +419,7 @@ void CHandler::TarStringToUnicode(const AString &s, NWindows::NCOM::CPropVariant
 
 
 // CPaxTime is defined (NumDigits >= 0)
-static void PaxTimeToProp(const CPaxTime &pt, NWindows::NCOM::CPropVariant &prop)
+static void PaxTimeToProp(const CPaxTime &pt, NCOM::CPropVariant &prop)
 {
   UInt64 v;
   if (!NTime::UnixTime64_To_FileTime64(pt.Sec, v))

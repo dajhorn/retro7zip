@@ -7,8 +7,6 @@
 #include "../../../Common/ComTry.h"
 #include "../../../Common/IntToString.h"
 
-#include "../../../Windows/PropVariant.h"
-
 #include "../../Common/ProgressUtils.h"
 #include "../../Common/StreamUtils.h"
 
@@ -18,7 +16,14 @@
 
 #define Get32(p) GetUi32(p)
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../../DOS/PropVariant.h"
+  using namespace NDOS;
+#else
+  #include "../../../Windows/PropVariant.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace NNsis {

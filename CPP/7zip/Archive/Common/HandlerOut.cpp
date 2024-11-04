@@ -134,7 +134,7 @@ static void SetMethodProp32_Replace(CMethodProps &m, PROPID propID, UInt32 value
   const int i = m.FindProp(propID);
   if (i >= 0)
   {
-    NWindows::NCOM::CPropVariant &val = m.Props[(unsigned)i].Value;
+    NCOM::CPropVariant &val = m.Props[(unsigned)i].Value;
     val = (UInt32)value;
     return;
   }

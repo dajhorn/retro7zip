@@ -10,8 +10,6 @@
 #include "../../Common/MyBuffer.h"
 #include "../../Common/MyString.h"
 
-#include "../../Windows/PropVariant.h"
-
 #include "../Common/InBuffer.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -26,6 +24,14 @@
 // #define Get16(p) GetBe16(p)
 #define Get24(p) GetBe24(p)
 #define Get32(p) GetBe32(p)
+
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  using namespace NWindows;
+#endif
 
 namespace NArchive {
 namespace NFlv {
@@ -138,7 +144,7 @@ static const char * const g_Rates[4] =
 
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value))
 {
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   const CItem2 &item = _items2[index];
   switch (propID)
   {
@@ -250,7 +256,7 @@ AString CHandler::GetComment()
 Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 {
   // COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     // case kpidComment: prop = GetComment(); break;

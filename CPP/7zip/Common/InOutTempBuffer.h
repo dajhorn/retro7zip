@@ -3,9 +3,9 @@
 #ifndef ZIP7_INC_IN_OUT_TEMP_BUFFER_H
 #define ZIP7_INC_IN_OUT_TEMP_BUFFER_H
 
-// #ifdef _WIN32
+#if defined(_WIN32)
 #define USE_InOutTempBuffer_FILE
-// #endif
+#endif // defined(_WIN32)
 
 #ifdef USE_InOutTempBuffer_FILE
 #include "../../Windows/FileDir.h"

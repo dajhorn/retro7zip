@@ -37,9 +37,17 @@ EXPORT_CODECS
 #include "../../../Common/StringToInt.h"
 #include "../../../Common/StringConvert.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/ErrorMsg.h"
+#include "../../../DOS/FileIO.h"
+#include "../../../DOS/PropVariant.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/ErrorMsg.h"
 #include "../../../Windows/FileIO.h"
 #include "../../../Windows/PropVariant.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "LoadCodecs.h"
 
@@ -61,7 +69,6 @@ EXPORT_CODECS
 #include "../../../Windows/Registry.h"
 #endif
 
-using namespace NWindows;
 using namespace NFile;
 
 
@@ -1281,7 +1288,7 @@ void CCodecs::GetCodecsErrorMessage(UString &s)
     if (ce.ErrorCode != 0)
     {
       s += " : ";
-      s += NWindows::NError::MyFormatMessage(ce.ErrorCode);
+      s += NError::MyFormatMessage(ce.ErrorCode);
     }
     if (!ce.Message.IsEmpty())
     {

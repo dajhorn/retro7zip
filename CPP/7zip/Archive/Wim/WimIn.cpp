@@ -429,7 +429,7 @@ static inline void ParseStream(bool oldVersion, const Byte *p, CStreamInfo &s)
 
 #define kLongPath "[LongPath]"
 
-void CDatabase::GetShortName(unsigned index, NWindows::NCOM::CPropVariant &name) const
+void CDatabase::GetShortName(unsigned index, NCOM::CPropVariant &name) const
 {
   const CItem &item = Items[index];
   const CImage &image = Images[item.ImageIndex];
@@ -452,7 +452,7 @@ void CDatabase::GetShortName(unsigned index, NWindows::NCOM::CPropVariant &name)
 }
 
 
-void CDatabase::GetItemName(unsigned index, NWindows::NCOM::CPropVariant &name) const
+void CDatabase::GetItemName(unsigned index, NCOM::CPropVariant &name) const
 {
   const CItem &item = Items[index];
   const CImage &image = Images[item.ImageIndex];
@@ -474,7 +474,7 @@ void CDatabase::GetItemName(unsigned index, NWindows::NCOM::CPropVariant &name) 
 }
 
 
-void CDatabase::GetItemPath(unsigned index1, bool showImageNumber, NWindows::NCOM::CPropVariant &path) const
+void CDatabase::GetItemPath(unsigned index1, bool showImageNumber, NCOM::CPropVariant &path) const
 {
   unsigned size = 0;
   int index = (int)index1;

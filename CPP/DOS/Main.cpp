@@ -320,7 +320,7 @@ static void ShowCopyrightAndHelp(CStdOutStream *so, bool needHelp)
   if (!so)
     return;
   *so << kCopyrightString;
-  // *so << "# CPUs: " << (UInt64)NWindows::NSystem::GetNumberOfProcessors() << endl;
+  // *so << "# CPUs: " << (UInt64)NDOS::NSystem::GetNumberOfProcessors() << endl;
   ShowProgInfo(so);
   *so << endl;
   if (needHelp)
@@ -557,7 +557,9 @@ static void PrintHexId(CStdOutStream &so, UInt64 id)
 }
 
 
+#if !defined(__DOS__)
 void Set_ModuleDirPrefix_From_ProgArg0(const char *s);
+#endif // !defined(__DOS__)
 
 int Main2(int numArgs, char *args[]);
 
@@ -579,8 +581,10 @@ int Main2(int numArgs, char *args[])
   UStringVector commandStrings;
   
   {
+#if !defined(__DOS__)
     if (numArgs > 0)
       Set_ModuleDirPrefix_From_ProgArg0(args[0]);
+#endif // !defined(__DOS__0
 
     for (int i = 0; i < numArgs; i++)
     {

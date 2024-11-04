@@ -9,8 +9,6 @@
 #include "../../Common/IntToString.h"
 #include "../../Common/MyBuffer.h"
 
-#include "../../Windows/PropVariantUtils.h"
-
 #include "../Common/RegisterArc.h"
 #include "../Common/StreamUtils.h"
 
@@ -20,7 +18,13 @@
 #define Get32(p) GetUi32(p)
 #define Get64(p) GetUi64(p)
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariantUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariantUtils.h"
+  using namespace NWindows;
+#endif
 
 namespace NArchive {
 

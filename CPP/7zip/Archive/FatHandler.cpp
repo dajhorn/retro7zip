@@ -12,9 +12,6 @@
 #include "../../Common/MyCom.h"
 #include "../../Common/StringConvert.h"
 
-#include "../../Windows/PropVariant.h"
-#include "../../Windows/TimeUtils.h"
-
 #include "../Common/LimitedStreams.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -30,6 +27,17 @@
 #define Get32a(p) GetUi32a(p)
 
 #define PRF(x) /* x */
+
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  #include "../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  #include "../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace NFat {
@@ -876,10 +884,10 @@ IMP_IInArchive_Props
 IMP_IInArchive_ArcProps_WITH_NAME
 
 
-static void FatTimeToProp(UInt32 dosTime, UInt32 ms10, NWindows::NCOM::CPropVariant &prop)
+static void FatTimeToProp(UInt32 dosTime, UInt32 ms10, NCOM::CPropVariant &prop)
 {
   FILETIME localFileTime, utc;
-  if (NWindows::NTime::DosTime_To_FileTime(dosTime, localFileTime))
+  if (NTime::DosTime_To_FileTime(dosTime, localFileTime))
     if (LocalFileTimeToFileTime(&localFileTime, &utc))
     {
       UInt64 t64 = (((UInt64)utc.dwHighDateTime) << 32) + utc.dwLowDateTime;
@@ -891,7 +899,7 @@ static void FatTimeToProp(UInt32 dosTime, UInt32 ms10, NWindows::NCOM::CPropVari
 }
 
 /*
-static void StringToProp(const Byte *src, unsigned size, NWindows::NCOM::CPropVariant &prop)
+static void StringToProp(const Byte *src, unsigned size, NCOM::CPropVariant &prop)
 {
   char dest[32];
   memcpy(dest, src, size);
@@ -905,7 +913,7 @@ static void StringToProp(const Byte *src, unsigned size, NWindows::NCOM::CPropVa
 Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case kpidFileSystem:
@@ -951,7 +959,7 @@ Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   const CItem &item = Items[index];
   switch (propID)
   {

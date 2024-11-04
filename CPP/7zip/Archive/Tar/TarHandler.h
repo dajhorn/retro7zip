@@ -46,7 +46,7 @@ private:
 
   HRESULT Open2(IInStream *stream, IArchiveOpenCallback *callback);
   HRESULT SkipTo(UInt32 index);
-  void TarStringToUnicode(const AString &s, NWindows::NCOM::CPropVariant &prop, bool toOs = false) const;
+  void TarStringToUnicode(const AString &s, NCOM::CPropVariant &prop, bool toOs = false) const;
 public:
   void Init();
   CHandler();

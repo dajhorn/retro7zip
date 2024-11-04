@@ -4,9 +4,18 @@
 
 #include "../../../Common/ComTry.h"
 
+#if defined(__DOS__)
+#include <stdio.h>
+#include "../../../DOS/FileName.h"
+#include "../../../DOS/PropVariant.h"
+#include "../../../DOS/System.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/FileName.h"
 #include "../../../Windows/PropVariant.h"
 #include "../../../Windows/System.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../Common/StreamUtils.h"
 
@@ -25,7 +34,6 @@
   #define PRF(x)
 #endif
 
-using namespace NWindows;
 
 HRESULT COpenCallbackImp::Init2(const FString &folderPrefix, const FString &fileName)
 {

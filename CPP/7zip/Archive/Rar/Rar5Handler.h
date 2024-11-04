@@ -7,7 +7,15 @@
 
 #include "../../../Common/MyBuffer.h"
 
-#include "../../../Windows/PropVariant.h"
+#if defined(__DOS__)
+  #include "../../../DOS/PropVariant.h"
+  #include "../../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../../Windows/PropVariant.h"
+  #include "../../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
 
 #include "../../Common/CreateCoder.h"
 
@@ -315,7 +323,7 @@ struct CItem
   bool FindExtra_Version(UInt64 &version) const;
 
   bool FindExtra_Link(CLinkInfo &link) const;
-  void Link_to_Prop(unsigned linkType, NWindows::NCOM::CPropVariant &prop) const;
+  void Link_to_Prop(unsigned linkType, NCOM::CPropVariant &prop) const;
   bool Is_CopyLink() const;
   bool Is_HardLink() const;
   bool Is_CopyLink_or_HardLink() const;

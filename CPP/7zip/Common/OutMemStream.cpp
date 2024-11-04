@@ -6,6 +6,12 @@
 
 #include "OutMemStream.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
+using namespace NWindows;
+#endif
+
 void COutMemStream::Free()
 {
   Blocks.Free(_memManager);
@@ -69,9 +75,9 @@ Z7_COM7F_IMF(COutMemStream::Write(const void *data, UInt32 size, UInt32 *process
       continue;
     }
 
-    const NWindows::NSynchronization::CHandle_WFMO events[3] =
+    const NSynchronization::CHandle_WFMO events[3] =
       { StopWritingEvent, WriteToRealStreamEvent, /* NoLockEvent, */ _memManager->Semaphore };
-    const DWORD waitResult = NWindows::NSynchronization::WaitForMultiObj_Any_Infinite(
+    const DWORD waitResult = NSynchronization::WaitForMultiObj_Any_Infinite(
         ((Blocks.LockMode /* && _memManager->Semaphore.IsCreated() */) ? 3 : 2), events);
     
     // printf("\n 1- outMemStream %d\n", waitResult - WAIT_OBJECT_0);

@@ -9,8 +9,6 @@
 #include "../../Common/IntToString.h"
 #include "../../Common/MyBuffer.h"
 
-#include "../../Windows/PropVariantUtils.h"
-
 #include "../Common/LimitedStreams.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -26,7 +24,14 @@
 #define G32(_offs_, dest) dest = Get32(p + (_offs_));
 #define G64(_offs_, dest) dest = Get64(p + (_offs_));
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariantUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariantUtils.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 

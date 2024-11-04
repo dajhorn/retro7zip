@@ -16,7 +16,12 @@
 
 #include "IsoHandler.h"
 
-using namespace NWindows;
+#if defined(__DOS__)
+  using namespace NDOS;
+#else
+  using namespace NWindows;
+#endif
+
 using namespace NTime;
 
 namespace NArchive {

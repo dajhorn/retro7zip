@@ -16,9 +16,6 @@
 #include "../../Common/MyBuffer.h"
 #include "../../Common/MyCom.h"
 
-#include "../../Windows/PropVariant.h"
-#include "../../Windows/TimeUtils.h"
-
 #include "../Common/MethodProps.h"
 #include "../Common/ProgressUtils.h"
 #include "../Common/RegisterArc.h"
@@ -51,7 +48,16 @@
 #define G32(p, dest) dest = Get32(p)
 #define G64(p, dest) dest = Get64(p)
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  #include "../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  #include "../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace Ntfs {

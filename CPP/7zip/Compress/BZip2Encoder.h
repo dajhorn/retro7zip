@@ -20,6 +20,13 @@
 #include "BZip2Const.h"
 #include "BZip2Crc.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
+using namespace NWindows;
+#endif
+
+
 namespace NCompress {
 namespace NBZip2 {
 
@@ -119,13 +126,13 @@ public:
   bool m_OptimizeNumTables;
   CEncoder *Encoder;
  #ifndef Z7_ST
-  NWindows::CThread Thread;
+  CThread Thread;
 
-  NWindows::NSynchronization::CAutoResetEvent StreamWasFinishedEvent;
-  NWindows::NSynchronization::CAutoResetEvent WaitingWasStartedEvent;
+  NSynchronization::CAutoResetEvent StreamWasFinishedEvent;
+  NSynchronization::CAutoResetEvent WaitingWasStartedEvent;
 
   // it's not member of this thread. We just need one event per thread
-  NWindows::NSynchronization::CAutoResetEvent CanWriteEvent;
+  NSynchronization::CAutoResetEvent CanWriteEvent;
 
 private:
   UInt32 m_BlockIndex;
@@ -197,15 +204,15 @@ public:
 
  #ifndef Z7_ST
   CThreadInfo *ThreadsInfo;
-  NWindows::NSynchronization::CManualResetEvent CanProcessEvent;
-  NWindows::NSynchronization::CCriticalSection CS;
+  NSynchronization::CManualResetEvent CanProcessEvent;
+  NSynchronization::CCriticalSection CS;
   UInt32 NumThreads;
   bool MtMode;
   UInt32 NextBlockIndex;
 
   bool CloseThreads;
   bool StreamWasFinished;
-  NWindows::NSynchronization::CManualResetEvent CanStartWaitingEvent;
+  NSynchronization::CManualResetEvent CanStartWaitingEvent;
 
   HRESULT Result;
   ICompressProgressInfo *Progress;

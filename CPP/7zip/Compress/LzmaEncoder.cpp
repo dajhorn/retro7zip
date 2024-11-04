@@ -18,6 +18,12 @@
 #include "../../Common/IntToString.h"
 #include "../../Windows/TimeUtils.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
+using namespace NWindows;
+#endif
+
 EXTERN_C_BEGIN
 void LzmaEnc_GetLzThreads(CLzmaEncHandle pp, HANDLE lz_threads[2]);
 EXTERN_C_END
@@ -316,7 +322,7 @@ Z7_COM7F_IMF(CEncoder::Code(ISequentialInStream *inStream, ISequentialOutStream 
   #ifdef LOG_LZMA_THREADS
 
   FILETIME startTimeFT;
-  NWindows::NTime::GetCurUtcFileTime(startTimeFT);
+  NTime::GetCurUtcFileTime(startTimeFT);
   UInt64 totalTime = GetTime64(startTimeFT);
   CBaseStat oldStat;
   if (!oldStat.Get(GetCurrentThread(), NULL))
@@ -337,7 +343,7 @@ Z7_COM7F_IMF(CEncoder::Code(ISequentialInStream *inStream, ISequentialOutStream 
   
   #ifdef LOG_LZMA_THREADS
   
-  NWindows::NTime::GetCurUtcFileTime(startTimeFT);
+  NTime::GetCurUtcFileTime(startTimeFT);
   totalTime = GetTime64(startTimeFT) - totalTime;
   HANDLE lz_threads[2];
   LzmaEnc_GetLzThreads(_encoder, lz_threads);

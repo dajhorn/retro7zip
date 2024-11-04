@@ -6,8 +6,15 @@
 #include "../../../Common/StringConvert.h"
 #include "../../../Common/StringToInt.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/PropVariant.h"
+#include "../../../DOS/TimeUtils.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/PropVariant.h"
 #include "../../../Windows/TimeUtils.h"
+using namespace NWindows;
+#endif // defined(__DOS__)
 
 #include "../../IPassword.h"
 
@@ -21,7 +28,6 @@
 #include "ZipHandler.h"
 #include "ZipUpdate.h"
 
-using namespace NWindows;
 using namespace NCOM;
 using namespace NTime;
 

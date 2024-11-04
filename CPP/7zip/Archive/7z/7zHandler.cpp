@@ -22,7 +22,12 @@
 #endif
 #endif
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
 using namespace NWindows;
+#endif // defined(__DOS__)
+
 using namespace NCOM;
 
 namespace NArchive {

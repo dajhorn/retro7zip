@@ -9,9 +9,6 @@
 #include "../../Common/MyBuffer.h"
 #include "../../Common/StringToInt.h"
 
-#include "../../Windows/PropVariantUtils.h"
-#include "../../Windows/TimeUtils.h"
-
 #include "../Common/RegisterArc.h"
 #include "../Common/StreamUtils.h"
 
@@ -23,7 +20,16 @@
 #define LE_32(offs, dest) dest = Get32(p + (offs))
 #define LE_64(offs, dest) dest = Get64(p + (offs))
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariantUtils.h"
+  #include "../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariantUtils.h"
+  #include "../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace NLvm {

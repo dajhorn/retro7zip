@@ -10,10 +10,6 @@
 #include "../../Common/StringConvert.h"
 #include "../../Common/UTFConvert.h"
 
-#include "../../Windows/PropVariant.h"
-#include "../../Windows/PropVariantUtils.h"
-#include "../../Windows/TimeUtils.h"
-
 #include "../Common/RegisterArc.h"
 #include "../Common/StreamUtils.h"
 
@@ -21,7 +17,17 @@
 
 // #define Z7_RPM_SHOW_METADATA
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  #include "../../DOS/PropVariantUtils.h"
+  #include "../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  #include "../../Windows/PropVariantUtils.h"
+  #include "../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
 
 #define Get16(p) GetBe16(p)
 #define Get32(p) GetBe32(p)
@@ -412,7 +418,7 @@ Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value))
 {
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   if (index == 0)
   switch (propID)
   {

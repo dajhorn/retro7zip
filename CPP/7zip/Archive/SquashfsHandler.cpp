@@ -14,9 +14,6 @@
 #include "../../Common/StringConvert.h"
 #include "../../Common/UTFConvert.h"
 
-#include "../../Windows/PropVariantUtils.h"
-#include "../../Windows/TimeUtils.h"
-
 #include "../Common/CWrappers.h"
 #include "../Common/LimitedStreams.h"
 #include "../Common/ProgressUtils.h"
@@ -27,6 +24,17 @@
 #include "../Compress/CopyCoder.h"
 #include "../Compress/ZlibDecoder.h"
 // #include "../Compress/LzmaDecoder.h"
+
+#if defined(__DOS__)
+  #include "../../DOS/PropVariantUtils.h"
+  #include "../../DOS/TimeUtils.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariantUtils.h"
+  #include "../../Windows/TimeUtils.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace NSquashfs {
@@ -1944,7 +1952,7 @@ Z7_COM7F_IMF(CHandler::GetNumberOfItems(UInt32 *numItems))
 Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   switch (propID)
   {
     case kpidMethod:
@@ -2021,7 +2029,7 @@ Z7_COM7F_IMF(CHandler::GetArchiveProperty(PROPID propID, PROPVARIANT *value))
 Z7_COM7F_IMF(CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *value))
 {
   COM_TRY_BEGIN
-  NWindows::NCOM::CPropVariant prop;
+  NCOM::CPropVariant prop;
   const CItem &item = _items[index];
   const CNode &node = _nodes[item.Node];
   const bool isDir = node.IsDir();

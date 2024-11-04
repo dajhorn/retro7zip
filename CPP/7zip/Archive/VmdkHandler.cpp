@@ -12,8 +12,6 @@
 #include "../../Common/StringToInt.h"
 #include "../../Common/UTFConvert.h"
 
-#include "../../Windows/PropVariant.h"
-
 #include "../Common/RegisterArc.h"
 #include "../Common/StreamObjects.h"
 #include "../Common/StreamUtils.h"
@@ -22,7 +20,14 @@
 
 #include "HandlerCont.h"
 
-using namespace NWindows;
+#if defined(__DOS__)
+  #include "../../DOS/PropVariant.h"
+  using namespace NDOS;
+#else
+  #include "../../Windows/PropVariant.h"
+  using namespace NWindows;
+#endif
+
 
 namespace NArchive {
 namespace NVmdk {

@@ -3,7 +3,13 @@
 #ifndef ZIP7_INC_7ZIP_BENCH_H
 #define ZIP7_INC_7ZIP_BENCH_H
 
-#include "../../../Windows/System.h"
+#if defined(__DOS__
+  #include "../../../DOS/System.h"
+  using namespace NDOS;
+#else
+  #include "../../../Windows/System.h"
+  using namespace NWindows;
+#endif
 
 #include "../../Common/CreateCoder.h"
 #include "../../UI/Common/Property.h"
@@ -106,7 +112,7 @@ HRESULT Bench(
     bool multiDict,
     IBenchFreqCallback *freqCallback = NULL);
 
-AString GetProcessThreadsInfo(const NWindows::NSystem::CProcessAffinity &ti);
+AString GetProcessThreadsInfo(const NSystem::CProcessAffinity &ti);
 
 void GetSysInfo(AString &s1, AString &s2);
 void GetCpuName(AString &s);
