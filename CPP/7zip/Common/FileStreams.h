@@ -88,6 +88,8 @@ public:
 
  #ifdef _WIN32
   BY_HANDLE_FILE_INFORMATION _info;
+ #elif defined(__DOS__)
+  struct stat _info;
  #else
   struct stat _info;
   UInt32 _uid;

@@ -133,6 +133,27 @@ bool GetOnlyDirPrefix(CFSTR path, FString &resDirPrefix)
 bool MyGetTempPath(FString &path)
 {
   // @FIXME: Improve this code. Use %TEMP%.
+  const char *s;
+
+  // By DOS convention, try %TEMP% first.
+  s = getenv("TEMP");
+  if (NFind::DoesDirExist_FollowLink(s)) {
+    path = s;
+	return true;
+  }
+
+  // By DOS convention, try %TMP% first.
+  s = getenv("TMP");
+  if (NFind::DoesDirExist_FollowLink(s)) {
+    path = s;
+	return true;
+  }
+
+  // Else, just use the current working directory.
+  path = "." STRING_PATH_SEPARATOR;
+  return true;
+
+#if 0
   path = STRING_PATH_SEPARATOR "tmp";
   const char *s;
   if (NFind::DoesDirExist_FollowLink(path))
@@ -141,6 +162,7 @@ bool MyGetTempPath(FString &path)
     s = "." STRING_PATH_SEPARATOR;
   path = s;
   return true;  
+#endif
 }
 
 bool CreateTempFile2(CFSTR prefix, bool addRandom, AString &postfix, NIO::COutFile *outFile)
@@ -199,8 +221,10 @@ bool CreateTempFile2(CFSTR prefix, bool addRandom, AString &postfix, NIO::COutFi
   return false;
 }
 
+#if 0 // unused
 bool CTempFile::Create(CFSTR prefix, NIO::COutFile *outFile)
 {
+  if (!Remove())
   if (!Remove())
     return false;
   _path.Empty();
@@ -212,6 +236,7 @@ bool CTempFile::Create(CFSTR prefix, NIO::COutFile *outFile)
   _mustBeDeleted = true;
   return true;
 }
+#endif
 
 bool CTempFile::CreateRandomInTempFolder(CFSTR namePrefix, NIO::COutFile *outFile)
 {

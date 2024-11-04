@@ -49,7 +49,7 @@ namespace NArchive {
 namespace NZip {
 
 static const Byte kHostOS =
-  #ifdef _WIN32
+  #if defined(_WIN32) || defined(__DOS__)
   NFileHeader::NHostOS::kFAT;
   #else
   NFileHeader::NHostOS::kUnix;

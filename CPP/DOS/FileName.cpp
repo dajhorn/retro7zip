@@ -60,7 +60,6 @@ void NormalizeDirPathPrefix(UString &dirPath)
 }
 
 
-#define IS_LETTER_CHAR(c) ((((unsigned)(int)(c) | 0x20) - (unsigned)'a' <= (unsigned)('z' - 'a')))
 
 bool IsDrivePath(const wchar_t *s) throw() { return IS_LETTER_CHAR(s[0]) && s[1] == ':' && IS_SEPAR(s[2]); }
 
@@ -182,9 +181,9 @@ bool IsNetworkShareRootPath(CFSTR s) throw()
 static const unsigned kDrivePrefixSize = 3; /* c:\ */
 
 bool IsDrivePath2(const wchar_t *s) throw() { return IS_LETTER_CHAR(s[0]) && s[1] == ':'; }
-// bool IsDriveName2(const wchar_t *s) throw() { return IS_LETTER_CHAR(s[0]) && s[1] == ':' && s[2] == 0; }
-bool IsSuperPath(const wchar_t *s) throw() { return IS_SUPER_PREFIX(s); }
-bool IsSuperOrDevicePath(const wchar_t *s) throw() { return IS_SUPER_OR_DEVICE_PATH(s); }
+bool IsDriveName2(const wchar_t *s) throw() { return IS_LETTER_CHAR(s[0]) && s[1] == ':' && s[2] == 0; }
+// bool IsSuperPath(const wchar_t *s) throw() { return IS_SUPER_PREFIX(s); }
+// bool IsSuperOrDevicePath(const wchar_t *s) throw() { return IS_SUPER_OR_DEVICE_PATH(s); }
 // bool IsSuperUncPath(const wchar_t *s) throw() { return (IS_SUPER_PREFIX(s) && IS_UNC_WITH_SLASH(s + kSuperPathPrefixSize)); }
 
 bool IsAltStreamPrefixWithColon(const UString &s) throw()
@@ -220,7 +219,7 @@ bool If_IsSuperPath_RemoveSuperPrefix(UString &s)
 
 #ifndef USE_UNICODE_FSTRING
 bool IsDrivePath2(CFSTR s) throw() { return IS_LETTER_CHAR(s[0]) && s[1] == ':'; }
-// bool IsDriveName2(CFSTR s) throw() { return IS_LETTER_CHAR(s[0]) && s[1] == ':' && s[2] == 0; }
+bool IsDriveName2(CFSTR s) throw() { return IS_LETTER_CHAR(s[0]) && s[1] == ':' && s[2] == 0; }
 bool IsDrivePath(CFSTR s) throw() { return IS_LETTER_CHAR(s[0]) && s[1] == ':' && IS_SEPAR(s[2]); }
 bool IsSuperPath(CFSTR s) throw() { return IS_SUPER_PREFIX(s); }
 bool IsSuperOrDevicePath(CFSTR s) throw() { return IS_SUPER_OR_DEVICE_PATH(s); }

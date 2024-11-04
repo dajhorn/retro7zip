@@ -470,6 +470,17 @@ void CArchiveExtractCallback::CreateComplexDirectory(const UStringVector &dirPat
         isAbsPath = true;
     }
     #endif
+    #if defined(__DOS__)
+    // @FIXME: Inline NName::IsDrivePath2 because wcc386 is failing to
+    // overload the wchar_t variant used here. This resolves error:
+    //
+    //   E473: function arguments do not match those in prototype
+    else
+    {
+      if (IS_LETTER_CHAR(s[0]) && s[1] == ':')
+        isAbsPath = true;
+    }
+    #endif
   }
   
   if (_pathMode == NExtract::NPathMode::kAbsPaths && isAbsPath)
@@ -496,6 +507,22 @@ void CArchiveExtractCallback::CreateComplexDirectory(const UStringVector &dirPat
     #if defined(_WIN32) && !defined(UNDER_CE)
     if (_pathMode == NExtract::NPathMode::kAbsPaths)
       if (i == 0 && s.Len() == 2 && NName::IsDrivePath2(s))
+      {
+        if (isFinalDir)
+        {
+          // we don't want to call SetAttrib() for root drive path
+          _itemFailure = true;
+        }
+        continue;
+      }
+    #endif
+    #if defined(__DOS__)
+    // @FIXME: Inline NName::IsDrivePath2 because wcc386 is failing to
+    // overload the wchar_t variant used here. This resolves error:
+    //
+    //   E473: function arguments do not match those in prototype
+    if (_pathMode == NExtract::NPathMode::kAbsPaths)
+      if (i == 0 && s.Len() == 2 && IS_LETTER_CHAR(s[0]) && s[1] == ':')
       {
         if (isFinalDir)
         {
@@ -960,7 +987,7 @@ HRESULT CArchiveExtractCallback::ReadLink()
 #endif // SUPPORT_LINKS
 
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__DOS__)
 
 static HRESULT GetOwner(IInArchive *archive,
     UInt32 index, UInt32 pidName, UInt32 pidId, COwnerInfo &res)
@@ -986,7 +1013,7 @@ static HRESULT GetOwner(IInArchive *archive,
     {
       const UString s = prop.bstrVal;
       ConvertUnicodeToUTF8(s, res.Name);
-    }
+    }    
     else if (prop.vt == VT_UI4)
     {
       res.Id_Defined = true;
@@ -1008,7 +1035,7 @@ HRESULT CArchiveExtractCallback::Read_fi_Props()
 
   _fi.Attrib_Defined = false;
 
- #ifndef _WIN32
+ #if !defined(_WIN32) && !defined(__DOS__)
   _fi.Owner.Clear();
   _fi.Group.Clear();
  #endif
@@ -1040,7 +1067,7 @@ HRESULT CArchiveExtractCallback::Read_fi_Props()
   RINOK(GetTime(index, kpidATime, _fi.ATime))
   RINOK(GetTime(index, kpidMTime, _fi.MTime))
 
- #ifndef _WIN32
+ #if !defined(_WIN32) && !defined(__DOS__)
   if (_ntOptions.ExtractOwner)
   {
     // SendMessageError_with_LastError("_ntOptions.ExtractOwner", _diskFilePath);
@@ -1079,7 +1106,7 @@ void CArchiveExtractCallback::CorrectPathParts()
       if (_removePartsForAltStreams || _pathMode == NExtract::NPathMode::kNoPathsAlt)
         needColon = false;
     }
-    #ifdef _WIN32
+    #if defined(_WIN32) || defined(__DOS__)
     else if (_pathMode == NExtract::NPathMode::kAbsPaths &&
         NWildcard::GetNumPrefixParts_if_DrivePath(pathParts) == pathParts.Size())
       pathParts.AddNew();
@@ -2359,7 +2386,7 @@ void CArchiveExtractCallback::SetAttrib()
       || !_extractMode)
     return;
 
- #ifndef _WIN32
+ #if !defined(_WIN32) && !defined(__DOS__)
   if (_fi.Owner.Id_Defined &&
       _fi.Group.Id_Defined)
   {

@@ -7,7 +7,7 @@
 extern
 bool g_CaseSensitive;
 bool g_CaseSensitive =
-  #ifdef _WIN32
+  #if defined(_WIN32) || defined(__DOS__)
     false;
   #elif defined (__APPLE__)
     #ifdef TARGET_OS_IPHONE
@@ -522,7 +522,7 @@ int CCensor::FindPairForPrefix(const UString &prefix) const
   return -1;
 }
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__DOS__)
 
 bool IsDriveColonName(const wchar_t *s)
 {
@@ -561,7 +561,7 @@ static unsigned GetNumPrefixParts(const UStringVector &pathParts)
   /* empty last part could be removed already from (pathParts),
      if there was tail path separator (slash) in original full path string. */
   
-  #ifdef _WIN32
+  #if defined(_WIN32) || defined(__DOS__)
 
   if (IsDriveColonName(pathParts[0]))
     return 1;
