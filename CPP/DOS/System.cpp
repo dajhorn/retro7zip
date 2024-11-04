@@ -1,11 +1,16 @@
 // 7-Zip System.cpp for DOS
 #include "StdAfx.h"
 
+
+// @FIXME: This should go top-level.
+#define __STDC_LIMIT_MACROS
+
 #include <dos.h>
 #include <i86.h>
-#include <unistd.h>
 #include <limits.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <cstdint>
 
 #include "../Common/Defs.h"
 
@@ -28,13 +33,45 @@ UInt32 GetNumberOfProcessors()
   return 1;
 }
 
-bool GetRamSize(UInt64 &size)
+bool GetRamSize(uint32_t &size)
 {
-  /* @FIXME:  Check whether this actually works. */
-  union REGS regs;
-  regs.h.ah = 0x88;
-  int386(0x15, &regs, &regs);
-  size = regs.w.ax;
+  /* 
+   * https://github.com/dajhorn/retro7zip/wiki/DOS-Extender-Test-Matrix
+   */
+
+  union REGS registers;
+
+  struct dpmi_memory_info_t {
+    unsigned long LargestBlockSize;
+    unsigned long LargestUnlockableSize;
+    unsigned long LargestLockableSize;
+    unsigned long LinearAddressSpaceTotal;
+    unsigned long VirtualPagesFree;
+    unsigned long PhysicalPagesFree;
+    unsigned long PhysicalPagesTotal;
+    unsigned long LinearAddressSpaceFree;
+    unsigned long PageFileSize;
+    unsigned long Reserved[3];
+  } dpmi_memory_info;
+
+  registers.w.ax = 0x0500;
+  registers.x.edi = (unsigned)&dpmi_memory_info;
+  int386(0x31, &registers, &registers);
+
+  if (registers.x.cflag) {
+    // unsigned short error_code = registers.w.ax;
+    size = 0;
+    return false;
+  }
+
+  if (dpmi_memory_info.PhysicalPagesFree >= UINT32_MAX / 4096) {
+    // DPMI should never report that more than 4GB of memory is available,
+    // and the DOS page size is always 4 KiB.
+    size = 0;
+    return false;
+  }
+
+  size = dpmi_memory_info.PhysicalPagesFree * 4096;
   return true;
 }
 

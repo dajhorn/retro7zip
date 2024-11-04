@@ -38,6 +38,13 @@ bool CFileBase::OpenBinary(const char *name, int flags, mode_t mode)
 
   Close();
   _handle = ::open(name, flags, mode);
+
+  if (_handle != -1) {
+    // @FIXME: In the Open Watcom v2 runtime for DOS, the <dos.h> functions
+    // are reliable, whereas the <sys/stat.h> functions are not.
+    _dos_getfileattr(name, &_handle_attributes);
+  }
+ 
   return _handle != -1;
 
   /*

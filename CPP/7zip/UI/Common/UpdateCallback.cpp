@@ -4,7 +4,7 @@
 
 // #include <stdio.h>
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__DOS__)
 // #include <grp.h>
 // #include <pwd.h>
 // for major()/minor():
@@ -19,8 +19,7 @@
 #else
 #include <sys/sysmacros.h>
 #endif
-
-#endif // _WIN32
+#endif //  !defined(_WIN32) && !defined(__DOS__)
 
 #ifndef Z7_ST
 #include "../../../Windows/Synchronization.h"
@@ -78,10 +77,10 @@ CArchiveUpdateCallback::CArchiveUpdateCallback():
     StoreHardLinks(false),
     StoreSymLinks(false),
 
-   #ifndef _WIN32
+    #if !defined(_WIN32) && !defined(__DOS__)
     StoreOwnerId(false),
     StoreOwnerName(false),
-   #endif
+    #endif // !defined(_WIN32) && !defined(__DOS__)
 
     /*
     , Need_ArcMTime_Report(false),
@@ -273,7 +272,7 @@ Z7_COM7F_IMF(CArchiveUpdateCallback::GetRawProp(UInt32 index, PROPID propID, con
       if (up.IsAnti)
         return S_OK;
       
-      #if defined(_WIN32) && !defined(UNDER_CE)
+      #if !defined(UNDER_CE) && defined(_WIN32) || defined(__DOS__)
       const CDirItem &di = DirItems->Items[(unsigned)up.DirIndex];
       #endif
 
@@ -316,7 +315,7 @@ Z7_COM7F_IMF(CArchiveUpdateCallback::GetRawProp(UInt32 index, PROPID propID, con
   return S_OK;
 }
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#if !defined(UNDER_CE) && defined(_WIN32) || defined(__DOS__)
 
 static UString GetRelativePath(const UString &to, const UString &from)
 {
@@ -336,7 +335,7 @@ static UString GetRelativePath(const UString &to, const UString &from)
 
   if (i == 0)
   {
-    #ifdef _WIN32
+    #if defined(_WIN32) || defined(__DOS__)
     if (NName::IsDrivePath(to) ||
         NName::IsDrivePath(from))
       return to;
@@ -385,7 +384,7 @@ Z7_COM7F_IMF(CArchiveUpdateCallback::GetProperty(UInt32 index, PROPID propID, PR
         return S_OK;
       }
       
-      #if !defined(UNDER_CE)
+      #if !defined(UNDER_CE) && !defined(__DOS__)
 
       if (up.DirIndex >= 0)
       {
@@ -432,7 +431,7 @@ Z7_COM7F_IMF(CArchiveUpdateCallback::GetProperty(UInt32 index, PROPID propID, PR
 
         #endif // _WIN32
       }
-      #endif // !defined(UNDER_CE)
+      #endif // !defined(UNDER_CE) && !defined(__DOS__)
     }
     else if (propID == kpidHardLink)
     {
@@ -495,7 +494,7 @@ Z7_COM7F_IMF(CArchiveUpdateCallback::GetProperty(UInt32 index, PROPID propID, PR
     #if defined(_WIN32)
       case kpidIsAltStream:  prop = di.IsAltStream; break;
       // case kpidShortName:  prop = di.ShortName; break;
-    #else
+    #elif !defined(__DOS__)
 
         #if defined(__APPLE__)
         #pragma GCC diagnostic push
@@ -653,7 +652,7 @@ Z7_COM7F_IMF(CArchiveUpdateCallback::GetStream2(UInt32 index, ISequentialInStrea
    #endif
    */
 
-   #ifndef _WIN32
+   #if !defined(_WIN32) && !defined(__DOS__)
     inStreamSpec->StoreOwnerId = StoreOwnerId;
     inStreamSpec->StoreOwnerName = StoreOwnerName;
 

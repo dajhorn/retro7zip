@@ -243,12 +243,18 @@ Z7_COM7F_IMF(CHandler::UpdateItems(ISequentialOutStream *outStream, UInt32 numIt
             _Write_ATime ||
             _Write_CTime;
           */
-          
+
+          #if defined(__DOS__) 
+          // @FIXME: Suppress extra subfields in DOS that would indicate an
+          // NTFS archive. This should happen in the DOS abstractions instead.
+          ui.Write_NtfsTime = false; 
+          #else
           // We treat zero timestamp as no timestamp
           ui.Write_NtfsTime =
             ! FILETIME_IsZero (ui.Ntfs_MTime) ||
             ! FILETIME_IsZero (ui.Ntfs_ATime) ||
             ! FILETIME_IsZero (ui.Ntfs_CTime);
+          #endif
         }
       }
 

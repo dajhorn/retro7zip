@@ -88,7 +88,7 @@ CInFileStream::CInFileStream():
   Buf(NULL),
   BufSize(0),
  #endif
- #ifndef _WIN32
+ #if !defined(_WIN32) && !defined(__DOS__)
   _uid(0),
   _gid(0),
   StoreOwnerId(false),
@@ -620,7 +620,12 @@ Z7_COM7F_IMF(CInFileStream::GetProps(UInt64 *size, FILETIME *cTime, FILETIME *aT
   if (cTime) FiTime_To_FILETIME (ST_CTIME(st), *cTime);
   if (aTime) FiTime_To_FILETIME (ST_ATIME(st), *aTime);
   if (mTime) FiTime_To_FILETIME (ST_MTIME(st), *mTime);
+
+  #if defined(__DOS__)
+  if (attrib) *attrib = st.st_attr;
+  #else
   if (attrib) *attrib = NFile::NFind::Get_WinAttribPosix_From_PosixMode(st.st_mode);
+  #endif
 
   return S_OK;
 }
@@ -651,7 +656,12 @@ Z7_COM7F_IMF(CInFileStream::GetProps2(CStreamFileProps *props))
   props->FileID_Low = st.st_ino;
   props->FileID_High = 0;
   props->NumLinks = (UInt32)st.st_nlink; // we reduce to UInt32 from (nlink_t) that is (unsigned long)
+
+  #if defined(__DOS__)
+  props->Attrib = st.st_attr;
+  #else
   props->Attrib = NFile::NFind::Get_WinAttribPosix_From_PosixMode(st.st_mode);
+  #endif
 
   FiTime_To_FILETIME (ST_CTIME(st), props->CTime);
   FiTime_To_FILETIME (ST_ATIME(st), props->ATime);
@@ -687,7 +697,11 @@ Z7_COM7F_IMF(CInFileStream::GetProperty(PROPID propID, PROPVARIANT *value))
     {
       case kpidSize: prop = (UInt64)st.st_size; break;
       case kpidAttrib:
+        #if defined(__DOS__)
+        prop = (UInt32)st.st_attr;
+        #else
         prop = (UInt32)NFile::NFind::Get_WinAttribPosix_From_PosixMode(st.st_mode);
+        #endif
         break;
       case kpidCTime:  PropVariant_SetFrom_FiTime(prop, ST_CTIME(st)); break;
       case kpidATime:  PropVariant_SetFrom_FiTime(prop, ST_ATIME(st)); break;

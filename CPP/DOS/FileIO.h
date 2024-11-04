@@ -26,9 +26,11 @@
 
 HRESULT GetLastError_noZero_HRESULT();
 
+#if 0
 #define my_FSCTL_SET_REPARSE_POINT     CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 41, METHOD_BUFFERED, FILE_SPECIAL_ACCESS) // REPARSE_DATA_BUFFER
 #define my_FSCTL_GET_REPARSE_POINT     CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 42, METHOD_BUFFERED, FILE_ANY_ACCESS)     // REPARSE_DATA_BUFFER
 #define my_FSCTL_DELETE_REPARSE_POINT  CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 43, METHOD_BUFFERED, FILE_SPECIAL_ACCESS) // REPARSE_DATA_BUFFER
+#endif
 
 namespace NDOS {
 namespace NFile {
@@ -98,6 +100,7 @@ class CFileBase
 {
 protected:
   int _handle;
+  unsigned _handle_attributes;
 
   /*
   bool IsDeviceFile;
@@ -125,7 +128,15 @@ public:
   off_t seekToBegin() const throw();
   off_t seekToCur() const throw();
   // bool SeekToBegin() throw();
-  int my_fstat(struct stat *st) const  { return fstat(_handle, st); }
+  int my_fstat(struct stat *st) const {
+    // @FIXME: Open Watcom v2 kludge.
+    //
+    // The stat() and fstat() in the DOS runtime sometimes return bogus
+    // values for everything except the st_size and st_mtime fields.
+    int owc_shim = fstat(_handle, st);
+    st->st_attr = _handle_attributes;
+    return owc_shim;
+  }
   /*
   int my_ioctl_BLKGETSIZE64(unsigned long long *val);
   int GetDeviceSize_InBytes(UInt64 &size);

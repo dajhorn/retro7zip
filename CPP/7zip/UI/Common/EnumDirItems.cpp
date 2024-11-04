@@ -3,7 +3,10 @@
 #include "StdAfx.h"
 
 #include <wchar.h>
-// #include <stdio.h>
+
+#ifdef DEBUG
+#include <stdio.h>
+#endif
 
 #ifndef _WIN32
 #if !defined(__WATCOMC__)
@@ -85,13 +88,13 @@ void CDirItems::AddDirFileInfo(int phyParent, int logParent, int secureIndex,
   
   if (fi.IsDir())
     Stat.NumDirs++;
- #if defined(_WIN32) && !defined(__WATCOMC__)
+  #if defined(_WIN32) && !defined(__WATCOMC__)
   else if (fi.IsAltStream)
   {
     Stat.NumAltStreams++;
     Stat.AltStreamsSize += fi.Size;
   }
- #endif // defined(_WIN32) && !defined(__WATCOMC__)
+  #endif // defined(_WIN32) && !defined(__WATCOMC__)
   else
   {
     Stat.NumFiles++;
@@ -197,7 +200,7 @@ CDirItems::CDirItems():
    #ifdef Z7_USE_SECURITY_CODE
     , ReadSecure(false)
    #endif
-   #ifndef _WIN32
+   #if !defined(_WIN32) && !defined(__DOS__)
     , StoreOwnerName(false)
    #endif
     , Callback(NULL)
@@ -270,11 +273,10 @@ HRESULT CDirItems::AddSecurityItem(const FString &path, int &secureIndex)
 HRESULT CDirItems::EnumerateOneDir(const FString &phyPrefix, CObjectVector<NFind::CFileInfo> &files)
 {
   NFind::CEnumerator enumerator;
-  // printf("\n  enumerator.SetDirPrefix(phyPrefix) \n");
 
   enumerator.SetDirPrefix(phyPrefix);
 
-  #ifdef _WIN32
+  #if defined(_WIN32) || defined(__DOS__)
 
   NFind::CFileInfo fi;
 
@@ -292,7 +294,7 @@ HRESULT CDirItems::EnumerateOneDir(const FString &phyPrefix, CObjectVector<NFind
     }
   }
 
-  #else // _WIN32
+  #else
 
   // enumerator.SolveLinks = !SymLinks;
   
@@ -333,7 +335,7 @@ HRESULT CDirItems::EnumerateOneDir(const FString &phyPrefix, CObjectVector<NFind
 
   return S_OK;
 
-  #endif // _WIN32
+  #endif // defined(_WIN32) || defined(__DOS__)
 }
 
 
@@ -348,7 +350,7 @@ HRESULT CDirItems::EnumerateDir(int phyParent, int logParent, const FString &phy
 
   FOR_VECTOR (i, files)
   {
-    #ifdef _WIN32
+    #if defined(_WIN32) || defined(__DOS__)
     const NFind::CFileInfo &fi = files[i];
     #else
     const NFind::CFileInfo &fi = files[i];
@@ -402,7 +404,7 @@ EnumerateItems2()
 fix it: we can scan AltStream also.
 */
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__DOS__)
 // #define FOLLOW_LINK_PARAM
 // #define FOLLOW_LINK_PARAM2
 #define FOLLOW_LINK_PARAM , (!SymLinks)
@@ -696,7 +698,7 @@ static HRESULT EnumerateForItem(
 #endif // !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 
-  #ifndef _WIN32
+  #if !defined(_WIN32) && !defined(__DOS__)
   if (!fi.IsPosixLink()) // posix link can follow to dir
   #endif
   if (!fi.IsDir())
@@ -719,8 +721,7 @@ static HRESULT EnumerateForItem(
     if (!enterToSubFolders)
       return S_OK;
 
-#if !defined(__DOS__)
-   #ifndef _WIN32
+    #if !defined(_WIN32) && !defined(__DOS__)
     if (fi.IsPosixLink())
     {
       // here we can try to resolve posix link
@@ -737,8 +738,7 @@ static HRESULT EnumerateForItem(
       */
       return S_OK;
     }
-    #endif // !defined(_WIN32)
-#endif // !defined(__DOS__)
+    #endif // !defined(_WIN32) && !defined(__DOS__)
     nextNode = &curNode;
   }
   
@@ -769,7 +769,7 @@ static bool CanUseFsDirect(const NWildcard::CCensorNode &curNode)
        and wildcard mode is disabled, we can ignore wildcard in name
     */
     /*
-    #ifndef _WIN32
+    #if !defined(_WIN32) && !defined(__DOS__)
     if (!item.WildcardParsing)
       continue;
     #endif
@@ -869,13 +869,19 @@ static HRESULT EnumerateDirItems(
 
               fullPath = CHAR_PATH_SEPARATOR;
             }
-            #if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
+            #if defined(_WIN32) && !defined(UNDER_CE)
             else if (item.IsDriveItem())
             {
               needAltStreams = false;
               fullPath.Add_PathSepar();
             }
-            #endif // defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
+            #endif
+            #if defined(__DOS__)
+            else if (item.IsDriveItem())
+            {
+              fullPath.Add_PathSepar();
+            }
+            #endif // defined(__DOS__)
           }
         }
 
@@ -958,7 +964,7 @@ static HRESULT EnumerateDirItems(
        }
 
 
-        #ifndef _WIN32
+        #if !defined(_WIN32) && !defined(__DOS__)
         if (!fi.IsPosixLink()) // posix link can follow to dir
         #endif
         if (!isDir)
@@ -976,8 +982,7 @@ static HRESULT EnumerateDirItems(
         }
         else
         {
-#if !defined(__DOS__)
-         #ifndef _WIN32
+         #if !defined(_WIN32) && !defined(__DOS__)
           if (fi.IsPosixLink())
           {
             // here we can try to resolve posix link
@@ -993,8 +998,7 @@ static HRESULT EnumerateDirItems(
               continue;
             }
           }
-         #endif
-#endif // !defined(__DOS__)
+         #endif // !defined(_WIN32) && !defined(__DOS__)
           nextNode = &curNode;
           newParts.Add(name); // don't change it to fi.Name. It's for shortnames support
         }
@@ -1026,6 +1030,13 @@ static HRESULT EnumerateDirItems(
             fullPath.Add_PathSepar();
         }
       #endif
+      #if defined(__DOS__)
+        else if(phyPrefix.IsEmpty())
+        {
+          if (NWildcard::IsDriveColonName(nextNode.Name))
+            fullPath.Add_PathSepar();
+        }
+      #endif // defined(__DOS__)
 
         // we don't want to call fi.Find() for root folder or virtual folder
         if ((phyPrefix.IsEmpty() && nextNode.Name.IsEmpty())
@@ -1120,7 +1131,7 @@ static HRESULT EnumerateDirItems(
   /*
   FOR_VECTOR (i, files)
   {
-    #ifdef _WIN32
+    #if defined(_WIN32) || defined(__DOS__)
     // const NFind::CFileInfo &fi = files[i];
     #else
     NFind::CFileInfo &fi = files[i];
@@ -1142,7 +1153,7 @@ static HRESULT EnumerateDirItems(
 
   FOR_VECTOR (i, files)
   {
-    #ifdef _WIN32
+    #if defined(_WIN32) || defined(__DOS__)
     const NFind::CFileInfo &fi = files[i];
     #else
     const NFind::CFileInfo &fi = files[i];
@@ -1160,6 +1171,8 @@ static HRESULT EnumerateDirItems(
     }
     */
     #endif
+
+
 
     RINOK(EnumerateForItem(fi, curNode, phyParent, logParent, phyPrefix,
           addParts, dirItems, enterToSubFolders))
@@ -1206,7 +1219,7 @@ HRESULT EnumerateItems(
   RINOK(dirItems.FillFixedReparse())
  #endif
 
- #ifndef _WIN32
+ #if !defined(_WIN32) && !defined(__DOS__)
   RINOK(dirItems.FillDeviceSizes())
  #endif
 
@@ -1350,7 +1363,7 @@ HRESULT CDirItems::FillFixedReparse()
 #endif // defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__DOS__)
 
 HRESULT CDirItems::FillDeviceSizes()
 {
@@ -1565,7 +1578,7 @@ HRESULT EnumerateDirItemsAndSort(
 
 
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__DOS__)
 
 static bool IsDotsName(const wchar_t *s)
 {
@@ -1582,7 +1595,7 @@ static void ConvertToLongName(const UString &prefix, UString &name)
     return;
   NFind::CFileInfo fi;
   const FString path (us2fs(prefix + name));
-  #ifndef UNDER_CE
+  #if !defined(UNDER_CE) && !defined(__DOS__)
   if (NFile::NName::IsDevicePath(path))
     return;
   #endif
@@ -1648,7 +1661,7 @@ void ConvertToLongNames(NWildcard::CCensor &censor)
   }
 }
 
-#endif
+#endif // defined(_WIN32) || defined(__DOS__)
 
 
 CMessagePathException::CMessagePathException(const char *a, const wchar_t *u)

@@ -1,9 +1,11 @@
-// Windows/FileName.h
+// 7-Zip FileName.h for DOS
 
 #ifndef ZIP7_INC_DOS_FILE_NAME_H
 #define ZIP7_INC_DOS_FILE_NAME_H
 
 #include "../Common/MyString.h"
+
+#define IS_LETTER_CHAR(c) ((((unsigned)(int)(c) | 0x20) - (unsigned)'a' <= (unsigned)('z' - 'a')))
 
 namespace NDOS {
 namespace NFile {
@@ -23,6 +25,7 @@ void NormalizeDirSeparators(FString &s);
 #endif
 
 bool IsDrivePath(const wchar_t *s) throw();  // first 3 chars are drive chars like "a:\\"
+bool IsDrivePath2(CFSTR s) throw();
 
 bool IsAltPathPrefix(CFSTR s) throw(); /* name: */
 bool IsAbsolutePath(const wchar_t *s) throw();

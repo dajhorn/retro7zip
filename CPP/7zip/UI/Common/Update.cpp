@@ -1,5 +1,7 @@
 // Update.cpp
 
+#include <cstdint>
+
 #include "StdAfx.h"
 
 // #include  <stdio.h>
@@ -200,7 +202,7 @@ FString CArchivePath::GetTempPath() const
 static const char * const kDefaultArcType = "7z";
 static const char * const kDefaultArcExt = "7z";
 static const char * const kSFXExtension =
-  #ifdef _WIN32
+  #if defined(_WIN32) || defined(__DOS__)
     "exe";
   #else
     "";
@@ -1111,7 +1113,7 @@ typedef Z7_WIN_MAPISENDMAILW FAR *Z7_WIN_LPMAPISENDMAILW;
 }
 #endif // defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 
-
+#if !defined(__WATCOMC__)
 struct C_CopyFileProgress_to_IUpdateCallbackUI2 Z7_final:
   public ICopyFileProgress
 {
@@ -1134,7 +1136,7 @@ struct C_CopyFileProgress_to_IUpdateCallbackUI2 Z7_final:
     // , Disable_Break(false)
     {}
 };
-
+#endif // __WATCOMC__
 
 HRESULT UpdateArchive(
     CCodecs *codecs,
@@ -1410,9 +1412,9 @@ HRESULT UpdateArchive(
       
       dirItems.ShareForWrite = options.OpenShareForWrite;
 
-     #ifndef _WIN32
+      #if !defined(_WIN32) && !defined(__DOS__)
       dirItems.StoreOwnerName = options.StoreOwnerName.Val;
-     #endif
+      #endif
 
       const HRESULT res = EnumerateItems(censor,
           options.PathMode,
@@ -1664,6 +1666,9 @@ HRESULT UpdateArchive(
       RINOK(callback->MoveArc_Start(fs2us(tempPath), arcPath,
           totalArcSize, BoolToInt(thereIsInArchive)))
 
+#if defined(__WATCOMC__)
+      if (!MyMoveFile(tempPath, us2fs(arcPath)))
+#else
       C_CopyFileProgress_to_IUpdateCallbackUI2 prox(callback);
       // if we update archive, we have removed original archive.
       // So if we break archive moving, we will have only temporary archive.
@@ -1671,13 +1676,15 @@ HRESULT UpdateArchive(
       // prox.Disable_Break = thereIsInArchive;
 
       if (!MyMoveFile_with_Progress(tempPath, us2fs(arcPath), &prox))
+#endif
       {
         errorInfo.SystemError = ::GetLastError();
         errorInfo.Message = "cannot move the file";
         if (errorInfo.SystemError == ERROR_INVALID_PARAMETER)
         {
-          if (totalArcSize > (UInt32)(Int32)-1)
+          if (totalArcSize > UINT32_MAX -1)
           {
+            // @TODO: Check for fat32 limits.
             // bool isFsDetected = false;
             // if (NSystem::Is_File_LimitedBy_4GB(us2fs(arcPath), isFsDetected) || !isFsDetected)
             {
@@ -1685,15 +1692,31 @@ HRESULT UpdateArchive(
               errorInfo.Message += "Archive file size exceeds 4 GB";
             }
           }
+          else if (totalArcSize > INT32_MAX -1)
+          {
+            // @TODO: Check for fat16 limits.
+            // bool isFsDetected = false;
+            // if (NSystem::Is_File_LimitedBy_2GB(us2fs(arcPath), isFsDetected) || !isFsDetected)
+            {
+              errorInfo.Message.Add_LF();
+              errorInfo.Message += "Archive file size exceeds 2 GB";
+            }
+          }
         }
         // if there was no input archive, and we have operation breaking.
         // then we can remove temporary archive, because we still have original uncompressed files.
+#if defined(__WATCOMC__)
+        if (!thereIsInArchive)
+#else
         if (!thereIsInArchive
             && prox.CallbackResult == E_ABORT)
+#endif
           tempFiles.NeedDeleteFiles = true;
         errorInfo.FileNames.Add(tempPath);
         errorInfo.FileNames.Add(us2fs(arcPath));
+#if !defined(__WATCOMC__)
         RINOK(prox.CallbackResult)
+#endif
         return errorInfo.Get_HRESULT_Error();
       }
 

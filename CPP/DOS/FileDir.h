@@ -22,7 +22,7 @@ but linux : allows unix time = 0 in filesystem
 bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CFiTime *mTime);
 
 // @FIXME:  Use these bits for __DOS__
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__DOS__)
 
 bool SetFileAttrib(CFSTR path, DWORD attrib);
 
@@ -76,7 +76,9 @@ public:
   CTempFile(): _mustBeDeleted(false) {}
   ~CTempFile() { Remove(); }
   const FString &GetPath() const { return _path; }
+#if 0
   bool Create(CFSTR pathPrefix, NIO::COutFile *outFile); // pathPrefix is not folder prefix
+#endif
   bool CreateRandomInTempFolder(CFSTR namePrefix, NIO::COutFile *outFile);
   bool Remove();
   bool MoveTo(CFSTR name, bool deleteDestBefore);

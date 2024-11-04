@@ -58,6 +58,9 @@ DECLARE_AND_SET_CLIENT_VERSION_VAR
 #elif defined(Z7_PROG_VARIANT_R)
   #define PROG_POSTFIX      "r"
   #define PROG_POSTFIX_2  " (r)"
+#elif defined(Z7_PROG_VARIANT_M)
+  #define PROG_POSTFIX      "m"
+  #define PROG_POSTFIX_2  " (m)"
 #elif defined(Z7_PROG_VARIANT_A) || !defined(Z7_EXTERNAL_CODECS)
   #define PROG_POSTFIX      "a"
   #define PROG_POSTFIX_2  " (a)"
@@ -70,6 +73,9 @@ static const char * const kCopyrightString = "\n7-Zip " MY_VERSION
 #if defined(Z7_PROG_VARIANT_A)
   " aggregate"
 #endif // defined(Z7_PROG_VARIANT_A)
+#if defined(Z7_PROG_VARIANT_M)
+  " mini"
+#endif // defined(Z7_PROG_VARIANT_R)
 #if defined(Z7_PROG_VARIANT_R)
   " reduced"
 #endif // defined(Z7_PROG_VARIANT_R)
@@ -82,7 +88,9 @@ static const char * const kHelpString =
     "\n"
     "<Commands>\n"
     "  a : Add files to archive\n"
+#if !defined(__DOS__)
     "  b : Benchmark\n"
+#endif
     "  d : Delete files from archive\n"
     "  e : Extract files from archive (without using directory names)\n"
     "  h : Calculate hash values for files\n"
@@ -102,11 +110,17 @@ static const char * const kHelpString =
     "  -bb[0-3] : set output log level\n"
     "  -bd : disable progress indicator\n"
     "  -bs{o|e|p}{0|1|2} : set output stream for output/error/progress line\n"
+#if !defined(__DOS__)
     "  -bt : show execution time statistics\n"
+#endif
     "  -i[r[-|0]][m[-|2]][w[-]]{@listfile|!wildcard} : Include filenames\n"
+#if !defined(__DOS__)
     "  -m{Parameters} : set compression Method\n"
     "    -mmt[N] : set number of CPU threads\n"
     "    -mx[N] : set compression level: -mx1 (fastest) ... -mx9 (ultra)\n"
+#else
+    "  -mx[N] : set compression level: -mx1 (fastest) ... -mx9 (ultra)\n"
+#endif
     "  -o{Directory} : set Output directory\n"
     #ifndef Z7_NO_CRYPTO
     "  -p{Password} : set Password\n"
@@ -124,25 +138,33 @@ static const char * const kHelpString =
 #endif
     "|*] : set hash function for x, e, h commands\n"
     "  -sdel : delete files after compression\n"
+#if !defined(__DOS__)
     "  -seml[.] : send archive by email\n"
     "  -sfx[{name}] : Create SFX archive\n"
     "  -si[{name}] : read data from stdin\n"
     "  -slp : set Large Pages mode\n"
+#endif
     "  -slt : show technical information for l (List) command\n"
+#if !defined(__DOS__)
     "  -snh : store hard links as links\n"
     "  -snl : store symbolic links as links\n"
     "  -sni : store NT security information\n"
     "  -sns[-] : store NTFS alternate streams\n"
     "  -so : write data to stdout\n"
+#endif
     "  -spd : disable wildcard matching for file names\n"
     "  -spe : eliminate duplication of root folder for extract command\n"
     "  -spf[2] : use fully qualified file paths\n"
     "  -ssc[-] : set sensitive case mode\n"
     "  -sse : stop archive creating, if it can't open some input file\n"
     "  -ssp : do not change Last Access Time of source files while archiving\n"
+#if !defined(__DOS__)
     "  -ssw : compress shared files\n"
+#endif
     "  -stl : set archive timestamp from the most recently modified file\n"
+#if !defined(__DOS__)
     "  -stm{HexMask} : set CPU thread affinity mask (hexadecimal number)\n"
+#endif
     "  -stx{Type} : exclude archive type\n"
     "  -t{Type} : Set type of archive\n"
     "  -u[-][p#][q#][r#][x#][y#][z#][!newArchiveName] : Update options\n"
