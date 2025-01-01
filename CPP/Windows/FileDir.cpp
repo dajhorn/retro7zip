@@ -326,7 +326,7 @@ EXTERN_C_END
 
 bool MyCreateHardLink(CFSTR newFileName, CFSTR existFileName)
 {
-#ifndef__WATCOMC__
+#ifndef __WATCOMC__
   #ifndef _UNICODE
   if (!g_IsNT)
   {

@@ -1737,7 +1737,7 @@ Z7_COM7F_IMF(CArchiveExtractCallback::GetStream(UInt32 index, ISequentialOutStre
       return S_OK;
   }
 
-#if defined(_WIN32) && !defined(UNDER_CE) && !defined(Z7_SFX)
+#if defined(_WIN32) && !defined(UNDER_CE) && !defined(Z7_SFX) && defined(SUPPORT_ALT_STREAMS)
   if (askExtractMode == NArchive::NExtract::NAskMode::kExtract
       && !_testMode
       && _item.IsAltStream

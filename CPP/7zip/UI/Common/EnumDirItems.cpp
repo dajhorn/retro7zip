@@ -856,7 +856,7 @@ static HRESULT EnumerateDirItems(
                So we ignore alt streams for these cases */
             if (name.IsEmpty())
             {
-              #if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
+              #if defined(_WIN32) && !defined(UNDER_CE) && defined(SUPPORT_ALT_STREAMS)
               needAltStreams = false;
               #endif
 
@@ -869,7 +869,7 @@ static HRESULT EnumerateDirItems(
 
               fullPath = CHAR_PATH_SEPARATOR;
             }
-            #if defined(_WIN32) && !defined(UNDER_CE)
+            #if defined(_WIN32) && !defined(UNDER_CE) && defined(SUPPORT_ALT_STREAMS)
             else if (item.IsDriveItem())
             {
               needAltStreams = false;

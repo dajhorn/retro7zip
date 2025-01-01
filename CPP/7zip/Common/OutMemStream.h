@@ -8,7 +8,7 @@
 #if defined(__DOS__)
 using namespace NDOS;
 #else
-using namespace NWindows;
+// using namespace NWindows;
 #endif // defined(__DOS__)
 
 #include "MemBlocks.h"
