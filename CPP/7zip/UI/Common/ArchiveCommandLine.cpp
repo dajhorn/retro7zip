@@ -190,6 +190,10 @@ enum Enum
   #ifndef Z7_NO_CRYPTO
   , kPassword
   #endif
+
+  #ifdef __WATCOMC__
+  , kVersionMode
+  #endif
 };
 
 }
@@ -340,6 +344,10 @@ static const CSwitchForm kSwitchForms[] =
 
   #ifndef Z7_NO_CRYPTO
   , { "p", SWFRM_STRING }
+  #endif
+
+  #ifdef __WATCOMC__
+  , { "-version", SWFRM_SIMPLE }
   #endif
 };
 
@@ -1022,6 +1030,10 @@ void CArcCmdLineParser::Parse1(const UStringVector &commandStrings,
   Parse1Log.Empty();
   if (!parser.ParseStrings(kSwitchForms, Z7_ARRAY_SIZE(kSwitchForms), commandStrings))
     throw CArcCmdLineException(parser.ErrorMessage, parser.ErrorLine);
+
+  #ifdef __WATCOMC__
+  options.VersionMode = parser[NKey::kVersionMode].ThereIs;
+  #endif
 
   options.IsInTerminal = MY_IS_TERMINAL(stdin);
   options.IsStdOutTerminal = MY_IS_TERMINAL(stdout);

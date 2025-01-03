@@ -37,6 +37,8 @@
 #include "../7zip/MyVersion.h"
 #endif
 
+#include "version.h"
+
 using namespace NDOS;
 using namespace NFile;
 using namespace NCommandLineParser;
@@ -52,126 +54,187 @@ extern const CHasherInfo *g_Hashers[];
 
 DECLARE_AND_SET_CLIENT_VERSION_VAR
 
-#if defined(Z7_PROG_VARIANT_Z)
-  #define PROG_POSTFIX      "z"
-  #define PROG_POSTFIX_2  " (z)"
-#elif defined(Z7_PROG_VARIANT_R)
-  #define PROG_POSTFIX      "r"
-  #define PROG_POSTFIX_2  " (r)"
-#elif defined(Z7_PROG_VARIANT_M)
-  #define PROG_POSTFIX      "m"
-  #define PROG_POSTFIX_2  " (m)"
-#elif defined(Z7_PROG_VARIANT_A) || !defined(Z7_EXTERNAL_CODECS)
-  #define PROG_POSTFIX      "a"
-  #define PROG_POSTFIX_2  " (a)"
-#else
-  #define PROG_POSTFIX    ""
-  #define PROG_POSTFIX_2  ""
-#endif
-
-static const char * const kCopyrightString = "\n7-Zip " MY_VERSION
 #if defined(Z7_PROG_VARIANT_A)
-  " aggregate"
-#endif // defined(Z7_PROG_VARIANT_A)
-#if defined(Z7_PROG_VARIANT_M)
-  " mini"
-#endif // defined(Z7_PROG_VARIANT_R)
-#if defined(Z7_PROG_VARIANT_R)
-  " reduced"
-#endif // defined(Z7_PROG_VARIANT_R)
-  " for DOS : " MY_COPYRIGHT_DATE "\n";
-
-static const char * const kHelpString =
-    "Usage: 7z"
-    PROG_POSTFIX
-    " <command> [<switches>...] <archive_name> [<file_names>...] [@listfile]\n"
-    "\n"
-    "<Commands>\n"
-    "  a : Add files to archive\n"
-#if !defined(__DOS__)
-    "  b : Benchmark\n"
-#endif
-    "  d : Delete files from archive\n"
-    "  e : Extract files from archive (without using directory names)\n"
-    "  h : Calculate hash values for files\n"
-    "  i : Show information about supported formats\n"
-    "  l : List contents of archive\n"
-    "  rn : Rename files in archive\n"
-    "  t : Test integrity of archive\n"
-    "  u : Update files to archive\n"
-    "  x : eXtract files with full paths\n"
-    "\n"
-    "<Switches>\n"
-    "  -- : Stop switches and @listfile parsing\n"
-    "  -ai[r[-|0]][m[-|2]][w[-]]{@listfile|!wildcard} : Include archives\n"
-    "  -ax[r[-|0]][m[-|2]][w[-]]{@listfile|!wildcard} : eXclude archives\n"
-    "  -ao{a|s|t|u} : set Overwrite mode\n"
-    "  -an : disable archive_name field\n"
-    "  -bb[0-3] : set output log level\n"
-    "  -bd : disable progress indicator\n"
-    "  -bs{o|e|p}{0|1|2} : set output stream for output/error/progress line\n"
-#if !defined(__DOS__)
-    "  -bt : show execution time statistics\n"
-#endif
-    "  -i[r[-|0]][m[-|2]][w[-]]{@listfile|!wildcard} : Include filenames\n"
-#if !defined(__DOS__)
-    "  -m{Parameters} : set compression Method\n"
-    "    -mmt[N] : set number of CPU threads\n"
-    "    -mx[N] : set compression level: -mx1 (fastest) ... -mx9 (ultra)\n"
+  #define PROG_NAME "7za"
+  #define PROG_BLURB "aggregated for DOS"
+#elif defined(Z7_PROG_VARIANT_M)
+  #define PROG_NAME "7zm"
+  #define PROG_BLURB "mini for DOS"
+#elif defined(Z7_PROG_VARIANT_R)
+  #define PROG_NAME "7zr"
+  #define PROG_BLURB "reduced for DOS"
 #else
-    "  -mx[N] : set compression level: -mx1 (fastest) ... -mx9 (ultra)\n"
+  #error "The wrong Z7_PROG_VARIANT_ is defined for DOS."
 #endif
-    "  -o{Directory} : set Output directory\n"
-    #ifndef Z7_NO_CRYPTO
-    "  -p{Password} : set Password\n"
-    #endif
-    "  -r[-|0] : Recurse subdirectories for name search\n"
-    "  -sa{a|e|s} : set Archive name mode\n"
-    "  -scc{UTF-8|WIN|DOS} : set charset for console input/output\n"
-    "  -scs{UTF-8|UTF-16LE|UTF-16BE|WIN|DOS|{id}} : set charset for list files\n"
-    "  -scrc[CRC32|CRC64|SHA256"
-#ifndef Z7_PROG_VARIANT_R
-    "|SHA1|XXH64"
-#ifdef Z7_PROG_VARIANT_Z
-    "|BLAKE2SP"
-#endif
-#endif
-    "|*] : set hash function for x, e, h commands\n"
-    "  -sdel : delete files after compression\n"
-#if !defined(__DOS__)
-    "  -seml[.] : send archive by email\n"
-    "  -sfx[{name}] : Create SFX archive\n"
-    "  -si[{name}] : read data from stdin\n"
-    "  -slp : set Large Pages mode\n"
-#endif
-    "  -slt : show technical information for l (List) command\n"
-#if !defined(__DOS__)
-    "  -snh : store hard links as links\n"
-    "  -snl : store symbolic links as links\n"
-    "  -sni : store NT security information\n"
-    "  -sns[-] : store NTFS alternate streams\n"
-    "  -so : write data to stdout\n"
-#endif
-    "  -spd : disable wildcard matching for file names\n"
-    "  -spe : eliminate duplication of root folder for extract command\n"
-    "  -spf[2] : use fully qualified file paths\n"
-    "  -ssc[-] : set sensitive case mode\n"
-    "  -sse : stop archive creating, if it can't open some input file\n"
-    "  -ssp : do not change Last Access Time of source files while archiving\n"
-#if !defined(__DOS__)
-    "  -ssw : compress shared files\n"
-#endif
-    "  -stl : set archive timestamp from the most recently modified file\n"
-#if !defined(__DOS__)
-    "  -stm{HexMask} : set CPU thread affinity mask (hexadecimal number)\n"
-#endif
-    "  -stx{Type} : exclude archive type\n"
-    "  -t{Type} : Set type of archive\n"
-    "  -u[-][p#][q#][r#][x#][y#][z#][!newArchiveName] : Update options\n"
-    "  -v{Size}[b|k|m|g] : Create volumes\n"
-    "  -w[{path}] : assign Work directory. Empty path means a temporary directory\n"
-    "  -x[r[-|0]][m[-|2]][w[-]]{@listfile|!wildcard} : eXclude filenames\n"
-    "  -y : assume Yes on all queries\n";
+
+static const char * const kBanner =
+  "7-Zip " MY_VERSION_NUMBERS " " PROG_BLURB
+  " : " COMMIT_HASH_STRING " @ " MY_DATE "\n";
+
+static const char * const kVersion =
+  #if defined(__WATCOMC__)
+  "Built " __DATE__ " " __TIME__ " using Open Watcom v2.\n"
+  "\n"
+  #endif
+  PROG_NAME " is " MY_COPYRIGHT_CR ".\n"
+  "\n"
+  "  https://7-Zip.org/\n"
+  "\n"
+  "Retro7zip is a backport of 7-Zip for DOS and Win32c.\n"
+  "\n"
+  "  https://github.com/dajhorn/retro7zip/\n"
+  "\n"
+  "This software is released into the public domain.\n"
+  "SPDX-License-Identifier: CC0-1.0\n"
+  "\n"
+  "  https://creativecommons.org/publicdomain/zero/1.0/\n"
+  #if defined(USE_COPYRIGHT_CR)
+  "\n"
+  "This build contains non-free and/or licensed components.\n"
+  #endif
+  ;
+
+static const char * const kShortHelp =
+  "Usage:\n"
+  "  " PROG_NAME " <command> [switches...] <archive> [file...] [@file...]\n"
+  "  " PROG_NAME " {--help,--version}  Print longer usage or copyright information\n"
+  "\n"
+  "Commands:\n"
+  "  a  Add files to archive; the filename suffix implies the archive type\n"
+  "  x  Extract files from archive\n"
+  "  t  Test files in archive\n"
+  "\n"
+  "Switches:\n"
+  "  -mx<N>         Compression presets, -mx1 is faster .. -mx9 is better\n"
+  "  -md<N>{b,k,m}  Dictionary size of N bytes, kilobytes, or megabytes\n"
+  "  -o<path>       Output directory\n"
+  "\n"
+  "Examples:\n"
+  "  " PROG_NAME " a -md4m My.7z DOCS\\  Creates an LZMA2 archive with a 4MB dictionary\n"
+  "  " PROG_NAME " a -mx9 My.zip *.txt  Creates a ZIP archive with maximal compression\n"
+  "  " PROG_NAME " x -dA:\\ My.tgz       Extracts a tarball to the first floppy drive\n"
+  "\n"
+  "LZMA compression uses XMS memory that is twelve times the dictionary size.\n";
+
+static const char * const kLongHelp =
+  "Usage:\n"
+  "\n"
+  "  " PROG_NAME " <command> [switches...] <archive> [file...] [@file...]\n"
+  "\n"
+  "Commands:\n"
+  "\n"
+  "  a   Add files to archive\n"
+  "  d   Delete files from archive\n"
+  "  e   Extract files from archive while discarding pathnames\n"
+  "  h   Calculate hash values for files\n"
+  "  i   Show information about supported containers and codecs\n"
+  "  l   List contents of archive\n"
+  "  rn  Rename files in archive\n"
+  "  t   Test integrity of archive\n"
+  "  u   Update files in archive\n"
+  "  x   eXtract files from archive while preserving pathnames\n"
+  "\n"
+  "Archive Update Switches (for the u command):\n"
+  "\n"
+  "  -up<N>  File exists in archive but is not matched by update pattern\n"
+  "  -uq<N>  File exists only in archive\n"
+  "  -ur<N>  File exists only in update\n"
+  "  -uw<N>  File in archive has different size than file in update\n"
+  "  -ux<N>  File in archive is newer than file in update\n"
+  "  -uy<N>  File in archive is older than file in update\n"
+  "      0   Ignore file in update\n"
+  "      1   Keep file already in archive\n"
+  "      2   Add file in update\n"
+  "      3   Mark file in archive as deleted (7z only)\n"
+  "\n"
+  "Archive Selection Switches (for the e, l, t, or x command with the -an switch):\n"
+  "\n"
+  "  -an         Specify command inputs with -ai instead of <archive>\n"
+  "  -ai!<glob>  Include archives matching pattern   (eg: -ai!*.7z        )\n"
+  "  -ai@<file>  Read -ai! patterns from listfile    (eg: -ai@include.txt )\n"
+  "  -ax!<glob>  Exclude archives matching pattern   (eg: -ax!*.zip       )\n"
+  "  -ax@<file>  Read -ax! patterns from listfile    (eg: -ax@exclude.txt )\n"
+  "\n"
+  "File Selection Switches:\n"
+  "\n"
+  "  -i!<glob>  Include files matching pattern   (eg: -i!*.bin       )\n"
+  "  -i@<file>  Read -i! patterns from listfile  (eg: -i@include.txt )\n"
+  "  -x!<glob>  Exclude files matching pattern   (eg: -x!tmp???.*    )\n"
+  "  -x@<file>  REad -x! patterns from listfile  (eg: -x@exclude.txt )\n"
+  "\n"
+  "Conflict Handling (for the e and x commands):\n"
+  "\n"
+  "  -aoa  Overwrite existing files\n"
+  "  -aos  Skip extracted files\n"
+  "  -aot  Rename extracted files\n"
+  "  -aou  Rename existing files\n"
+  "\n"
+  "Informational Switches:\n"
+  "\n"
+  "  -bb{0,1,2,3}  Verbosity level 0=silent 1=normal 2=extra 3=debug\n"
+  "  -bd           Disable progress indicator\n"
+  "  -bso{0,1,2}   Send info messages to 0=null 1=stdout 2=stderr\n"
+  "  -bse{0,1,2}   Send error messages to 0=null 1=stdout 2=stderr\n"
+  "  -bsp{0,1,2}   Send progress messages to 0=null 1=stdout 2=stderr\n"
+  "\n"
+  "Main Switches:\n"
+  "\n"
+  "  --           Stop processing switches; all subsequent arguments are files\n"
+  "  --help       Print this message\n"
+  "  --version    Print copyright information\n"
+  "  -m<options>  Codec parameters\n"
+  "  -mx[N]       Compression presets 0=store 1=faster .. 9=better\n"
+  "  -o<path>     Extract files to this output directory\n"
+  #ifndef Z7_NO_CRYPTO
+  "  -p[key]      Encrypt or decrypt using password\n"
+  #endif
+  "  -r           Enable recursive file search\n"
+  "  -r0          Enable resursive file search only for patterns\n"
+  "  -r-          Disable recursive file search\n"
+  "  -saa         Always append the type suffix to the archive name\n"
+  "  -sae         Force the specified archive name\n"
+  "  -sas         Append the type suffix to the archive name if missing\n"
+  "  -scrc<name>  Use this hash function in the x, e, or h commands\n"
+  "  -sdel        Delete input files after archive output\n"
+  "  -slt         Show technical information in archive lists\n"
+  "  -spe         Eliminate duplication of root folder for extract command\n"
+  "  -spf         Use absolute pathnames including the drive letter\n"
+  "  -spf2        Use absolute pathnames excluding the drive letter\n"
+  "  -sse         Abort on any input file error\n"
+  "  -stl         Set the archive timestamp from the most recently modified file\n"
+  "  -stx<type>   Disable the handler for this container type\n"
+  "  -t<type>     Create an archive of this container type\n"
+  "  -v<N>[b,k,m] Create archive volumes of N-size bytes, kilobytes, or megabytes\n"
+  "  -w           Put temporary files in %TEMP%\n"
+  "  -w<path>     Override %TEMP% using this directory\n"
+  "  -y           Assume yes for all prompts; force overwrites and deletions\n"
+  "\n"
+  "These commands and switches are unimplemented for DOS:\n"
+  "\n"
+  "  b       Benchmark command\n"
+  "  -bt     Show runtime statistics\n"
+  "  -mt     Enable multithreading\n"
+  #ifdef Z7_NO_CRYPTO
+  "  -p[key] Encrypt or decrypt using password\n"
+  #endif
+  "  -scc    Use this character set in the console\n"
+  "  -scs    Use this character set in file listings\n"
+  "  -seml   Send archive by email\n"
+  "  -sfx    Create an SFX archive\n"
+  "  -si     Read data from stdin\n"
+  "  -slp    Enable large memory pages\n"
+  "  -snh    Store hard links as metadata\n"
+  "  -snl    Store soft links as \metadata\n"
+  "  -sni    Store access control lists\n"
+  "  -sns    Store alternate file streams\n"
+  "  -so     Write data to stdout\n"
+  "  -spd    Disable globbing and pattern matching\n"
+  "  -ssc    Enable case sensitivity\n"
+  "  -ssp    Preserve the last access times of input files\n"
+  "  -ssw    Open shared files\n"
+  "  -stm    Set the CPU thread affinity mask\n"
+  ;
+
 
 // ---------------------------
 // exception messages
@@ -192,161 +255,6 @@ static void ShowMessageAndThrowException(LPCSTR message, NExitCode::EEnum code)
   if (g_ErrStream)
     *g_ErrStream << endl << "ERROR: " << message << endl;
   throw code;
-}
-
-static void ShowProgInfo(CStdOutStream *so)
-{
-  if (!so)
-    return;
-
-  *so
-  
-  /*
-  #ifdef __DATE__
-      << " " << __DATE__
-  #endif
-  #ifdef __TIME__
-      << " " << __TIME__
-  #endif
-  */
-
-  << " " << (unsigned)(sizeof(void *)) * 8 << "-bit"
-
-  #ifdef __ILP32__
-    << " ILP32"
-  #endif
-
-  #ifdef __ARM_ARCH
-  << " arm_v:" << __ARM_ARCH
-  #if (__ARM_ARCH == 8)
-    // for macos:
-    #if   defined(__ARM_ARCH_8_9__)
-      << ".9"
-    #elif defined(__ARM_ARCH_8_8__)
-      << ".8"
-    #elif defined(__ARM_ARCH_8_7__)
-      << ".7"
-    #elif defined(__ARM_ARCH_8_6__)
-      << ".6"
-    #elif defined(__ARM_ARCH_8_5__)
-      << ".5"
-    #elif defined(__ARM_ARCH_8_4__)
-      << ".4"
-    #elif defined(__ARM_ARCH_8_3__)
-      << ".3"
-    #elif defined(__ARM_ARCH_8_2__)
-      << ".2"
-    #elif defined(__ARM_ARCH_8_1__)
-      << ".1"
-    #endif
-  #endif
-    
-    #if defined(__ARM_ARCH_PROFILE) && \
-        (   __ARM_ARCH_PROFILE >= 'A' && __ARM_ARCH_PROFILE <= 'Z' \
-         || __ARM_ARCH_PROFILE >= 65  && __ARM_ARCH_PROFILE <= 65 + 25)
-      << "-" << (char)__ARM_ARCH_PROFILE
-    #endif
-
-  #ifdef __ARM_ARCH_ISA_THUMB
-  << " thumb:" << __ARM_ARCH_ISA_THUMB
-  #endif
-  #endif
-
-  #ifdef _MIPS_ARCH
-  << " mips_arch:" << _MIPS_ARCH
-  #endif
-  #ifdef __mips_isa_rev
-  << " mips_isa_rev:" << __mips_isa_rev
-  #endif
-
-  #ifdef __iset__
-  << " e2k_v:" << __iset__
-  #endif
-  ;
-
-
-
-  #ifdef ENV_HAVE_LOCALE
-    *so << " locale=" << GetLocale();
-  #endif
-  #ifndef _WIN32
-  {
-    const bool is_IsNativeUTF8 = IsNativeUTF8();
-    if (!is_IsNativeUTF8)
-      *so << " UTF8=" << (is_IsNativeUTF8 ? "+" : "-");
-  }
-  if (!g_ForceToUTF8)
-    *so << " use-UTF8=" << (g_ForceToUTF8 ? "+" : "-");
-  {
-    const unsigned wchar_t_size = (unsigned)sizeof(wchar_t);
-    if (wchar_t_size != 4)
-      *so << " wchar_t=" << wchar_t_size * 8 << "-bit";
-  }
-  {
-    const unsigned off_t_size = (unsigned)sizeof(off_t);
-    if (off_t_size != 8)
-      *so << " Files=" << off_t_size * 8 << "-bit";
-  }
-  #endif
-  
-  {
-    const UInt32 numCpus = 1;
-    *so << " Threads:" << numCpus;
-    const UInt64 openMAX = FOPEN_MAX;
-    *so << " OPEN_MAX:" << openMAX;
-    {
-      FString temp;
-      NDir::MyGetTempPath(temp);
-      if (!temp.IsEqualTo(STRING_PATH_SEPARATOR "tmp" STRING_PATH_SEPARATOR))
-        *so << " temp_path:" << temp;
-    }
-  }
-
-  #ifdef Z7_7ZIP_ASM
-  *so << ", ASM";
-  #endif
-
-  /*
-  {
-    AString s;
-    GetCpuName(s);
-    s.Trim();
-    *so << ", " << s;
-  }
-
-  #ifdef __ARM_FEATURE_CRC32
-     << " CRC32"
-  #endif
-
-  
-  #if (defined MY_CPU_X86_OR_AMD64 || defined(MY_CPU_ARM_OR_ARM64))
-  if (CPU_IsSupported_AES()) *so << ",AES";
-  #endif
-  
-  #ifdef MY_CPU_ARM_OR_ARM64
-  if (CPU_IsSupported_CRC32()) *so << ",CRC32";
-  #if defined(_WIN32)
-  if (CPU_IsSupported_CRYPTO()) *so << ",CRYPTO";
-  #else
-  if (CPU_IsSupported_SHA1()) *so << ",SHA1";
-  if (CPU_IsSupported_SHA2()) *so << ",SHA2";
-  #endif
-  #endif
-  */
-
-  *so << endl;
-}
-
-static void ShowCopyrightAndHelp(CStdOutStream *so, bool needHelp)
-{
-  if (!so)
-    return;
-  *so << kCopyrightString;
-  // *so << "# CPUs: " << (UInt64)NDOS::NSystem::GetNumberOfProcessors() << endl;
-  ShowProgInfo(so);
-  *so << endl;
-  if (needHelp)
-    *so << kHelpString;
 }
 
 
@@ -627,7 +535,7 @@ int Main2(int numArgs, char *args[])
 
   if (commandStrings.Size() == 0)
   {
-    ShowCopyrightAndHelp(g_StdStream, true);
+    *g_StdStream << endl << kBanner << endl << kShortHelp;
     return 0;
   }
 
@@ -650,15 +558,21 @@ int Main2(int numArgs, char *args[])
   if (options.Number_for_Percents != k_OutStream_disabled)
     percentsStream = (options.Number_for_Percents == k_OutStream_stderr) ? &g_StdErr : &g_StdOut;
   
-  if (options.HelpMode)
+  if (options.HelpMode && g_StdStream)
   {
-    ShowCopyrightAndHelp(g_StdStream, true);
+    *g_StdStream << kBanner << endl << kLongHelp;
     return 0;
   }
 
-  if (options.EnableHeaders)
+  if (options.VersionMode && g_StdStream)
   {
-    ShowCopyrightAndHelp(g_StdStream, false);
+    *g_StdStream << endl << kBanner << kVersion;
+    return 0;
+  }
+
+  if (options.EnableHeaders && g_StdStream)
+  {
+    *g_StdStream << kBanner << endl;
     if (!parser.Parse1Log.IsEmpty())
       *g_StdStream << parser.Parse1Log;
   }

@@ -50,6 +50,10 @@ struct CArcCmdLineOptions
 {
   bool HelpMode;
 
+  #ifdef __WATCOMC__
+  bool VersionMode;
+  #endif
+
   // bool LargePages;
   bool CaseSensitive_Change;
   bool CaseSensitive;
@@ -122,6 +126,11 @@ struct CArcCmdLineOptions
 
   CArcCmdLineOptions():
       HelpMode(false),
+
+      #ifdef __WATCOM__
+      VersionMode(false),
+      #endif
+
       // LargePages(false),
       CaseSensitive_Change(false),
       CaseSensitive(false),
