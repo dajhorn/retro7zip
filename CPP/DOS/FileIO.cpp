@@ -6,6 +6,7 @@
 #include "../../C/Alloc.h"
 #endif
 
+#include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -315,36 +316,38 @@ bool COutFile::Close()
     return res;
   if (CTime_defined || ATime_defined || MTime_defined)
   {
-    /* bool res2 = */ NDOS::NFile::NDir::SetDirTime(Path,
-        CTime_defined ? &CTime : NULL,
-        ATime_defined ? &ATime : NULL,
-        MTime_defined ? &MTime : NULL);
+    NDOS::NFile::NDir::SetDirTime(Path,
+      CTime_defined ? &CTime : NULL,
+      ATime_defined ? &ATime : NULL,
+      MTime_defined ? &MTime : NULL);
   }
   return res;
 }
 
 bool COutFile::SetTime(const CFiTime *cTime, const CFiTime *aTime, const CFiTime *mTime) throw()
 {
-  // On some OS (cygwin, MacOSX ...), you must close the file before updating times
-  // return true;
-
+  /* @TODO: Determine whether the CTime and ATime logic can be strippped. */
   if (cTime) { CTime = *cTime; CTime_defined = true; } else CTime_defined = false;
   if (aTime) { ATime = *aTime; ATime_defined = true; } else ATime_defined = false;
   if (mTime) { MTime = *mTime; MTime_defined = true; } else MTime_defined = false;
-  return true;
 
-  /*
-  struct timespec times[2];
-  UNUSED_VAR(cTime)
-  if (!aTime && !mTime)
-    return true;
-  bool needChange;
-  needChange  = FiTime_To_timespec(aTime, times[0]);
-  needChange |= FiTime_To_timespec(mTime, times[1]);
-  if (!needChange)
-    return true;
-  return futimens(_handle, times) == 0;
-  */
+  if (!MTime_defined)
+    return false;
+
+  time_t owc_posix_seconds = mTime->tv_sec;
+  struct tm *owc_posix_time = localtime(&owc_posix_seconds);
+
+  unsigned owc_dos_date =                    /* DOS 16-bit packed date format masks: */
+    ((owc_posix_time->tm_year - 80) << 9) |  /* 1111111000000000, years since 1980.  */
+    ((owc_posix_time->tm_mon  +  1) << 5) |  /* 0000000111100000, month.             */
+    ((owc_posix_time->tm_mday     ) << 0) ;  /* 0000000000011111, day.               */
+
+  unsigned owc_dos_time =                    /* DOS 16-bit packed time format masks: */
+     (owc_posix_time->tm_hour << 11) |       /* 11111100000000000, hours.            */
+     (owc_posix_time->tm_min  <<  5) |       /* 00000011111100000, minutes.          */
+     (owc_posix_time->tm_sec  >>  2) ;       /* 00000000000011111, duo-seconds.      */
+
+  return _dos_setftime(_handle, owc_dos_date, owc_dos_time) == 0;
 }
 
 bool COutFile::SetMTime(const CFiTime *mTime) throw()

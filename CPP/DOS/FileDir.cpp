@@ -3,6 +3,7 @@
 #include "StdAfx.h"
 
 
+#include <dos.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -398,77 +399,84 @@ bool GetCurrentDir(FString &path)
 #endif
 
 
-
-
-
 bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CFiTime *mTime)
 {
-  // need testing
   /*
-  struct utimbuf buf;
-  struct stat st;
-  UNUSED_VAR(cTime)
- 
-  printf("\nstat = %s\n", path);
-  int ret = stat(path, &st);
+   * @NOTE: In context of the DOS platform, ctime and atime are VFAT features
+   * that regular FAT12 and FAT16 filesystems do not have. The Open Watcom v2
+   * runtime for DOS cannot access this metadata because the system API does
+   * expose it. Discard ctime and atime here; only process mtime.
+   */
 
-  if (ret == 0)
-  {
-    buf.actime  = st.st_atime;
-    buf.modtime = st.st_mtime;
-  }
-  else
-  {
-    time_t cur_time = time(0);
-    buf.actime  = cur_time;
-    buf.modtime = cur_time;
+  if (!mTime) {
+    if (cTime)
+      return true;
+    if (aTime)
+      return true;
+    // Else all three times are null.
+    return false;
   }
 
-  if (aTime)
-  {
-    UInt32 ut;
-    if (NTime::FileTimeToUnixTime(*aTime, ut))
-      buf.actime = ut;
-  }
+  int owc_handle;
+  time_t owc_posix_seconds = mTime->tv_sec;
+  struct tm *owc_posix_time = localtime(&owc_posix_seconds);
 
-  if (mTime)
-  {
-    UInt32 ut;
-    if (NTime::FileTimeToUnixTime(*mTime, ut))
-      buf.modtime = ut;
-  }
+  unsigned owc_dos_date =                    /* DOS 16-bit packed date format masks: */
+    ((owc_posix_time->tm_year - 80) << 9) |  /* 1111111000000000, years since 1980.  */
+    ((owc_posix_time->tm_mon  +  1) << 5) |  /* 0000000111100000, month.             */
+    ((owc_posix_time->tm_mday     ) << 0) ;  /* 0000000000011111, day.               */
 
-  return utime(path, &buf) == 0;
-  */
-
-  // if (!aTime && !mTime) return true;
-
-  struct timespec times[2];
-  UNUSED_VAR(cTime)
-  
-  bool needChange;
-  needChange  = FiTime_To_timespec(aTime, times[0]);
-  needChange |= FiTime_To_timespec(mTime, times[1]);
-
-  /*
-  if (mTime)
-  {
-    printf("\n time = %ld.%9ld\n", mTime->tv_sec, mTime->tv_nsec);
-  }
-  */
-
-  /* @FIXME: __DOS__ compatibility */
-  return true;
+  unsigned owc_dos_time =                    /* DOS 16-bit packed time format masks: */
+     (owc_posix_time->tm_hour << 11) |       /* 11111100000000000, hours.            */
+     (owc_posix_time->tm_min  <<  5) |       /* 00000011111100000, minutes.          */
+     (owc_posix_time->tm_sec  >>  2) ;       /* 00000000000011111, duo-seconds.      */
 
 #if 0
-  if (!needChange)
+  /*
+   * The _dos_open() function always returns EACCES (errno 6) for directories
+   * because the DOS platform lacks an API for changing directory metadata.
+   */
+
+  if (_dos_open(path, O_RDONLY, &owc_handle) != 0) {
+    if (errno == EACCES)
+      return true;
+    else
+      return false;
+  }
+
+  if (_dos_setftime(owc_handle, owc_dos_date, owc_dos_time) != 0) {
+    _dos_close(owc_handle);
+    return false;
+  }
+
+  _dos_close(owc_handle);
+  return true;
+
+#else
+  /*
+   * Interrupt 21h Function 57h does the same thing as _dos_setftime except
+   * that is does not return an error if the argument is a directory.
+   *
+   * 7-Zip tries to reset the mtime on all extracted items, so this method
+   * is simpler and faster because it does not have open+close overheads. 
+   */
+    union REGS registers;
+    memset(&registers, 0, sizeof(registers));
+
+    registers.w.ax  = 0x5701;
+    registers.w.cx  = owc_dos_time;
+    registers.w.di  = owc_dos_date;
+    registers.x.esi = (unsigned)path;
+
+    int386(0x21, &registers, &registers);
+
+    if (registers.x.cflag & 1) {
+        return false;
+    }
+
     return true;
-  const int flags = 0; // follow link
-    // = AT_SYMLINK_NOFOLLOW; // don't follow link
-  return utimensat(AT_FDCWD, path, times, flags) == 0;
 #endif
 }
-
 
 
 struct C_umask
@@ -506,83 +514,10 @@ int my_chown(CFSTR path, uid_t owner, gid_t group)
 
 bool SetFileAttrib_PosixHighDetect(CFSTR path, DWORD attrib)
 {
-  TRACE_SetFileAttrib("")
+  // Some DOS flavors will fail or complain if this bit is not masked out.
+  attrib &= ~_A_SUBDIR;
 
-  struct stat st;
-
-  bool use_lstat = true;
-  if (use_lstat)
-  {
-    if (lstat(path, &st) != 0)
-    {
-      TRACE_SetFileAttrib("bad lstat()")
-      return false;
-    }
-    // TRACE_chmod("lstat", st.st_mode);
-  }
-  else
-  {
-    if (stat(path, &st) != 0)
-    {
-      TRACE_SetFileAttrib("bad stat()")
-      return false;
-    }
-  }
-  
-  if (attrib & FILE_ATTRIBUTE_UNIX_EXTENSION)
-  {
-    TRACE_SetFileAttrib("attrib & FILE_ATTRIBUTE_UNIX_EXTENSION")
-    st.st_mode = attrib >> 16;
-    if (S_ISDIR(st.st_mode))
-    {
-      // user/7z must be able to create files in this directory
-      st.st_mode |= (S_IRUSR | S_IWUSR | S_IXUSR);
-    }
-    else if (!S_ISREG(st.st_mode))
-      return true;
-  }
-  else if (S_ISLNK(st.st_mode))
-  {
-    /* for most systems: permissions for symlinks are fixed to rwxrwxrwx.
-       so we don't need chmod() for symlinks. */
-    return true;
-    // SetLastError(ENOSYS);
-    // return false;
-  }
-  else
-  {
-    TRACE_SetFileAttrib("Only Windows Attributes")
-    // Only Windows Attributes
-    if (S_ISDIR(st.st_mode)
-        || (attrib & FILE_ATTRIBUTE_READONLY) == 0)
-      return true;
-    st.st_mode &= ~(mode_t)(S_IWUSR | S_IWGRP | S_IWOTH); // octal: ~0222; // disable write permissions
-  }
-
-  int res;
-  /*
-  if (S_ISLNK(st.st_mode))
-  {
-    printf("\nfchmodat()\n");
-    TRACE_chmod(path, (st.st_mode) & g_umask.mask)
-    // AT_SYMLINK_NOFOLLOW is not implemted still in Linux.
-    res = fchmodat(AT_FDCWD, path, (st.st_mode) & g_umask.mask,
-        S_ISLNK(st.st_mode) ? AT_SYMLINK_NOFOLLOW : 0);
-  }
-  else
-  */
-  {
-    TRACE_chmod(path, (st.st_mode) & g_umask.mask)
-    res = chmod(path, (st.st_mode) & g_umask.mask);
-  }
-  // TRACE_SetFileAttrib("End")
-  return (res == 0);
-}
-
-
-bool MyCreateHardLink(CFSTR newFileName, CFSTR existFileName)
-{
-  return false;
+  return _dos_setfileattr(path, attrib) == 0;
 }
 
 // #endif

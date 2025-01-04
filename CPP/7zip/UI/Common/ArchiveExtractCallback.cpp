@@ -2374,7 +2374,7 @@ HRESULT CArchiveExtractCallback::CloseReparseAndFile()
 
 void CArchiveExtractCallback::SetAttrib()
 {
- #ifndef _WIN32
+ #if !defined(_WIN32) && !defined(__DOS__)
   // Linux now doesn't support permissions for symlinks
   if (_isSymLinkCreated)
     return;
