@@ -26,10 +26,13 @@
 #include "../7zip/UI/Common/Extract.h"
 #include "../7zip/UI/Console/ConsoleClose.h"
 #include "../7zip/UI/Console/ExtractCallbackConsole.h"
-#include "../7zip/UI/Console/HashCon.h"
 #include "../7zip/UI/Console/List.h"
 #include "../7zip/UI/Console/OpenCallbackConsole.h"
 #include "../7zip/UI/Console/UpdateCallbackConsole.h"
+
+#ifndef Z7_NO_HASHCON
+#include "../7zip/UI/Console/HashCon.h"
+#endif
 
 #ifdef Z7_PROG_VARIANT_R
 #include "../../C/7zVersion.h"
@@ -49,8 +52,10 @@ extern CStdOutStream *g_ErrStream;
 extern unsigned g_NumCodecs;
 extern const CCodecInfo *g_Codecs[];
 
+#ifndef Z7_NO_HASHCON
 extern unsigned g_NumHashers;
 extern const CHasherInfo *g_Hashers[];
+#endif
 
 DECLARE_AND_SET_CLIENT_VERSION_VAR
 
@@ -126,7 +131,9 @@ static const char * const kLongHelp =
   "  a   Add files to archive\n"
   "  d   Delete files from archive\n"
   "  e   Extract files from archive while discarding pathnames\n"
+  #ifndef Z7_NO_HASHCON
   "  h   Calculate hash values for files\n"
+  #endif
   "  i   Show information about supported containers and codecs\n"
   "  l   List contents of archive\n"
   "  rn  Rename files in archive\n"
@@ -194,7 +201,9 @@ static const char * const kLongHelp =
   "  -saa         Always append the type suffix to the archive name\n"
   "  -sae         Force the specified archive name\n"
   "  -sas         Append the type suffix to the archive name if missing\n"
+  #ifndef Z7_NO_HASHCON
   "  -scrc<name>  Use this hash function in the x, e, or h commands\n"
+  #endif
   "  -sdel        Delete input files after archive output\n"
   "  -slt         Show technical information in archive lists\n"
   "  -spe         Eliminate duplication of root folder for extract command\n"
@@ -212,12 +221,18 @@ static const char * const kLongHelp =
   "These commands and switches are unimplemented for DOS:\n"
   "\n"
   "  b       Benchmark command\n"
+  #ifdef Z7_NO_HASHCON
+  "  h       Calculate hash values for files\n"
+  #endif
   "  -bt     Show runtime statistics\n"
   "  -mt     Enable multithreading\n"
   #ifdef Z7_NO_CRYPTO
   "  -p[key] Encrypt or decrypt using password\n"
   #endif
   "  -scc    Use this character set in the console\n"
+  #ifdef Z7_NO_HASHCON
+  "  -scrc   Use this hash function in the x, e, or h commands\n"
+  #endif
   "  -scs    Use this character set in file listings\n"
   "  -seml   Send archive by email\n"
   "  -sfx    Create an SFX archive\n"
@@ -604,8 +619,10 @@ int Main2(int numArgs, char *args[])
   codecs->CaseSensitive_Change = options.CaseSensitive_Change;
   codecs->CaseSensitive = options.CaseSensitive;
   ThrowException_if_Error(codecs->Load());
-  Codecs_AddHashArcHandler(codecs);
 
+  #ifndef Z7_NO_HASHCON
+  Codecs_AddHashArcHandler(codecs);
+  #endif
   const bool isExtractGroupCommand = options.Command.IsFromExtractGroup();
 
   if (codecs->Formats.Size() == 0 &&
@@ -748,7 +765,7 @@ int Main2(int numArgs, char *args[])
       PrintHexId(so, cod.Id);
       so << ' ' << cod.Name << endl;
     }
-    
+    #ifndef Z7_NO_HASHCON
     so << endl << "Hashers:" << endl; //  << " L Size       ID Name" << endl;
 
     for (i = 0; i < g_NumHashers; i++)
@@ -760,7 +777,7 @@ int Main2(int numArgs, char *args[])
       PrintHexId(so, codec.Id);
       so << ' ' << codec.Name << endl;
     }
-    
+    #endif
   }
   else if (options.Command.CommandType == NCommandType::kBenchmark)
   {
@@ -865,6 +882,8 @@ int Main2(int numArgs, char *args[])
 
       UString errorMessage;
       CDecompressStat stat;
+
+      #ifndef Z7_NO_HASHCON
       CHashBundle hb;
       IHashCalc *hashCalc = NULL;
 
@@ -874,6 +893,7 @@ int Main2(int numArgs, char *args[])
         ThrowException_if_Error(hb.SetMethods(EXTERNAL_CODECS_VARS_L options.HashMethods));
         // hb.Init();
       }
+      #endif // Z7_NO_HASHCON
       
       hresultMain = Extract(
           // EXTERNAL_CODECS_VARS_L
@@ -885,7 +905,13 @@ int Main2(int numArgs, char *args[])
           options.Censor.Pairs.Front().Head,
           eo,
           ecs, ecs, ecs,
-          hashCalc, errorMessage, stat);
+          #ifndef Z7_NO_HASHCON
+            hashCalc,
+          #else
+            NULL,
+          #endif
+          errorMessage,
+          stat);
       
       ecs->ClosePercents();
 
@@ -978,11 +1004,13 @@ int Main2(int numArgs, char *args[])
         *so
           << "Size:       " << stat.UnpackSize << endl
           << "Compressed: " << stat.PackSize << endl;
+        #ifndef Z7_NO_HASHCON
         if (hashCalc)
         {
           *so << endl;
           PrintHashStat(*so, hb);
         }
+        #endif
       }
       } // if (so)
     }
@@ -1093,6 +1121,12 @@ int Main2(int numArgs, char *args[])
         );
    #endif
   }
+  #ifdef Z7_NO_HASHCON
+  else if (options.Command.CommandType == NCommandType::kHash)
+  {
+      throw CArcCmdLineException("The hash command is not in this 7-Zip variant.");
+  }
+  #else
   else if (options.Command.CommandType == NCommandType::kHash)
   {
     const CHashOptions &uo = options.HashOptions;
@@ -1116,6 +1150,7 @@ int Main2(int numArgs, char *args[])
       se = g_ErrStream;
     retCode = WarningsCheck(hresultMain, callback, errorInfo, g_StdStream, se, options.EnableHeaders);
   }
+  #endif // Z7_NO_HASHCON
   else
     ShowMessageAndThrowException(kUserErrorMessage, NExitCode::kUserError);
 
