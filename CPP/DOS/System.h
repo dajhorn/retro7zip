@@ -44,6 +44,8 @@ struct CProcessAffinity
 
 UInt32 GetNumberOfProcessors();
 
+bool LongFileNames(); // returns true if the host has LFN support
+
 bool GetRamSize(uint32_t &size); // returns false, if unknown ram size
 
 // Returns the number of bits for -mdN and the dictionary_size in bytes.

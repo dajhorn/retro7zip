@@ -331,7 +331,21 @@ bool DoesFileOrDirExist(CFSTR name)
 void CEnumerator::SetDirPrefix(const FString &dirPrefix)
 {
   _wildcard = dirPrefix;
-  _wildcard.Add_Char('*');
+
+  /*
+   * If the DOS host lacks LFN support or is in SFN mode, then a single
+   * asterisk globs only file names that lack a file extension, and a
+   * double asterisk globs all file names.
+   *
+   * If the DOS host is in LFN mode, then a single asterisk globs all
+   * file names like it does on posix and win32 hosts.
+   */
+
+  if (NDOS::NSystem::LongFileNames()) {
+    _wildcard += "*";
+  } else {
+    _wildcard += "*.*";
+  }
 }
 
 bool CEnumerator::NextAny(CFileInfo &fi)

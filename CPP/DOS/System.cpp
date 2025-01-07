@@ -33,6 +33,23 @@ UInt32 GetNumberOfProcessors()
   return 1;
 }
 
+bool LongFileNames()
+{
+  union REGS lfn;
+
+  // Ralph Brown's Interrupt List
+  // 2171 - Windows95 - LONG FILENAME FUNCTIONS
+  lfn.h.ah = 0x71;
+  lfn.h.al = 0x00;
+  int386(0x21, &lfn, &lfn);
+
+  if (!lfn.x.cflag) {
+    return false;
+  }
+
+  return true;
+}
+
 bool GetRamSize(uint32_t &size)
 {
   /* 
