@@ -43,6 +43,7 @@
 #include "version.h"
 
 using namespace NDOS;
+using namespace NSystem;
 using namespace NFile;
 using namespace NCommandLineParser;
 
@@ -74,7 +75,7 @@ DECLARE_AND_SET_CLIENT_VERSION_VAR
 
 static const char * const kBanner =
   "7-Zip " MY_VERSION_NUMBERS " " PROG_BLURB
-  " : " COMMIT_HASH_STRING " @ " MY_DATE "\n";
+  " : " COMMIT_HASH_STRING " @ " MY_DATE;
 
 static const char * const kVersion =
   #if defined(__WATCOMC__)
@@ -118,8 +119,7 @@ static const char * const kShortHelp =
   "  " PROG_NAME " a -md4m My.7z DOCS\\  Creates an LZMA2 archive with a 4MB dictionary\n"
   "  " PROG_NAME " a -mx9 My.zip *.txt  Creates a ZIP archive with maximal compression\n"
   "  " PROG_NAME " x -dA:\\ My.tgz       Extracts a tarball to the first floppy drive\n"
-  "\n"
-  "LZMA compression uses XMS memory that is twelve times the dictionary size.\n";
+  ;
 
 static const char * const kLongHelp =
   "Usage:\n"
@@ -550,7 +550,13 @@ int Main2(int numArgs, char *args[])
 
   if (commandStrings.Size() == 0)
   {
-    *g_StdStream << endl << kBanner << endl << kShortHelp;
+    unsigned int m = 0;
+    *g_StdStream
+      << endl << kBanner
+      << " : LFN=" << LongFileNames()
+      << " SWITCHES=-md" << MaximumDictionarySize(m)
+      << endl << endl 
+      << kShortHelp;
     return 0;
   }
 
@@ -575,13 +581,25 @@ int Main2(int numArgs, char *args[])
   
   if (options.HelpMode && g_StdStream)
   {
-    *g_StdStream << kBanner << endl << kLongHelp;
+    unsigned int m = 0;
+    *g_StdStream
+      << endl << kBanner
+      << " : LFN=" << LongFileNames()
+      << " SWITCHES=-md" << MaximumDictionarySize(m)
+      << endl << endl
+      << kLongHelp;
     return 0;
   }
 
   if (options.VersionMode && g_StdStream)
   {
-    *g_StdStream << endl << kBanner << kVersion;
+    unsigned int m = 0;
+    *g_StdStream
+      << endl << kBanner
+      << " : LFN=" << LongFileNames()
+      << " SWITCHES=-md" << MaximumDictionarySize(m)
+      << endl << endl
+      << kVersion;
     return 0;
   }
 
