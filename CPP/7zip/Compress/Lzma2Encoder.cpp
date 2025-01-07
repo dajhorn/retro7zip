@@ -7,6 +7,11 @@
 #include "../Common/CWrappers.h"
 #include "../Common/StreamUtils.h"
 
+#if defined(__DOS__)
+#include "../../DOS/System.h"
+using namespace NDOS;
+#endif
+
 #include "Lzma2Encoder.h"
 
 namespace NCompress {
@@ -71,6 +76,12 @@ Z7_COM7F_IMF(CEncoder::SetCoderProperties(const PROPID *propIDs,
   {
     RINOK(SetLzma2Prop(propIDs[i], coderProps[i], lzma2Props))
   }
+
+  #if defined(__DOS__)
+  if (lzma2Props.lzmaProps.dictSize == 0)
+    NSystem::MaximumDictionarySize(lzma2Props.lzmaProps.dictSize);
+  #endif
+
   return SResToHRESULT(Lzma2Enc_SetProps(_encoder, &lzma2Props));
 }
 
