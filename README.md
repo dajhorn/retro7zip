@@ -1,3 +1,5 @@
+![Retro7zip Icon](https://github.com/user-attachments/assets/22abdb30-fe6e-456d-9e34-acd7fc9c1e92)
+
 ## Retro7zip
 
 Retro7zip is a native backport of 7-Zip for DOS and Win32c that runs on
