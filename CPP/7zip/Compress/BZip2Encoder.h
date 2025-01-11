@@ -20,12 +20,6 @@
 #include "BZip2Const.h"
 #include "BZip2Crc.h"
 
-#if defined(__DOS__)
-using namespace NDOS;
-#else
-using namespace NWindows;
-#endif
-
 
 namespace NCompress {
 namespace NBZip2 {

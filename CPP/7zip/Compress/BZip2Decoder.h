@@ -20,11 +20,6 @@
 #include "HuffmanDecoder.h"
 #include "Mtf8.h"
 
-#if defined(__DOS__)
-using namespace NDOS;
-#else
-using namespace NWindows;
-#endif
 
 namespace NCompress {
 namespace NBZip2 {
