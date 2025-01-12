@@ -111,8 +111,9 @@ bool HasTailSlash(const AString &name, UINT
   if (name.IsEmpty())
     return false;
   char c;
-    #if defined(_WIN32) && !defined(UNDER_CE)
+    #if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
     if (codePage != CP_UTF8)
+      /* USER32.DLL in Windows NT 3.1 lacks CharPrevExA */
       c = *CharPrevExA((WORD)codePage, name, name.Ptr(name.Len()), 0);
     else
     #endif
