@@ -5,10 +5,16 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "version.h"
 
 #ifndef USE_WINDOWS_FILE
 /* for mkdir */
-#ifdef _WIN32
+#if __DOS__
+#include <direct.h>
+#include <time.h>
+#include <utime.h>
+#define UTIME_OMIT -2
+#elif _WIN32
 #include <direct.h>
 #else
 #include <stdlib.h>
@@ -219,7 +225,7 @@ static WRes MyCreateDir(const UInt16 *name)
   RINOK(Utf16_To_Char(&buf, name MY_FILE_CODE_PAGE_PARAM))
 
   res =
-  #ifdef _WIN32
+  #if defined(_WIN32) || defined(__DOS__)
   _mkdir((const char *)buf.data)
   #else
   mkdir((const char *)buf.data, 0777)
@@ -355,6 +361,7 @@ static BOOL WINAPI FileTimeToLocalFileTime(const FILETIME *fileTime, FILETIME *l
   return TRUE;
 }
 
+#if !defined(__DOS__)
 static const UInt32 kNumTimeQuantumsInSecond = 10000000;
 static const UInt32 kFileTimeStartYear = 1601;
 static const UInt32 kUnixTimeStartYear = 1970;
@@ -366,6 +373,7 @@ static Int64 Time_FileTimeToUnixTime64(const FILETIME *ft)
   const UInt64 winTime = GET_TIME_64(ft);
   return (Int64)(winTime / kNumTimeQuantumsInSecond) - (Int64)kUnixTimeOffset;
 }
+#endif // __DOS__
 
 #if defined(_AIX)
   #define MY_ST_TIMESPEC st_timespec
@@ -373,6 +381,7 @@ static Int64 Time_FileTimeToUnixTime64(const FILETIME *ft)
   #define MY_ST_TIMESPEC timespec
 #endif
 
+#if !defined(__DOS__)
 static void FILETIME_To_timespec(const FILETIME *ft, struct MY_ST_TIMESPEC *ts)
 {
   if (ft)
@@ -397,9 +406,21 @@ static void FILETIME_To_timespec(const FILETIME *ft, struct MY_ST_TIMESPEC *ts)
     ts->tv_nsec = UTIME_OMIT; // keep old timesptamp
   }
 }
+#endif // __DOS__
 
 static WRes Set_File_FILETIME(const UInt16 *name, const FILETIME *mTime)
 {
+#if __DOS__
+  CBuf buf;
+  int res;
+  struct utimbuf dostime;
+  Buf_Init(&buf);
+  RINOK(Utf16_To_Char(&buf, name MY_FILE_CODE_PAGE_PARAM))
+  /* @fixme: This has the 2038 time_t bug */
+  dostime.actime = mTime->dwLowDateTime;
+  dostime.modtime = mTime->dwLowDateTime;
+  res = utime((const char *)buf.data, &dostime);
+#else
   struct timespec times[2];
   
   const int flags = 0; // follow link
@@ -412,6 +433,7 @@ static WRes Set_File_FILETIME(const UInt16 *name, const FILETIME *mTime)
   FILETIME_To_timespec(NULL, &times[0]);
   FILETIME_To_timespec(mTime, &times[1]);
   res = utimensat(AT_FDCWD, (const char *)buf.data, times, flags);
+#endif // __DOS__
   Buf_Free(&buf, &g_Alloc);
   if (res == 0)
     return 0;
@@ -555,17 +577,36 @@ int Z7_CDECL main(int numargs, char *args[])
   size_t tempSize = 0;
   // UInt32 parents[NUM_PARENTS_MAX];
 
+#if defined(__DOS__)
+  Print("\n7-Zip " MY_VERSION_NUMBERS " minimalistic for DOS : " COMMIT_HASH_STRING " @ " MY_DATE "\n\n");
+#else
   Print("\n7z Decoder " MY_VERSION_CPU " : " MY_COPYRIGHT_DATE "\n\n");
+#endif
 
   if (numargs == 1)
   {
     Print(
-      "Usage: 7zDec <command> <archive_name>\n\n"
-      "<Commands>\n"
-      "  e: Extract files from archive (without using directory names)\n"
-      "  l: List contents of archive\n"
-      "  t: Test integrity of archive\n"
-      "  x: eXtract files with full paths\n");
+      "Usage:\n"
+      "\n"
+      "  7zDec <command> <archive>\n"
+      "\n"
+      "Commands:\n"
+      "\n"
+      "  e  Extract all files from archive to current directory, discarding pathnames\n"
+      "  l  List contents of archive\n"
+      "  t  Test integrity of archive\n"
+      "  x  eXtract all files from archive to current directory, preserving pathnames\n"
+      "\n"
+      "Switches:\n"
+      "\n"
+      "  None.\n"
+      "\n"
+      "Limitations:\n"
+      "\n"
+      "  * Plain single-volume 7z archives.\n"
+      "  * 64 megabyte maximum dictionary size.\n"
+      "  * Delta filter, BCJ2 filter, and LZMA2 codec only.\n" 
+      );
     return 0;
   }
 

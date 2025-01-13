@@ -11,7 +11,9 @@
 
 #ifdef USE_WINDOWS_FILE
 #include "7zWindows.h"
-
+#elif defined(__DOS__)
+#define USE_FOPEN
+#include <stdio.h>
 #else
 // note: USE_FOPEN mode is limited to 32-bit file size
 // #define USE_FOPEN
