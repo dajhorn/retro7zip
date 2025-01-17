@@ -35,19 +35,81 @@ UInt32 GetNumberOfProcessors()
 
 bool LongFileNames()
 {
-  union REGS lfn;
+  // https://github.com/dajhorn/retro7zip/wiki/LFN-Detection-Test-Matrix
 
-  // Ralph Brown's Interrupt List
-  // 2171 - Windows95 - LONG FILENAME FUNCTIONS
-  lfn.h.ah = 0x71;
-  lfn.h.al = 0x00;
-  int386(0x21, &lfn, &lfn);
+  union REGS regs;
+  char buffer[PATH_MAX +1];
 
-  if (!lfn.x.cflag) {
+  memset(&regs, 0, sizeof(regs));
+  memset(&buffer, 0, sizeof(buffer));
+  regs.h.ah = 0x71;
+  regs.h.al = 0x47;
+  regs.w.cflag = 1;
+  regs.x.esi = (unsigned)buffer;
+  int386(0x21, &regs, &regs);
+
+  /*
+  printf("Function 7147h cflag=%x ah=0x%04x al=0x%04x esi=%s\n",
+         regs.w.cflag, regs.h.ah, regs.h.al, regs.x.esi);
+  */
+
+  if (regs.w.cflag == 0 && regs.h.ah == 0x00 && regs.h.al == 0x00 ) {
+    /*
+     * This is:
+     *
+     * - DOXBox-X [dos lfn=on]
+     * - Windows 95
+     * - Windows 98
+     * - Windows Me
+     *
+     * The esi register will be a pointer to a printable string on Win9x only.
+     */
+    return true;
+  }
+
+  if (regs.w.cflag == 0 && regs.h.ah == 0x71 && regs.h.al == 0x47 ) {
+    /*
+     * This is DOSLFN 0.41f running on any host.
+     *
+     * @TODO: Check whether esi ever points to a string or is always bogus.
+     */
+    return true;
+  }
+
+  if (regs.w.cflag == 0 && regs.h.ah == 0x71 && regs.h.al == 0x00 ) {
+    /*
+     * These are all pre-VFAT DOS platforms:
+     *
+     * - MS-DOS 6.22
+     * - PC-DOS 7.0
+     * - Windows NT 3.51
+     * - Windows NT 4.0
+     *
+     * NTVDM was forked from MS-DOS 5 and always reports DOS version 5.5,
+     * even on Windows 10 (the 32-bit edition still has it as a
+     * feature-on-demand).
+     */
     return false;
   }
 
-  return true;
+  if (regs.w.cflag == 1 && regs.h.ah == 0x71 && regs.h.al == 0x00 ) {
+    /*
+     * These are all post-VFAT DOS platforms:
+     *
+     * - DOSBox-X    [dos vfn=off]
+     * - FreeDOS 1.4 (without an LFN driver)
+     * - MS-DOS 7.0  (MS-DOS Mode in Windows 95 RTM and Windows 95 OSR1)
+     * - MS-DOS 7.1  (MS-DOS Mode in Windows 95 OSR2 and Windows 98)
+     * - MS-DOS 8.0  (MS-DOS Mode in Windows Me if enabled by a patch)
+     */
+     return false;
+  }
+
+  /*
+   * Make the default false because the *.* globbing pattern works
+   * mostly everwhere.
+   */
+  return false;
 }
 
 bool GetRamSize(uint32_t &size)
