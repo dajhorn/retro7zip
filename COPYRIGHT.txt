@@ -1,8 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: 7-Zip
-Source: https://www.7-zip.org/
-Files-Excluded: CPP/7zip/Compress/Rar*
-Comment: RAR code is under the non-free "unRAR license restriction"
+Source: https://www.7-zip.org/a/7z2409-src.7z
 
 Files: *
 Copyright: 1999-2024 Igor Pavlov
@@ -158,10 +156,9 @@ License: BSD-3-clause
 Comment: the code was developed by Igor Pavlov, using Zstandard format
          specification and original zstd decoder code as reference code.
 
-Files: debian/*
-Copyright: 2021 Collabora, Ltd.
-           2021-2024 YOKOTA Hiroshi <yokota.hgml@gmail.com>
-License: LGPL-2.1+
+Files: CPP/7zip/Compress/Rar*
+Copyright: 2024 Alexander Roshal
+License: UnRAR
 
 License: LGPL-2.1+
  This program is free software: you can redistribute it and/or modify it
@@ -202,3 +199,33 @@ License: BSD-3-clause
  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+License: UnRAR
+   1. All copyrights to RAR and the utility UnRAR are exclusively
+      owned by the author - Alexander Roshal.
+ .
+   2. UnRAR source code may be used in any software to handle
+      RAR archives without limitations free of charge, but cannot be
+      used to develop RAR (WinRAR) compatible archiver and to
+      re-create RAR compression algorithm, which is proprietary.
+      Distribution of modified UnRAR source code in separate form
+      or as a part of other software is permitted, provided that
+      full text of this paragraph, starting from "UnRAR source code"
+      words, is included in license, or in documentation if license
+      is not available, and in source code comments of resulting package.
+ .
+   3. The UnRAR utility may be freely distributed. It is allowed
+      to distribute UnRAR inside of other software packages.
+ .
+   4. THE RAR ARCHIVER AND THE UnRAR UTILITY ARE DISTRIBUTED "AS IS".
+      NO WARRANTY OF ANY KIND IS EXPRESSED OR IMPLIED.  YOU USE AT
+      YOUR OWN RISK. THE AUTHOR WILL NOT BE LIABLE FOR DATA LOSS,
+      DAMAGES, LOSS OF PROFITS OR ANY OTHER KIND OF LOSS WHILE USING
+      OR MISUSING THIS SOFTWARE.
+ .
+   5. Installing and using the UnRAR utility signifies acceptance of
+      these terms and conditions of the license.
+ .
+   6. If you don't agree with terms of the license you must remove
+      UnRAR files from your storage devices and cease to use the
+      utility.
