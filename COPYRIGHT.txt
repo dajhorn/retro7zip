@@ -1,0 +1,204 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: 7-Zip
+Source: https://www.7-zip.org/
+Files-Excluded: CPP/7zip/Compress/Rar*
+Comment: RAR code is under the non-free "unRAR license restriction"
+
+Files: *
+Copyright: 1999-2024 Igor Pavlov
+License: LGPL-2.1+
+
+Files: Asm/arm64/7zAsm.S
+       Asm/arm64/LzmaDecOpt.S
+       Asm/x86/7zAsm.asm
+       Asm/x86/7zCrcOpt.asm
+       Asm/x86/AesOpt.asm
+       Asm/x86/LzFindOpt.asm
+       Asm/x86/LzmaDecOpt.asm
+       Asm/x86/Sha1Opt.asm
+       Asm/x86/Sha256Opt.asm
+       Asm/x86/XzCrc64Opt.asm
+       C/7z.h
+       C/7zAlloc.c
+       C/7zAlloc.h
+       C/7zArcIn.c
+       C/7zBuf.c
+       C/7zBuf.h
+       C/7zBuf2.c
+       C/7zCrc.c
+       C/7zCrc.h
+       C/7zCrcOpt.c
+       C/7zDec.c
+       C/7zFile.c
+       C/7zFile.h
+       C/7zStream.c
+       C/7zTypes.h
+       C/7zVersion.h
+       C/Aes.c
+       C/Aes.h
+       C/AesOpt.c
+       C/Alloc.c
+       C/Alloc.h
+       C/Bcj2.c
+       C/Bcj2.h
+       C/Bcj2Enc.c
+       C/Blake2.h
+       C/Blake2s.c
+       C/Bra.c
+       C/Bra.h
+       C/Bra86.c
+       C/BraIA64.c
+       C/BwtSort.c
+       C/BwtSort.h
+       C/Compiler.h
+       C/CpuArch.c
+       C/CpuArch.h
+       C/Delta.c
+       C/Delta.h
+       C/DllSecur.c
+       C/DllSecur.h
+       C/HuffEnc.c
+       C/HuffEnc.h
+       C/LzFind.c
+       C/LzFind.h
+       C/LzFindMt.c
+       C/LzFindMt.h
+       C/LzFindOpt.c
+       C/LzHash.h
+       C/Lzma2Dec.c
+       C/Lzma2Dec.h
+       C/Lzma2DecMt.c
+       C/Lzma2DecMt.h
+       C/Lzma2Enc.c
+       C/Lzma2Enc.h
+       C/Lzma86.h
+       C/Lzma86Dec.c
+       C/Lzma86Enc.c
+       C/LzmaDec.c
+       C/LzmaDec.h
+       C/LzmaEnc.c
+       C/LzmaEnc.h
+       C/LzmaLib.c
+       C/LzmaLib.h
+       C/MtCoder.c
+       C/MtCoder.h
+       C/MtDec.c
+       C/MtDec.h
+       C/Ppmd.h
+       C/Ppmd7.c
+       C/Ppmd7.h
+       C/Ppmd7aDec.c
+       C/Ppmd7Dec.c
+       C/Ppmd7Enc.c
+       C/Ppmd8.c
+       C/Ppmd8.h
+       C/Ppmd8Dec.c
+       C/Ppmd8Enc.c
+       C/Precomp.h
+       C/RotateDefs.h
+       C/Sha1.c
+       C/Sha1.h
+       C/Sha1Opt.c
+       C/Sha256.c
+       C/Sha256.h
+       C/Sha256Opt.c
+       C/Sort.c
+       C/Sort.h
+       C/Threads.c
+       C/Threads.h
+       C/Util/7z/7zMain.c
+       C/Util/7z/Precomp.c
+       C/Util/7z/Precomp.h
+       C/Util/7zipInstall/7zipInstall.c
+       C/Util/7zipInstall/Precomp.c
+       C/Util/7zipInstall/Precomp.h
+       C/Util/7zipUninstall/7zipUninstall.c
+       C/Util/7zipUninstall/Precomp.c
+       C/Util/7zipUninstall/Precomp.h
+       C/Util/Lzma/LzmaUtil.c
+       C/Util/LzmaLib/LzmaLibExports.c
+       C/Util/SfxSetup/Precomp.c
+       C/Util/SfxSetup/Precomp.h
+       C/Util/SfxSetup/SfxSetup.c
+       C/Xz.c
+       C/Xz.h
+       C/XzCrc64.c
+       C/XzCrc64.h
+       C/XzCrc64Opt.c
+       C/XzDec.c
+       C/XzEnc.c
+       C/XzEnc.h
+       C/XzIn.c
+       CPP/7zip/Archive/PpmdHandler.cpp
+       CPP/7zip/Compress/PpmdDecoder.cpp
+       CPP/7zip/Compress/PpmdDecoder.h
+Copyright: No copyright claimed
+License: public-domain
+ Igor Pavlov : Public domain
+ ----------
+ This code is based on public domain code of Steve Reid from Wei Dai's Crypto++ library.
+ ----------
+ This code is based on public domain code from Wei Dai's Crypto++ library.
+ ----------
+ PPMd var.H (2001) / var.I (2002): Dmitry Shkarin : Public domain
+ ----------
+ Carryless rangecoder (1999): Dmitry Subbotin : Public domain
+ ----------
+ Samuel Neves : Public domain
+
+Files: CPP/7zip/Compress/LzfseDecoder.cpp
+Copyright: 2015-2017, Apple Inc.
+           2018 Igor Pavlov
+License: BSD-3-clause
+Comment: Some parts come from the "LZFSE compression library"
+
+Files: C/ZstdDec.c
+Copyright: 2024 Igor Pavlov
+License: BSD-3-clause
+Comment: the code was developed by Igor Pavlov, using Zstandard format
+         specification and original zstd decoder code as reference code.
+
+Files: debian/*
+Copyright: 2021 Collabora, Ltd.
+           2021-2024 YOKOTA Hiroshi <yokota.hgml@gmail.com>
+License: LGPL-2.1+
+
+License: LGPL-2.1+
+ This program is free software: you can redistribute it and/or modify it
+ under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation version 2.1 of the License, or (at your
+ option) any later version.  This program is distributed in the hope that
+ it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ .
+ On Debian systems you can find the full text of the GNU Lesser General
+ Public License version 2.1 license at /usr/share/common-licenses/LGPL-2.1.
+
+License: BSD-3-clause
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+ .
+    Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ .
+    Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and\/or other materials provided with the
+    distribution.
+ .
+    Neither the name of the <ORGANIZATION> nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
