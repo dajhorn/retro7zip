@@ -58,19 +58,14 @@ The DOS variants are compatible with
 [NTLFN.EXE 0.81.71](https://sta.c64.org/lfnemu.html),
 but the Win32c variant is better for Windows NT.
 
+
 ## Licensing
 
-7-Zip is copyright Igor Pavlov and released into the public domain.
+The LZMA SDK is copyright Igor Pavlov and released into the public domain.
 
-Retro7zip is a derived work, copyright Darik Horn, that is similarly
-released into the public domain.
+7-Zip is an aggregate work, copyright Igor Pavlov,  that is subject to
+multiple licenses that are described in the [COPYRIGHT.txt](COPYRIGHT.txt)
+file and the [License.txt](DOC/License.txt) file.
 
-Some builds of 7-Zip and/or Retro7zip may contain non-free components that
-are subject to additional constraints and restrictions.  Review the
-[DOC/License.txt](https://raw.githubusercontent.com/dajhorn/retro7zip/refs/heads/watcom/DOC/License.txt)
-file in the source tree for specific details.
-
-SPDX-License-Identifier: [CC0-1.0](https://spdx.org/licenses/CC0-1.0.html)  
-SPDX-License-Identifier: [LGPL-2.1-or-later](https://spdx.org/licenses/LGPL-2.1-or-later.html)  
-SPDX-License-Identifier: [BSD-3-Clause](https://spdx.org/licenses/BSD-3-Clause.html)  
-SPDX-License-Identifier: [UnRAR](https://www.rarlab.com/license.htm)  
+Retro7zip is a derived work, copyright Darik Horn, that is released into
+the public domain.
