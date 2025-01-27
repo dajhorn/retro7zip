@@ -32,11 +32,16 @@ typedef PROCESS_MEMORY_COUNTERS *PPROCESS_MEMORY_COUNTERS;
 
 #endif // Z7_OLD_WIN_SDK
 
-#else // _WIN32
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/time.h>
-#include <sys/times.h>
+#elif defined(__DOS__)
+  #include <time.h>
+  #include <unistd.h>
+
+#else
+  #include <unistd.h>
+  #include <sys/ioctl.h>
+  #include <sys/time.h>
+  #include <sys/times.h>
+
 #endif // _WIN32
 
 #include "../../../../C/CpuArch.h"
@@ -52,9 +57,15 @@ typedef PROCESS_MEMORY_COUNTERS *PPROCESS_MEMORY_COUNTERS;
 #include "../../../Common/StringToInt.h"
 #include "../../../Common/UTFConvert.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/ErrorMsg.h"
+#include "../../../DOS/TimeUtils.h"
+#include "../../../DOS/FileDir.h"
+#else
 #include "../../../Windows/ErrorMsg.h"
 #include "../../../Windows/TimeUtils.h"
 #include "../../../Windows/FileDir.h"
+#endif
 
 #include "../Common/ArchiveCommandLine.h"
 #if !defined(__WATCOMC__)
@@ -68,6 +79,7 @@ typedef PROCESS_MEMORY_COUNTERS *PPROCESS_MEMORY_COUNTERS;
 #endif
 
 #include "../../Common/RegisterCodec.h"
+#include "../../Compress/Lzma2Encoder.h"
 
 #if !defined(__WATCOMC__)
 #include "BenchCon.h"
@@ -79,7 +91,7 @@ typedef PROCESS_MEMORY_COUNTERS *PPROCESS_MEMORY_COUNTERS;
 #include "OpenCallbackConsole.h"
 #include "UpdateCallbackConsole.h"
 
-#ifdef Z7_PROG_VARIANT_R
+#if defined(Z7_PROG_VARIANT_M) || defined(Z7_PROG_VARIANT_R)
 #include "../../../../C/7zVersion.h"
 #else
 #include "../../MyVersion.h"
@@ -87,7 +99,11 @@ typedef PROCESS_MEMORY_COUNTERS *PPROCESS_MEMORY_COUNTERS;
 
 #include "version.h"
 
+#if defined(__DOS__)
+using namespace NDOS;
+#else
 using namespace NWindows;
+#endif
 using namespace NFile;
 using namespace NCommandLineParser;
 
@@ -103,8 +119,10 @@ extern CStdOutStream *g_ErrStream;
 extern unsigned g_NumCodecs;
 extern const CCodecInfo *g_Codecs[];
 
+#ifndef Z7_NO_HASHCON
 extern unsigned g_NumHashers;
 extern const CHasherInfo *g_Hashers[];
+#endif
 
 #ifdef Z7_EXTERNAL_CODECS
 extern
@@ -116,15 +134,33 @@ DECLARE_AND_SET_CLIENT_VERSION_VAR
 
 #if defined(Z7_PROG_VARIANT_A)
   #define PROG_NAME "7za"
-  #define PROG_BLURB "aggregated for Win32c"
+  #if defined(__DOS__)
+    #define PROG_BLURB "aggregated for DOS"
+  #elif defined(_WIN32)
+    #define PROG_BLURB "aggregated for Win32c"
+  #else
+    #define PROG_BLURB "aggregated"
+  #endif
 #elif defined(Z7_PROG_VARIANT_M)
   #define PROG_NAME "7zm"
-  #define PROG_BLURB "mini for Win32c"
+  #if defined(__DOS__)
+    #define PROG_BLURB "mini for DOS"
+  #elif defined(_WIN32)
+    #define PROG_BLURB "mini for Win32c"
+  #else
+    #define PROG_BLURB "mini"
+  #endif
 #elif defined(Z7_PROG_VARIANT_R)
   #define PROG_NAME "7zr"
-  #define PROG_BLURB "reduced for Win32c"
+  #if defined(__DOS__)
+    #define PROG_BLURB "reduced for DOS"
+  #elif defined(_WIN32)
+    #define PROG_BLURB "reduced for Win32c"
+  #else
+    #define PROG_BLURB "reduced"
+  #endif
 #else
-  #error "The wrong Z7_PROG_VARIANT_ is defined for Win32c."
+  #error "An unknown Z7_PROG_VARIANT_ is defined."
 #endif
 
 static const char * const kBanner =
@@ -143,11 +179,6 @@ static const char * const kVersion =
   "Retro7zip is a backport of 7-Zip for DOS and Win32c.\n"
   "\n"
   "  https://github.com/dajhorn/retro7zip/\n"
-  "\n"
-  "This software is released into the public domain.\n"
-  "SPDX-License-Identifier: CC0-1.0\n"
-  "\n"
-  "  https://creativecommons.org/publicdomain/zero/1.0/\n"
   #if defined(USE_COPYRIGHT_CR)
   "\n"
   "This build contains non-free and/or licensed components.\n"
@@ -325,154 +356,6 @@ static void ShowMessageAndThrowException(LPCSTR message, NExitCode::EEnum code)
     *g_ErrStream << endl << "ERROR: " << message << endl;
   throw code;
 }
-
-
-#ifdef _WIN32
-#define ShowProgInfo(so)
-#else
-static void ShowProgInfo(CStdOutStream *so)
-{
-  if (!so)
-    return;
-
-  *so
-  
-  /*
-  #ifdef __DATE__
-      << " " << __DATE__
-  #endif
-  #ifdef __TIME__
-      << " " << __TIME__
-  #endif
-  */
-
-  << " " << (unsigned)(sizeof(void *)) * 8 << "-bit"
-
-  #ifdef __ILP32__
-    << " ILP32"
-  #endif
-
-  #ifdef __ARM_ARCH
-  << " arm_v:" << __ARM_ARCH
-  #if (__ARM_ARCH == 8)
-    // for macos:
-    #if   defined(__ARM_ARCH_8_9__)
-      << ".9"
-    #elif defined(__ARM_ARCH_8_8__)
-      << ".8"
-    #elif defined(__ARM_ARCH_8_7__)
-      << ".7"
-    #elif defined(__ARM_ARCH_8_6__)
-      << ".6"
-    #elif defined(__ARM_ARCH_8_5__)
-      << ".5"
-    #elif defined(__ARM_ARCH_8_4__)
-      << ".4"
-    #elif defined(__ARM_ARCH_8_3__)
-      << ".3"
-    #elif defined(__ARM_ARCH_8_2__)
-      << ".2"
-    #elif defined(__ARM_ARCH_8_1__)
-      << ".1"
-    #endif
-  #endif
-    
-    #if defined(__ARM_ARCH_PROFILE) && \
-        (   __ARM_ARCH_PROFILE >= 'A' && __ARM_ARCH_PROFILE <= 'Z' \
-         || __ARM_ARCH_PROFILE >= 65  && __ARM_ARCH_PROFILE <= 65 + 25)
-      << "-" << (char)__ARM_ARCH_PROFILE
-    #endif
-
-  #ifdef __ARM_ARCH_ISA_THUMB
-  << " thumb:" << __ARM_ARCH_ISA_THUMB
-  #endif
-  #endif
-
-  #ifdef _MIPS_ARCH
-  << " mips_arch:" << _MIPS_ARCH
-  #endif
-  #ifdef __mips_isa_rev
-  << " mips_isa_rev:" << __mips_isa_rev
-  #endif
-
-  #ifdef __iset__
-  << " e2k_v:" << __iset__
-  #endif
-  ;
-
-
-
-  #ifdef ENV_HAVE_LOCALE
-    *so << " locale=" << GetLocale();
-  #endif
-  #ifndef _WIN32
-  {
-    const bool is_IsNativeUTF8 = IsNativeUTF8();
-    if (!is_IsNativeUTF8)
-      *so << " UTF8=" << (is_IsNativeUTF8 ? "+" : "-");
-  }
-  if (!g_ForceToUTF8)
-    *so << " use-UTF8=" << (g_ForceToUTF8 ? "+" : "-");
-  {
-    const unsigned wchar_t_size = (unsigned)sizeof(wchar_t);
-    if (wchar_t_size != 4)
-      *so << " wchar_t=" << wchar_t_size * 8 << "-bit";
-  }
-  {
-    const unsigned off_t_size = (unsigned)sizeof(off_t);
-    if (off_t_size != 8)
-      *so << " Files=" << off_t_size * 8 << "-bit";
-  }
-  #endif
-  
-  {
-    const UInt32 numCpus = NWindows::NSystem::GetNumberOfProcessors();
-    *so << " Threads:" << numCpus;
-    const UInt64 openMAX= NWindows::NSystem::Get_File_OPEN_MAX();
-    *so << " OPEN_MAX:" << openMAX;
-    {
-      FString temp;
-      NDir::MyGetTempPath(temp);
-      if (!temp.IsEqualTo(STRING_PATH_SEPARATOR "tmp" STRING_PATH_SEPARATOR))
-        *so << " temp_path:" << temp;
-    }
-  }
-
-  #ifdef Z7_7ZIP_ASM
-  *so << ", ASM";
-  #endif
-
-  /*
-  {
-    AString s;
-    GetCpuName(s);
-    s.Trim();
-    *so << ", " << s;
-  }
-
-  #ifdef __ARM_FEATURE_CRC32
-     << " CRC32"
-  #endif
-
-  
-  #if (defined MY_CPU_X86_OR_AMD64 || defined(MY_CPU_ARM_OR_ARM64))
-  if (CPU_IsSupported_AES()) *so << ",AES";
-  #endif
-  
-  #ifdef MY_CPU_ARM_OR_ARM64
-  if (CPU_IsSupported_CRC32()) *so << ",CRC32";
-  #if defined(_WIN32)
-  if (CPU_IsSupported_CRYPTO()) *so << ",CRYPTO";
-  #else
-  if (CPU_IsSupported_SHA1()) *so << ",SHA1";
-  if (CPU_IsSupported_SHA2()) *so << ",SHA2";
-  #endif
-  #endif
-  */
-
-  *so << endl;
-}
-#endif
 
 static void PrintStringRight(CStdOutStream &so, const char *s, unsigned size)
 {
@@ -794,6 +677,12 @@ Z7_DIAGNOSTIC_IGNORE_CAST_FUNCTION
 
 #else  // ! _WIN32
 
+#if defined(__DOS__)
+static UInt64 Get_timeofday_us()
+{
+  return (UInt64)time(NULL) * 1000000;
+}
+#else
 static UInt64 Get_timeofday_us()
 {
   struct timeval now;
@@ -801,6 +690,7 @@ static UInt64 Get_timeofday_us()
     return (UInt64)now.tv_sec * 1000000 + (UInt64)now.tv_usec;
   return 0;
 }
+#endif
 
 static void PrintTime(const char *s, UInt64 val, UInt64 total_us, UInt64 kFreq)
 {
@@ -862,6 +752,9 @@ static void PrintTime(const char *s, UInt64 val, UInt64 total_us, UInt64 kFreq)
 
 static void PrintStat(const UInt64 startTime)
 {
+#if defined(__DOS__)
+  *g_StdStream << "PrintStat is not implemented for DOS" << endl;
+#else
   tms t;
   /* clock_t res = */ times(&t);
   const UInt64 totalTime = Get_timeofday_us() - startTime;
@@ -871,6 +764,7 @@ static void PrintStat(const UInt64 startTime)
   PrintTime("Process", (UInt64)t.tms_utime + (UInt64)t.tms_stime, totalTime, kFreq);
   PrintTime("Global ", totalTime, totalTime, 0);
   *g_StdStream << endl;
+#endif
 }
 
 #endif // ! _WIN32
@@ -886,7 +780,7 @@ static void PrintHexId(CStdOutStream &so, UInt64 id)
   PrintStringRight(so, s, 8);
 }
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__DOS__)
 void Set_ModuleDirPrefix_From_ProgArg0(const char *s);
 #endif
 
@@ -939,8 +833,10 @@ int Main2(
   NCommandLineParser::SplitCommandLine(GetCommandLineW(), commandStrings);
   #else
   {
+    #if !defined(__DOS__)
     if (numArgs > 0)
       Set_ModuleDirPrefix_From_ProgArg0(args[0]);
+    #endif
 
     for (int i = 0; i < numArgs; i++)
     {
@@ -967,7 +863,11 @@ int Main2(
   {
     unsigned int m = 0;
     *g_StdStream
-      << endl << kBanner
+      << endl << kBanner << " :"
+      #if defined(__DOS__)
+      << " LFN=" << NDOS::NSystem::LongFileNames()
+      #endif
+      << " SWITCHES=-md" << NCompress::NLzma2::MaximumDictionarySize(m)
       << endl << endl 
       << kShortHelp;
     return 0;
@@ -996,7 +896,11 @@ int Main2(
   {
     unsigned int m = 0;
     *g_StdStream
-      << endl << kBanner
+      << endl << kBanner << " :"
+      #if defined(__DOS__)
+      << " LFN=" << NDOS::NSystem::LongFileNames()
+      #endif
+      << " SWITCHES=-md" << NCompress::NLzma2::MaximumDictionarySize(m)
       << endl << endl
       << kLongHelp;
     return 0;
@@ -1006,7 +910,11 @@ int Main2(
   {
     unsigned int m = 0;
     *g_StdStream
-      << endl << kBanner
+      << endl << kBanner << " :"
+      #if defined(__DOS__)
+      << " LFN=" << NDOS::NSystem::LongFileNames()
+      #endif
+      << " SWITCHES=-md" << NCompress::NLzma2::MaximumDictionarySize(m)
       << endl << endl
       << kVersion;
     return 0;
@@ -1070,21 +978,18 @@ int Main2(
 
   if (percentsStream)
   {
-    #ifdef _WIN32
-    
-    #if !defined(UNDER_CE)
-    CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
-    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &consoleInfo))
-      consoleWidth = (USHORT)consoleInfo.dwSize.X;
-    #endif
-    
+    #if defined(_WIN32)
+      #if !defined(UNDER_CE)
+        CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
+        if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &consoleInfo))
+          consoleWidth = (USHORT)consoleInfo.dwSize.X;
+      #endif
     #else
-    
-#if !defined(__sun)
-    struct winsize w;
-    if (ioctl(0, TIOCGWINSZ, &w) == 0)
-      consoleWidth = w.ws_col;
-#endif
+      #if !defined(__sun) && !defined(__DOS__)
+        struct winsize w;
+        if (ioctl(0, TIOCGWINSZ, &w) == 0)
+          consoleWidth = w.ws_col;
+      #endif
     #endif
   }
 
@@ -1093,7 +998,10 @@ int Main2(
   codecs->CaseSensitive_Change = options.CaseSensitive_Change;
   codecs->CaseSensitive = options.CaseSensitive;
   ThrowException_if_Error(codecs->Load());
+
+  #ifndef Z7_NO_HASHCON
   Codecs_AddHashArcHandler(codecs);
+  #endif
 
   #ifdef Z7_EXTERNAL_CODECS
   {
@@ -1331,6 +1239,7 @@ int Main2(
     #endif
     
 
+    #ifndef Z7_NO_HASHCON
     so << endl << "Hashers:" << endl; //  << " L Size       ID Name" << endl;
 
     for (i = 0; i < g_NumHashers; i++)
@@ -1342,6 +1251,7 @@ int Main2(
       PrintHexId(so, codec.Id);
       so << ' ' << codec.Name << endl;
     }
+    #endif
 
     #ifdef Z7_EXTERNAL_CODECS
     
@@ -1473,6 +1383,8 @@ int Main2(
 
       UString errorMessage;
       CDecompressStat stat;
+
+      #ifndef Z7_NO_HASHCON
       CHashBundle hb;
       IHashCalc *hashCalc = NULL;
 
@@ -1482,6 +1394,7 @@ int Main2(
         ThrowException_if_Error(hb.SetMethods(EXTERNAL_CODECS_VARS_L options.HashMethods));
         // hb.Init();
       }
+      #endif
       
       hresultMain = Extract(
           // EXTERNAL_CODECS_VARS_L
@@ -1493,8 +1406,14 @@ int Main2(
           options.Censor.Pairs.Front().Head,
           eo,
           ecs, ecs, ecs,
-          hashCalc, errorMessage, stat);
-      
+          #ifndef Z7_NO_HASHCON
+            hashCalc,
+          #else
+            NULL,
+          #endif
+          errorMessage,
+          stat);
+
       ecs->ClosePercents();
 
       if (!errorMessage.IsEmpty())
@@ -1586,11 +1505,13 @@ int Main2(
         *so
           << "Size:       " << stat.UnpackSize << endl
           << "Compressed: " << stat.PackSize << endl;
+        #ifndef Z7_NO_HASHCON
         if (hashCalc)
         {
           *so << endl;
           PrintHashStat(*so, hb);
         }
+        #endif
       }
       } // if (so)
     }
@@ -1701,6 +1622,12 @@ int Main2(
         );
    #endif
   }
+  #ifdef Z7_NO_HASHCON
+  else if (options.Command.CommandType == NCommandType::kHash)
+  {
+      throw CArcCmdLineException("The hash command is not in this 7-Zip variant.");
+  }
+  #else
   else if (options.Command.CommandType == NCommandType::kHash)
   {
     const CHashOptions &uo = options.HashOptions;
@@ -1724,15 +1651,18 @@ int Main2(
       se = g_ErrStream;
     retCode = WarningsCheck(hresultMain, callback, errorInfo, g_StdStream, se, options.EnableHeaders);
   }
+  #endif // Z7_NO_HASHCON
   else
     ShowMessageAndThrowException(kUserErrorMessage, NExitCode::kUserError);
 
+  #if !defined(__DOS__)
   if (options.ShowTime && g_StdStream)
     PrintStat(
       #ifndef _WIN32
         startTime
       #endif
     );
+  #endif
 
   ThrowException_if_Error(hresultMain);
 
