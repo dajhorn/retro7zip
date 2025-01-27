@@ -10,6 +10,9 @@
 #if defined(__DOS__)
 #include "../../DOS/System.h"
 using namespace NDOS;
+#else
+#include "../../Windows/System.h"
+using namespace NWindows;
 #endif
 
 #include "Lzma2Encoder.h"
@@ -36,6 +39,39 @@ CEncoder::~CEncoder()
 {
   if (_encoder)
     Lzma2Enc_Destroy(_encoder);
+}
+
+
+unsigned int MaximumDictionarySize(uint32_t &dictionary_size)
+{
+  // Compute the largest dictionary size that can be used to create an
+  // LZMA2 archive without using virtual memory.
+
+  unsigned int dictionary_width = 0;
+
+  // Get the amount of alloc'able memory in bytes.
+  NSystem::GetRamSize(dictionary_size);
+
+  if (dictionary_size == 0)
+    return 0;
+
+  // For extra dictionary headspace, divide the amount of free memory by
+  // sixteen instead of thirteen.
+  dictionary_size /= 16;
+
+  // Compute floor(log2(size)).
+  while (dictionary_size >>= 1)
+    ++dictionary_width;
+
+  // 4 KiB is the smallest LZMA dictionary size.
+  if (dictionary_width < 12)
+    dictionary_width = 12;
+
+  // Round dictionary_size down to a power-of-two.
+  dictionary_size = 1 << dictionary_width;
+
+  // This is the largest -md<N> value that can be used without memory swapping.
+  return dictionary_width;
 }
 
 
@@ -77,9 +113,32 @@ Z7_COM7F_IMF(CEncoder::SetCoderProperties(const PROPID *propIDs,
     RINOK(SetLzma2Prop(propIDs[i], coderProps[i], lzma2Props))
   }
 
-  #if defined(__DOS__)
+  #if defined(__WATCOMC__)
+  /*
+   * LZMA uses an amount of XMS memory that is approximately thirteen times
+   * the size of the encoding dictionary, plus the size of the static
+   * allocation of the 7z executable image.
+   *
+   * None of the upstream compression presets comfortably fit the intended
+   * DOS target machine. Rounding up:
+   *
+   *   -mx1 requires 8 MiB
+   *   -mx2 requires 16 MiB
+   *   -mx3 requires 64 MiB
+   *   -mx4 requires 256 MiB
+   *   -mx5 requires 512 MiB (this is the upstream default)
+   *
+   * If a dictionary size is not passed with a -md switch, then override the
+   * working preset and just use the largest dictionary that can be allocated
+   * by the host.
+   *
+   * This means that a 64 MiB host will create 7z files with a 2 MiB
+   * dictionary that can be unpacked by the 7zm mini variant running on a
+   * 6 MiB host or the 7zr reduced variant running on a 8 MiB host.
+   */
+
   if (lzma2Props.lzmaProps.dictSize == 0)
-    NSystem::MaximumDictionarySize(lzma2Props.lzmaProps.dictSize);
+    MaximumDictionarySize(lzma2Props.lzmaProps.dictSize);
   #endif
 
   return SResToHRESULT(Lzma2Enc_SetProps(_encoder, &lzma2Props));

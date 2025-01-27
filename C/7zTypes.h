@@ -12,6 +12,10 @@
 
 #include <stddef.h>
 
+#if defined(__WATCOMC__)
+#include <stdint.h>
+#endif
+
 #ifndef EXTERN_C_BEGIN
 #ifdef __cplusplus
 #define EXTERN_C_BEGIN extern "C" {

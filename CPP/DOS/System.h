@@ -48,9 +48,6 @@ bool LongFileNames(); // returns true if the host has LFN support
 
 bool GetRamSize(uint32_t &size); // returns false, if unknown ram size
 
-// Returns the number of bits for -mdN and the dictionary_size in bytes.
-unsigned int MaximumDictionarySize(uint32_t &dictionary_size);
-
 unsigned long Get_File_OPEN_MAX();
 unsigned Get_File_OPEN_MAX_Reduced_for_3_tasks();
 

@@ -21,6 +21,7 @@
 #include "FileDir.h"
 
 #include "../7zip/Common/RegisterCodec.h"
+#include "../7zip/Compress/Lzma2Encoder.h"
 #include "../7zip/UI/Common/ArchiveCommandLine.h"
 #include "../7zip/UI/Common/ExitCode.h"
 #include "../7zip/UI/Common/Extract.h"
@@ -554,7 +555,7 @@ int Main2(int numArgs, char *args[])
     *g_StdStream
       << endl << kBanner
       << " : LFN=" << LongFileNames()
-      << " SWITCHES=-md" << MaximumDictionarySize(m)
+      << " SWITCHES=-md" << NCompress::NLzma2::MaximumDictionarySize(m)
       << endl << endl 
       << kShortHelp;
     return 0;
@@ -585,7 +586,7 @@ int Main2(int numArgs, char *args[])
     *g_StdStream
       << endl << kBanner
       << " : LFN=" << LongFileNames()
-      << " SWITCHES=-md" << MaximumDictionarySize(m)
+      << " SWITCHES=-md" << NCompress::NLzma2::MaximumDictionarySize(m)
       << endl << endl
       << kLongHelp;
     return 0;
@@ -597,7 +598,7 @@ int Main2(int numArgs, char *args[])
     *g_StdStream
       << endl << kBanner
       << " : LFN=" << LongFileNames()
-      << " SWITCHES=-md" << MaximumDictionarySize(m)
+      << " SWITCHES=-md" << NCompress::NLzma2::MaximumDictionarySize(m)
       << endl << endl
       << kVersion;
     return 0;

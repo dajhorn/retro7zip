@@ -12,6 +12,8 @@
 namespace NCompress {
 namespace NLzma2 {
 
+unsigned int MaximumDictionarySize(uint32_t &dictionary_size);
+
 Z7_CLASS_IMP_COM_4(
   CEncoder
   , ICompressCoder
