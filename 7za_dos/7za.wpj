@@ -4,10 +4,10 @@ projectIdent
 VpeMain
 1
 WRect
--6748
-2709
-3416
-3612
+5092
+0
+5176
+4999
 2
 MProject
 3
@@ -30,7 +30,7 @@ VComponent
 8
 WRect
 132
-78
+71
 1984
 3264
 1
@@ -39,6 +39,6 @@ WRect
 WFileName
 7
 7za.tgt
-240
-301
+278
+292
 7
