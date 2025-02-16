@@ -1,26 +1,10 @@
-// 7-Zip System.cpp for DOS
+// 7-Zip System.cpp for DOS.
+
 #include "StdAfx.h"
-
-
-// @FIXME: This should go top-level.
-#define __STDC_LIMIT_MACROS
-
-#include <dos.h>
-#include <i86.h>
-#include <limits.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <cstdint>
-
-#include "../Common/Defs.h"
-
-// #include "../Common/MyWindows.h"
-// #include "../../C/CpuArch.h"
-
-#include "System.h"
 
 namespace NDOS {
 namespace NSystem {
+
 
 BOOL CProcessAffinity::Get()
 {
@@ -28,14 +12,18 @@ BOOL CProcessAffinity::Get()
   return TRUE;
  }
 
+
 UInt32 GetNumberOfProcessors()
 {
   return 1;
 }
 
+
 bool LongFileNames()
 {
-  // https://github.com/dajhorn/retro7zip/wiki/LFN-Detection-Test-Matrix
+  /*
+   * https://github.com/dajhorn/retro7zip/wiki/LFN-Detection-Test-Matrix
+   */
 
   union REGS regs;
   char buffer[PATH_MAX +1];
@@ -82,8 +70,10 @@ bool LongFileNames()
      *
      * - MS-DOS 6.22
      * - PC-DOS 7.0
-     * - Windows NT 3.51
-     * - Windows NT 4.0
+     * - Windows NT 3.1  (NTVDM)
+     * - Windows NT 3.50 (NTVDM)
+     * - Windows NT 3.51 (NTVDM)
+     * - Windows NT 4.0  (NTVDM)
      *
      * NTVDM was forked from MS-DOS 5 and always reports DOS version 5.5,
      * even on Windows 10 (the 32-bit edition still has it as a
@@ -96,7 +86,7 @@ bool LongFileNames()
     /*
      * These are all post-VFAT DOS platforms:
      *
-     * - DOSBox-X    [dos vfn=off]
+     * - DOSBox-X    [dos lfn=off]
      * - FreeDOS 1.4 (without an LFN driver)
      * - MS-DOS 7.0  (MS-DOS Mode in Windows 95 RTM and Windows 95 OSR1)
      * - MS-DOS 7.1  (MS-DOS Mode in Windows 95 OSR2 and Windows 98)
@@ -107,10 +97,11 @@ bool LongFileNames()
 
   /*
    * Make the default false because the *.* globbing pattern works
-   * mostly everwhere.
+   * mostly everywhere.
    */
   return false;
 }
+
 
 bool GetRamSize(uint32_t &size)
 {
@@ -154,14 +145,17 @@ bool GetRamSize(uint32_t &size)
   return true;
 }
 
+
 unsigned long Get_File_OPEN_MAX()
 {
   return FOPEN_MAX;
 }
 
+
 unsigned Get_File_OPEN_MAX_Reduced_for_3_tasks()
 {
   return (FOPEN_MAX - 10) / 3;
 }
+
 
 }}

@@ -1,92 +1,65 @@
-// 7-zip FileDir.h for DOS
+// 7-Zip FileDir.h for DOS.
 
 #ifndef ZIP7_INC_DOS_FILE_DIR_H
 #define ZIP7_INC_DOS_FILE_DIR_H
 
-#include "../Common/MyString.h"
+#include <stdio.h>
+#include <unistd.h>
 
+#include "../Common/MyString.h"
 #include "FileIO.h"
 
 namespace NDOS {
 namespace NFile {
 namespace NDir {
 
-bool GetWindowsDir(FString &path);
-bool GetSystemDir(FString &path);
-
-/*
-WIN32 API : SetFileTime() doesn't allow to set zero timestamps in file
-but linux : allows unix time = 0 in filesystem
-*/
-
+bool CreateComplexDir(CFSTR path);
+bool CreateTempFile2(CFSTR prefix, bool addRandom, AString &postfix, NIO::COutFile *outFile);
+bool GetCurrentDir(FString &resultPath);
+bool GetFullPathAndSplit(CFSTR path, FString &resDirPrefix, FString &resFileName);
+bool MyCreateHardLink(CFSTR newFileName, CFSTR existFileName);
+bool MyGetFullPathName(CFSTR path, FString &resFullPath);
+bool MyGetTempPath(FString &resultPath);
+bool MyMoveFile(CFSTR existFileName, CFSTR newFileName);
+bool RemoveDirWithSubItems(const FString &path);
 bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CFiTime *mTime);
-
-// @FIXME:  Use these bits for __DOS__
-#if defined(_WIN32) || defined(__DOS__)
-
 bool SetFileAttrib(CFSTR path, DWORD attrib);
-
-/*
-  Some programs store posix attributes in high 16 bits of windows attributes field.
-  Also some programs use additional flag markers: 0x8000 or 0x4000.
-  SetFileAttrib_PosixHighDetect() tries to detect posix field, and it extracts only attribute
-  bits that are related to current system only.
-*/
-#else
-
-int my_chown(CFSTR path, uid_t owner, gid_t group);
-
-#endif
-
 bool SetFileAttrib_PosixHighDetect(CFSTR path, DWORD attrib);
 
 
-bool MyMoveFile(CFSTR existFileName, CFSTR newFileName);
-bool MyCreateHardLink(CFSTR newFileName, CFSTR existFileName);
-bool RemoveDir(CFSTR path);
-bool CreateDir(CFSTR path);
+inline bool CreateDir(CFSTR path)        { return (mkdir(path)  == 0); }
+inline bool CreateDir2(CFSTR path)       { return (mkdir(path)  == 0); }
+inline bool DeleteFileAlways(CFSTR path) { return (remove(path) == 0); }
+inline bool RemoveDir(CFSTR path)        { return (rmdir(path)  == 0); }
+inline bool SetCurrentDir(CFSTR path)    { return (chdir(path)  == 0); }
 
-/* CreateComplexDir returns true, if directory can contain files after the call (two cases):
-    1) the directory already exists (network shares and drive paths are supported)
-    2) the directory was created
-  path can be WITH or WITHOUT trailing path separator. */
 
-bool CreateComplexDir(CFSTR path);
+inline bool GetOnlyDirPrefix(CFSTR path, FString &resDirPrefix) {
+	FString resFileName; /* This value is discarded. */
+	return GetFullPathAndSplit(path, resDirPrefix, resFileName);
+}
 
-bool DeleteFileAlways(CFSTR name);
-bool RemoveDirWithSubItems(const FString &path);
-
-bool MyGetFullPathName(CFSTR path, FString &resFullPath);
-bool GetFullPathAndSplit(CFSTR path, FString &resDirPrefix, FString &resFileName);
-bool GetOnlyDirPrefix(CFSTR path, FString &resDirPrefix);
-
-bool SetCurrentDir(CFSTR path);
-bool GetCurrentDir(FString &resultPath);
-
-bool MyGetTempPath(FString &resultPath);
-
-bool CreateTempFile2(CFSTR prefix, bool addRandom, AString &postfix, NIO::COutFile *outFile);
 
 class CTempFile  MY_UNCOPYABLE
 {
   bool _mustBeDeleted;
   FString _path;
   void DisableDeleting() { _mustBeDeleted = false; }
+
 public:
   CTempFile(): _mustBeDeleted(false) {}
   ~CTempFile() { Remove(); }
   const FString &GetPath() const { return _path; }
-#if 0
-  bool Create(CFSTR pathPrefix, NIO::COutFile *outFile); // pathPrefix is not folder prefix
-#endif
   bool CreateRandomInTempFolder(CFSTR namePrefix, NIO::COutFile *outFile);
   bool Remove();
   bool MoveTo(CFSTR name, bool deleteDestBefore);
 };
 
+
 class CCurrentDirRestorer  MY_UNCOPYABLE
 {
   FString _path;
+
 public:
   bool NeedRestore;
 
@@ -94,6 +67,7 @@ public:
   {
     GetCurrentDir(_path);
   }
+
   ~CCurrentDirRestorer()
   {
     if (!NeedRestore)
@@ -104,6 +78,7 @@ public:
         SetCurrentDir(_path);
   }
 };
+
 
 }}}
 

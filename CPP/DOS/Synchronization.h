@@ -1,106 +1,205 @@
-// Windows/Synchronization.h
+// 7-Zip Synchronization.h for DOS.
 
 #ifndef ZIP7_INC_DOS_SYNCHRONIZATION_H
 #define ZIP7_INC_DOS_SYNCHRONIZATION_H
 
 #include "../../C/Threads.h"
-
 #include "../Common/MyTypes.h"
-
 #include "Defs.h"
 
 namespace NDOS {
 namespace NSynchronization {
 
+
 class CBaseEvent  MY_UNCOPYABLE
 {
-protected:
-  ::CEvent _object;
-public:
-  bool IsCreated() { return Event_IsCreated(&_object) != 0; }
 
-  CBaseEvent() { Event_Construct(&_object); }
-  ~CBaseEvent() { Close(); }
-  WRes Close() { return Event_Close(&_object); }
-  WRes Set() { return Event_Set(&_object); }
-  // bool Pulse() { return BOOLToBool(::PulseEvent(_handle)); }
-  WRes Reset() { return Event_Reset(&_object); }
-  WRes Lock() { return Event_Wait(&_object); }
+protected:
+
+  ::CEvent _object;
+
+public:
+
+  bool IsCreated()
+  {
+    return Event_IsCreated(&_object) != 0;
+  }
+
+  CBaseEvent()
+  {
+    Event_Construct(&_object);
+  }
+
+  ~CBaseEvent()
+  {
+    Close();
+  }
+
+  WRes Close()
+  {
+    return Event_Close(&_object);
+  }
+
+  WRes Set()
+  {
+    return Event_Set(&_object);
+  }
+
+  WRes Reset()
+  {
+    return Event_Reset(&_object);
+  }
+
+  WRes Lock()
+  {
+    return Event_Wait(&_object);
+  }
+
 };
+
 
 class CManualResetEvent: public CBaseEvent
 {
+
 public:
+
   WRes Create(bool initiallyOwn = false)
   {
     return ManualResetEvent_Create(&_object, initiallyOwn ? 1: 0);
   }
+
   WRes CreateIfNotCreated_Reset()
   {
     if (IsCreated())
       return Reset();
     return ManualResetEvent_CreateNotSignaled(&_object);
   }
+
 };
+
 
 class CAutoResetEvent: public CBaseEvent
 {
+
 public:
+
   WRes Create()
   {
     return AutoResetEvent_CreateNotSignaled(&_object);
   }
+
   WRes CreateIfNotCreated_Reset()
   {
     if (IsCreated())
       return Reset();
     return AutoResetEvent_CreateNotSignaled(&_object);
   }
+
 };
+
 
 class CSemaphore  MY_UNCOPYABLE
 {
-  ::CSemaphore _object;
-public:
-  CSemaphore() { Semaphore_Construct(&_object); }
-  ~CSemaphore() { Close(); }
-  WRes Close() { return Semaphore_Close(&_object); }
 
-  // bool IsCreated() const { return Semaphore_IsCreated(&_object) != 0; }
+  ::CSemaphore _object;
+
+public:
+ 
+  CSemaphore()
+  {
+    Semaphore_Construct(&_object);
+  }
+
+  ~CSemaphore()
+  {
+    Close();
+  }
+
+  WRes Close()
+  {
+    return Semaphore_Close(&_object);
+  }
 
   WRes Create(UInt32 initCount, UInt32 maxCount)
   {
     return Semaphore_Create(&_object, initCount, maxCount);
   }
+
   WRes OptCreateInit(UInt32 initCount, UInt32 maxCount)
   {
     return Semaphore_OptCreateInit(&_object, initCount, maxCount);
   }
-  WRes Release() { return Semaphore_Release1(&_object); }
-  WRes Release(UInt32 releaseCount) { return Semaphore_ReleaseN(&_object, releaseCount); }
-  WRes Lock() { return Semaphore_Wait(&_object); }
+
+  WRes Release()
+  {
+    return Semaphore_Release1(&_object);
+  }
+
+  WRes Release(UInt32 releaseCount)
+  {
+    return Semaphore_ReleaseN(&_object, releaseCount);
+  }
+
+  WRes Lock()
+  {
+    return Semaphore_Wait(&_object);
+  }
+
 };
+
 
 class CCriticalSection  MY_UNCOPYABLE
 {
   ::CCriticalSection _object;
+
 public:
-  CCriticalSection() { CriticalSection_Init(&_object); }
-  ~CCriticalSection() { CriticalSection_Delete(&_object); }
-  void Enter() { CriticalSection_Enter(&_object); }
-  void Leave() { CriticalSection_Leave(&_object); }
+
+  CCriticalSection()
+  {
+    CriticalSection_Init(&_object);
+  }
+
+  ~CCriticalSection()
+  {
+    CriticalSection_Delete(&_object);
+  }
+
+  void Enter()
+  {
+    CriticalSection_Enter(&_object);
+  }
+
+  void Leave()
+  {
+    CriticalSection_Leave(&_object);
+  }
+
 };
+
 
 class CCriticalSectionLock  MY_UNCOPYABLE
 {
   CCriticalSection *_object;
-  void Unlock()  { _object->Leave(); }
+
+  void Unlock()
+  {
+    _object->Leave();
+  }
+
 public:
-  CCriticalSectionLock(CCriticalSection &object): _object(&object) {_object->Enter(); }
-  ~CCriticalSectionLock() { Unlock(); }
+
+  CCriticalSectionLock(CCriticalSection &object): _object(&object)
+  {
+    _object->Enter();
+  }
+
+  ~CCriticalSectionLock()
+  {
+    Unlock();
+  }
+
 };
 
-// POSIX sync objects for WaitForMultipleObjects
 
 #define SYNC_WFMO(x) x
 #define SYNC_PARAM(x) x,
@@ -114,7 +213,12 @@ class CSynchro  MY_UNCOPYABLE
   bool _isValid;
 
 public:
-  CSynchro() { _isValid = false; }
+
+  CSynchro()
+  {
+    _isValid = false;
+  }
+
   ~CSynchro()
   {
     if (_isValid)
@@ -124,6 +228,7 @@ public:
     }
     _isValid = false;
   }
+
   WRes Create()
   {
     RINOK(::pthread_mutex_init(&_mutex, NULL))
@@ -131,28 +236,27 @@ public:
     _isValid = 1;
     return ret;
   }
+
   WRes Enter()
   {
     return ::pthread_mutex_lock(&_mutex);
   }
+
   WRes Leave()
   {
     return ::pthread_mutex_unlock(&_mutex);
   }
+
   WRes WaitCond()
   {
     return ::pthread_cond_wait(&_cond, &_mutex);
   }
+
   WRes LeaveAndSignal()
   {
-#if defined(__DOS__)
     return 0;
-#else
-    const WRes res1 = ::pthread_cond_broadcast(&_cond);
-    const WRes res2 = ::pthread_mutex_unlock(&_mutex);
-    return (res2 ? res2 : res1);
-#endif // defined(__DOS__)
   }
+
 };
 
 
@@ -169,10 +273,8 @@ DWORD WINAPI WaitForMultiObj_Any_Infinite(DWORD count, const CHandle_WFMO *handl
 struct CBaseHandle_WFMO  MY_UNCOPYABLE
 {
   CSynchro *_sync;
-
   CBaseHandle_WFMO(): _sync(NULL) {}
   virtual ~CBaseHandle_WFMO();
-
   operator CHandle_WFMO() { return this; }
   virtual bool IsSignaledAndUpdate() = 0;
 };
@@ -185,15 +287,13 @@ class CBaseEvent_WFMO : public CBaseHandle_WFMO
 
 public:
 
-  // bool IsCreated()  { return (this->_sync != NULL); }
-  // CBaseEvent_WFMO()  { ; }
-  // ~CBaseEvent_WFMO() Z7_override { Close(); }
+  WRes Close()
+  {
+    this->_sync = NULL;
+    return 0;
+  }
 
-  WRes Close() { this->_sync = NULL; return 0; }
-
-  WRes Create(
-      CSynchro *sync,
-      bool manualReset, bool initiallyOwn)
+  WRes Create(CSynchro *sync, bool manualReset, bool initiallyOwn)
   {
     this->_sync         = sync;
     this->_manual_reset = manualReset;
@@ -214,26 +314,40 @@ public:
     this->_state = false;
     return this->_sync->Leave();
   }
-  
+
   virtual bool IsSignaledAndUpdate() Z7_override;
+
 };
 
 
 class CManualResetEvent_WFMO Z7_final: public CBaseEvent_WFMO
 {
+
 public:
-  WRes Create(CSynchro *sync, bool initiallyOwn = false) { return CBaseEvent_WFMO::Create(sync, true, initiallyOwn); }
+
+  WRes Create(CSynchro *sync, bool initiallyOwn = false)
+  {
+    return CBaseEvent_WFMO::Create(sync, true, initiallyOwn);
+  }
+
 };
 
 
 class CAutoResetEvent_WFMO Z7_final: public CBaseEvent_WFMO
 {
+
 public:
-  WRes Create(CSynchro *sync) { return CBaseEvent_WFMO::Create(sync, false, false); }
+
+  WRes Create(CSynchro *sync)
+  {
+    return CBaseEvent_WFMO::Create(sync, false, false);
+  }
+
   WRes CreateIfNotCreated_Reset(CSynchro *sync)
   {
     return Create(sync);
   }
+
 };
 
 
@@ -244,8 +358,12 @@ class CSemaphore_WFMO Z7_final: public CBaseHandle_WFMO
 
 public:
   CSemaphore_WFMO() : _count(0), _maxCount(0) {}
-  
-  WRes Close() { this->_sync = NULL; return 0; }
+
+  WRes Close()
+  {
+    this->_sync = NULL;
+	return 0;
+  }
 
   WRes Create(CSynchro *sync, UInt32 initCount, UInt32 maxCount)
   {
@@ -256,7 +374,7 @@ public:
     this->_maxCount = maxCount;
     return 0;
   }
-  
+
   WRes Release(UInt32 releaseCount = 1)
   {
     if (releaseCount < 1)
@@ -275,8 +393,10 @@ public:
   }
 
   virtual bool IsSignaledAndUpdate() Z7_override;
+
 };
+
 
 }}
 
-#endif
+#endif // ZIP7_INC_DOS_SYNCHRONIZATION_H

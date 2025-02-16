@@ -1,7 +1,7 @@
-// Windows/PropVariantUtils.h
+// 7-Zip PropVariantUtils.h for DOS.
 
-#ifndef ZIP7_INC_PROP_VARIANT_UTILS_H
-#define ZIP7_INC_PROP_VARIANT_UTILS_H
+#ifndef ZIP7_INC_DOS_PROP_VARIANT_UTILS_H
+#define ZIP7_INC_DOS_PROP_VARIANT_UTILS_H
 
 #include "../Common/MyString.h"
 
@@ -31,4 +31,4 @@ void TypeToProp(const char * const table[], unsigned num, UInt32 value, NDOS::NC
 void Flags64ToProp(const CUInt32PCharPair *pairs, unsigned num, UInt64 flags, NDOS::NCOM::CPropVariant &prop);
 #define FLAGS64_TO_PROP(pairs, value, prop) Flags64ToProp(pairs, Z7_ARRAY_SIZE(pairs), value, prop)
 
-#endif
+#endif // ZIP7_INC_DOS_PROP_VARIANT_UTILS_H

@@ -1,12 +1,10 @@
-// PropVariantUtils.cpp
+// 7-Zip PropVariantUtils.cpp for DOS.
 
 #include "StdAfx.h"
-
 #include "../Common/IntToString.h"
 
-#include "PropVariantUtils.h"
-
 using namespace NDOS;
+
 
 static void AddHex(AString &s, UInt32 v)
 {
@@ -16,6 +14,7 @@ static void AddHex(AString &s, UInt32 v)
   ConvertUInt32ToHex(v, sz + 2);
   s += sz;
 }
+
 
 AString TypePairToString(const CUInt32PCharPair *pairs, unsigned num, UInt32 value)
 {
@@ -35,10 +34,12 @@ AString TypePairToString(const CUInt32PCharPair *pairs, unsigned num, UInt32 val
   return (AString)p;
 }
 
+
 void PairToProp(const CUInt32PCharPair *pairs, unsigned num, UInt32 value, NCOM::CPropVariant &prop)
 {
   prop = TypePairToString(pairs, num, value);
 }
+
 
 AString TypeToString(const char * const table[], unsigned num, UInt32 value)
 {
@@ -54,6 +55,7 @@ AString TypeToString(const char * const table[], unsigned num, UInt32 value)
   return (AString)p;
 }
 
+
 void TypeToProp(const char * const table[], unsigned num, UInt32 value, NDOS::NCOM::CPropVariant &prop)
 {
   char sz[16];
@@ -67,6 +69,7 @@ void TypeToProp(const char * const table[], unsigned num, UInt32 value, NDOS::NC
   }
   prop = p;
 }
+
 
 AString FlagsToString(const char * const *names, unsigned num, UInt32 flags)
 {
@@ -92,6 +95,7 @@ AString FlagsToString(const char * const *names, unsigned num, UInt32 flags)
   return s;
 }
 
+
 AString FlagsToString(const CUInt32PCharPair *pairs, unsigned num, UInt32 flags)
 {
   AString s;
@@ -114,15 +118,18 @@ AString FlagsToString(const CUInt32PCharPair *pairs, unsigned num, UInt32 flags)
   return s;
 }
 
+
 void FlagsToProp(const char * const *names, unsigned num, UInt32 flags, NCOM::CPropVariant &prop)
 {
   prop = FlagsToString(names, num, flags);
 }
 
+
 void FlagsToProp(const CUInt32PCharPair *pairs, unsigned num, UInt32 flags, NCOM::CPropVariant &prop)
 {
   prop = FlagsToString(pairs, num, flags);
 }
+
 
 static AString Flags64ToString(const CUInt32PCharPair *pairs, unsigned num, UInt64 flags)
 {
@@ -150,6 +157,7 @@ static AString Flags64ToString(const CUInt32PCharPair *pairs, unsigned num, UInt
   }
   return s;
 }
+
 
 void Flags64ToProp(const CUInt32PCharPair *pairs, unsigned num, UInt64 flags, NCOM::CPropVariant &prop)
 {

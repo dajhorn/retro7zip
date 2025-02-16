@@ -1,13 +1,12 @@
 // 7-Zip ErrorMsg.h for DOS
 
 #include "StdAfx.h"
-
 #include "../Common/StringConvert.h"
 
-#include "ErrorMsg.h"
 
 namespace NDOS {
 namespace NError {
+
 
 static bool MyFormatMessage(DWORD errorCode, UString &message)
 {
@@ -70,6 +69,7 @@ static bool MyFormatMessage(DWORD errorCode, UString &message)
   return true;
 }
 
+
 UString MyFormatMessage(DWORD errorCode)
 {
   UString m;
@@ -92,5 +92,6 @@ UString MyFormatMessage(DWORD errorCode)
     m.DeleteFrom(m.Len() - 2);
   return m;
 }
+
 
 }}

@@ -1,4 +1,4 @@
-// Windows/PropVariant.h
+// 7-Zip PropVariant.h for DOS.
 
 #ifndef ZIP7_INC_DOS_PROP_VARIANT_H
 #define ZIP7_INC_DOS_PROP_VARIANT_H
@@ -15,6 +15,7 @@ BSTR AllocBstrFromAscii(const char *s) throw();
 HRESULT PropVariant_Clear(PROPVARIANT *p) throw();
 
 HRESULT PropVarEm_Alloc_Bstr(PROPVARIANT *p, unsigned numChars) throw();
+
 HRESULT PropVarEm_Set_Str(PROPVARIANT *p, const char *s) throw();
 
 inline void PropVarEm_Set_UInt32(PROPVARIANT *p, UInt32 v) throw()
@@ -45,7 +46,6 @@ inline void PropVarEm_Set_Bool(PROPVARIANT *p, bool b) throw()
   p->boolVal = (b ? VARIANT_TRUE : VARIANT_FALSE);
 }
 
-
 class CPropVariant : public tagPROPVARIANT
 {
   // ---------- forbidden functions ----------
@@ -57,6 +57,7 @@ class CPropVariant : public tagPROPVARIANT
  #endif
 
 public:
+
   CPropVariant()
   {
     vt = VT_EMPTY;
@@ -66,7 +67,6 @@ public:
     // uhVal.QuadPart = 0;
     bstrVal = NULL;
   }
-
 
   void Set_FtPrec(unsigned prec)
   {
@@ -136,9 +136,7 @@ public:
   CPropVariant& operator=(const UString &s);
   CPropVariant& operator=(const UString2 &s);
   CPropVariant& operator=(const char *s);
-  CPropVariant& operator=(const AString &s)
-    { return (*this)=(const char *)s; }
-  
+  CPropVariant& operator=(const AString &s) { return (*this)=(const char *)s; }
   CPropVariant& operator=(bool bSrc) throw();
   CPropVariant& operator=(Byte value) throw();
   

@@ -1,30 +1,12 @@
 // 7-Zip FileDir.cpp for DOS
 
 #include "StdAfx.h"
-
-
-#include <dos.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <limits.h>
-#include <unistd.h>
-#include <time.h>
-#include <utime.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-
-#include "../Common/StringConvert.h"
-#include "../Common/C_FileIO.h"
-
-#include "FileDir.h"
-#include "FileFind.h"
-#include "FileName.h"
 
 using namespace NDOS;
 using namespace NFile;
 using namespace NName;
+
 
 static bool FiTime_To_timespec(const CFiTime *ft, timespec &ts)
 {
@@ -47,13 +29,17 @@ static bool FiTime_To_timespec(const CFiTime *ft, timespec &ts)
   }
 }
 
+
 namespace NDOS {
 namespace NFile {
 namespace NDir {
 
 
+bool MyGetFullPathName(CFSTR path, FString &resFullPath)
+{
+  return GetFullPath(path, resFullPath);
+}
 
-static bool CreateDir2(CFSTR path);
 
 bool CreateComplexDir(CFSTR _path)
 {
@@ -105,13 +91,6 @@ bool CreateComplexDir(CFSTR _path)
 }
 
 
-
-bool MyGetFullPathName(CFSTR path, FString &resFullPath)
-{
-  return GetFullPath(path, resFullPath);
-}
-
-
 bool GetFullPathAndSplit(CFSTR path, FString &resDirPrefix, FString &resFileName)
 {
   bool res = MyGetFullPathName(path, resDirPrefix);
@@ -122,12 +101,6 @@ bool GetFullPathAndSplit(CFSTR path, FString &resDirPrefix, FString &resFileName
   resFileName = resDirPrefix.Ptr((unsigned)pos);
   resDirPrefix.DeleteFrom((unsigned)pos);
   return res;
-}
-
-bool GetOnlyDirPrefix(CFSTR path, FString &resDirPrefix)
-{
-  FString resFileName;
-  return GetFullPathAndSplit(path, resDirPrefix, resFileName);
 }
 
 
@@ -143,7 +116,7 @@ bool MyGetTempPath(FString &path)
 	return true;
   }
 
-  // By DOS convention, try %TMP% first.
+  // By DOS convention, try %TMP% second.
   s = getenv("TMP");
   if (NFind::DoesDirExist_FollowLink(s)) {
     path = s;
@@ -154,7 +127,7 @@ bool MyGetTempPath(FString &path)
   path = "." STRING_PATH_SEPARATOR;
   return true;
 
-#if 0
+  #if 0
   path = STRING_PATH_SEPARATOR "tmp";
   const char *s;
   if (NFind::DoesDirExist_FollowLink(path))
@@ -163,8 +136,9 @@ bool MyGetTempPath(FString &path)
     s = "." STRING_PATH_SEPARATOR;
   path = s;
   return true;  
-#endif
+  #endif
 }
+
 
 bool CreateTempFile2(CFSTR prefix, bool addRandom, AString &postfix, NIO::COutFile *outFile)
 {
@@ -222,22 +196,6 @@ bool CreateTempFile2(CFSTR prefix, bool addRandom, AString &postfix, NIO::COutFi
   return false;
 }
 
-#if 0 // unused
-bool CTempFile::Create(CFSTR prefix, NIO::COutFile *outFile)
-{
-  if (!Remove())
-  if (!Remove())
-    return false;
-  _path.Empty();
-  AString postfix;
-  if (!CreateTempFile2(prefix, false, postfix, outFile))
-    return false;
-  _path = prefix;
-  _path += postfix;
-  _mustBeDeleted = true;
-  return true;
-}
-#endif
 
 bool CTempFile::CreateRandomInTempFolder(CFSTR namePrefix, NIO::COutFile *outFile)
 {
@@ -257,6 +215,7 @@ bool CTempFile::CreateRandomInTempFolder(CFSTR namePrefix, NIO::COutFile *outFil
   return true;
 }
 
+
 bool CTempFile::Remove()
 {
   if (!_mustBeDeleted)
@@ -265,34 +224,19 @@ bool CTempFile::Remove()
   return !_mustBeDeleted;
 }
 
+
 bool CTempFile::MoveTo(CFSTR name, bool deleteDestBefore)
 {
-  // DWORD attrib = 0;
   if (deleteDestBefore)
   {
     if (NFind::DoesFileExist_Raw(name))
     {
-      // attrib = NFind::GetFileAttrib(name);
       if (!DeleteFileAlways(name))
         return false;
     }
   }
   DisableDeleting();
   return MyMoveFile(_path, name);
-  
-  /*
-  if (attrib != INVALID_FILE_ATTRIBUTES && (attrib & FILE_ATTRIBUTE_READONLY))
-  {
-    DWORD attrib2 = NFind::GetFileAttrib(name);
-    if (attrib2 != INVALID_FILE_ATTRIBUTES)
-      SetFileAttrib(name, attrib2 | FILE_ATTRIBUTE_READONLY);
-  }
-  */
-}
-
-bool RemoveDir(CFSTR path)
-{
-  return (rmdir(path) == 0);
 }
 
 
@@ -326,77 +270,40 @@ static BOOL My_CopyFile(CFSTR oldFile, CFSTR newFile)
 bool MyMoveFile(CFSTR oldFile, CFSTR newFile)
 {
   int res = rename(oldFile, newFile);
+
   if (res == 0)
     return true;
-  if (errno != EXDEV) // (oldFile and newFile are not on the same mounted filesystem)
+
+  if (errno != EXDEV)
+    // (oldFile and newFile are not on the same mounted filesystem)
     return false;
 
   if (My_CopyFile(oldFile, newFile) == FALSE)
     return false;
-    
+
   struct stat info_file;
   res = stat(oldFile, &info_file);
   if (res != 0)
     return false;
 
-  /*
-  ret = chmod(dst,info_file.st_mode & g_umask.mask);
-  */
   return (unlink(oldFile) == 0);
-}
-
-
-bool CreateDir(CFSTR path)
-{
-  return (mkdir(path) == 0);
-}
-
-static bool CreateDir2(CFSTR path)
-{
-  return (mkdir(path) == 0);
-}
-
-
-bool DeleteFileAlways(CFSTR path)
-{
-  return (remove(path) == 0);
-}
-
-bool SetCurrentDir(CFSTR path)
-{
-  return (chdir(path) == 0);
 }
 
 
 bool GetCurrentDir(FString &path)
 {
-  path.Empty();
+  char s[PATH_MAX + 1];
+  char *res = getcwd(s, PATH_MAX);
 
-  #define MY_PATH_MAX  PATH_MAX
-  // #define MY_PATH_MAX  1024
-
-  char s[MY_PATH_MAX + 1];
-  char *res = getcwd(s, MY_PATH_MAX);
   if (res)
   {
+    path.Empty();
     path = fas2fs(s);
     return true;
   }
-  {
-    // if (errno != ERANGE) return false;
-    return false;
-  }
+
+  return false;
 }
-
-
-
-// #undef UTIME_OMIT // to debug
-
-#ifndef UTIME_OMIT
-  /* we can define UTIME_OMIT for debian and another systems.
-     Is it OK to define UTIME_OMIT to -2 here, if UTIME_OMIT is not defined? */
-  // #define UTIME_OMIT -2
-#endif
 
 
 bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CFiTime *mTime)
@@ -431,7 +338,7 @@ bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CF
      (owc_posix_time->tm_min  <<  5) |       /* 00000011111100000, minutes.          */
      (owc_posix_time->tm_sec  >>  2) ;       /* 00000000000011111, duo-seconds.      */
 
-#if 0
+  #if 0
   /*
    * The _dos_open() function always returns EACCES (errno 6) for directories
    * because the DOS platform lacks an API for changing directory metadata.
@@ -452,7 +359,7 @@ bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CF
   _dos_close(owc_handle);
   return true;
 
-#else
+  #else
   /*
    * Interrupt 21h Function 57h does the same thing as _dos_setftime except
    * that is does not return an error if the argument is a directory.
@@ -460,57 +367,24 @@ bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CF
    * 7-Zip tries to reset the mtime on all extracted items, so this method
    * is simpler and faster because it does not have open+close overheads. 
    */
-    union REGS registers;
-    memset(&registers, 0, sizeof(registers));
+  union REGS registers;
+  memset(&registers, 0, sizeof(registers));
 
-    registers.w.ax  = 0x5701;
-    registers.w.cx  = owc_dos_time;
-    registers.w.di  = owc_dos_date;
-    registers.x.esi = (unsigned)path;
+  registers.w.ax  = 0x5701;
+  registers.w.cx  = owc_dos_time;
+  registers.w.di  = owc_dos_date;
+  registers.x.esi = (unsigned)path;
 
-    int386(0x21, &registers, &registers);
+  int386(0x21, &registers, &registers);
 
-    if (registers.x.cflag & 1) {
-        return false;
-    }
-
-    return true;
-#endif
-}
-
-
-struct C_umask
-{
-  mode_t mask;
-
-  C_umask()
-  {
-    /* by security reasons we restrict attributes according
-       with process's file mode creation mask (umask) */
-    const mode_t um = umask(0); // octal :0022 is expected
-    mask = 0777 & (~um);        // octal: 0755 is expected
-    umask(um);  // restore the umask
-    // printf("\n umask = 0%03o mask = 0%03o\n", um, mask);
-    
-    // mask = 0777; // debug we can disable the restriction:
+  if (registers.x.cflag & 1) {
+      return false;
   }
-};
 
-static C_umask g_umask;
-
-// #define PRF(x) x;
-#define PRF(x)
-
-#define TRACE_SetFileAttrib(msg) \
-  PRF(printf("\nSetFileAttrib(%s, %x) : %s\n", (const char *)path, attrib, msg);)
-
-#define TRACE_chmod(s, mode) \
-  PRF(printf("\n chmod(%s, %o)\n", (const char *)path, (unsigned)(mode));)
-
-int my_chown(CFSTR path, uid_t owner, gid_t group)
-{
-  return 0;
+  return true;
+  #endif // 0
 }
+
 
 bool SetFileAttrib_PosixHighDetect(CFSTR path, DWORD attrib)
 {
@@ -520,6 +394,5 @@ bool SetFileAttrib_PosixHighDetect(CFSTR path, DWORD attrib)
   return _dos_setfileattr(path, attrib) == 0;
 }
 
-// #endif
 
 }}}
