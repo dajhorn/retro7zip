@@ -9,7 +9,13 @@
 #include "../../../Common/MyLinux.h"
 #include "../../../Common/StringConvert.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/PropVariantUtils.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/PropVariantUtils.h"
+using namespace NWindows;
+#endif
 
 #include "../Common/ItemNameUtils.h"
 
