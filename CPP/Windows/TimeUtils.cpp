@@ -273,11 +273,13 @@ void GetCurUtc_FiTime(CFiTime &ft) throw()
 
   // Both variants provide same low resolution on WinXP: about 15 ms.
   // But GetSystemTimeAsFileTime is much faster.
-  #ifdef UNDER_CE
+  #if defined(UNDER_CE) || defined(__WATCOMC__)
   SYSTEMTIME st;
   GetSystemTime(&st);
   SystemTimeToFileTime(&st, &ft);
   #else
+  // This function was first implemented in kernel32.dll by
+  // Windows NT 3.51 and Windows 95.
   GetSystemTimeAsFileTime(&ft);
   #endif
 
