@@ -169,7 +169,8 @@ static const char * const kBanner =
 
 static const char * const kVersion =
   #if defined(__WATCOMC__)
-  "Built " __DATE__ " " __TIME__ " using Open Watcom v2.\n"
+  "Built " __DATE__ " " __TIME__ " from a commit by " MAINTAINED_BY "\n"
+  "using " WATCOM_VERSION ".\n"
   "\n"
   #endif
   PROG_NAME " is " MY_COPYRIGHT_CR ".\n"
