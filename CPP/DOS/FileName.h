@@ -16,17 +16,16 @@ int FindSepar(const FChar *s) throw();
 
 void NormalizeDirPathPrefix(FString &dirPath);
 void NormalizeDirPathPrefix(UString &dirPath);
-
-// @FIXME:  Implement NormalizeDirSeparators for  __DOS__
-#ifdef _WIN32
 void NormalizeDirSeparators(FString &s);
-#endif
 
-bool IsDrivePath(const wchar_t *s) throw();  // first 3 chars are drive chars like "a:\\"
+bool IsDrivePath(const wchar_t *s) throw();
+bool IsDrivePath(CFSTR s) throw();
+
+bool IsDrivePath2(const wchar_t *s) throw();
 bool IsDrivePath2(CFSTR s) throw();
 
-bool IsAltPathPrefix(CFSTR s) throw(); /* name: */
 bool IsAbsolutePath(const wchar_t *s) throw();
+
 unsigned GetRootPrefixSize(const wchar_t *s) throw();
 
 #define IF_USE_MAIN_PATH

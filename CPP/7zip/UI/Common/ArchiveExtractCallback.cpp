@@ -463,21 +463,10 @@ void CArchiveExtractCallback::CreateComplexDirectory(const UStringVector &dirPat
     const UString &s = dirPathParts[0];
     if (s.IsEmpty())
       isAbsPath = true;
-    #if defined(_WIN32) && !defined(UNDER_CE)
+    #if defined(_WIN32) && !defined(UNDER_CE) || defined(__DOS__)
     else
     {
       if (NName::IsDrivePath2(s))
-        isAbsPath = true;
-    }
-    #endif
-    #if defined(__DOS__)
-    // @FIXME: Inline NName::IsDrivePath2 because wcc386 is failing to
-    // overload the wchar_t variant used here. This resolves error:
-    //
-    //   E473: function arguments do not match those in prototype
-    else
-    {
-      if (IS_LETTER_CHAR(s[0]) && s[1] == ':')
         isAbsPath = true;
     }
     #endif
@@ -504,25 +493,9 @@ void CArchiveExtractCallback::CreateComplexDirectory(const UStringVector &dirPat
       continue;
     }
 
-    #if defined(_WIN32) && !defined(UNDER_CE)
+    #if defined(_WIN32) && !defined(UNDER_CE) || defined(__DOS__)
     if (_pathMode == NExtract::NPathMode::kAbsPaths)
       if (i == 0 && s.Len() == 2 && NName::IsDrivePath2(s))
-      {
-        if (isFinalDir)
-        {
-          // we don't want to call SetAttrib() for root drive path
-          _itemFailure = true;
-        }
-        continue;
-      }
-    #endif
-    #if defined(__DOS__)
-    // @FIXME: Inline NName::IsDrivePath2 because wcc386 is failing to
-    // overload the wchar_t variant used here. This resolves error:
-    //
-    //   E473: function arguments do not match those in prototype
-    if (_pathMode == NExtract::NPathMode::kAbsPaths)
-      if (i == 0 && s.Len() == 2 && IS_LETTER_CHAR(s[0]) && s[1] == ':')
       {
         if (isFinalDir)
         {
@@ -1106,7 +1079,7 @@ void CArchiveExtractCallback::CorrectPathParts()
       if (_removePartsForAltStreams || _pathMode == NExtract::NPathMode::kNoPathsAlt)
         needColon = false;
     }
-    #if defined(_WIN32) || defined(__DOS__)
+    #ifdef _WIN32
     else if (_pathMode == NExtract::NPathMode::kAbsPaths &&
         NWildcard::GetNumPrefixParts_if_DrivePath(pathParts) == pathParts.Size())
       pathParts.AddNew();

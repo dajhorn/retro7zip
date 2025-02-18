@@ -10,6 +10,9 @@ namespace NFile {
 namespace NName {
 
 
+static const unsigned kDrivePrefixSize = 3; /* c:\ */
+
+
 int FindSepar(const FChar *s) throw()
 {
   for (const FChar *p = s;; p++)
@@ -41,29 +44,87 @@ void NormalizeDirPathPrefix(UString &dirPath)
 }
 
 
-bool IsDrivePath(const wchar_t *s) throw() {
+void NormalizeDirSeparators(FString &s)
+{
+  const unsigned len = s.Len();
+  for (unsigned i = 0; i < len; i++)
+    if (s[i] == '/')
+      s.ReplaceOneCharAtPos(i, FCHAR_PATH_SEPARATOR);
+}
+
+
+
+
+bool IsDrivePath(const wchar_t *s) throw()
+{
   return IS_LETTER_CHAR(s[0]) && s[1] == ':' && IS_SEPAR(s[2]);
 }
 
 
-bool IsAltPathPrefix(CFSTR s) throw()
+bool IsDrivePath(CFSTR s) throw()
 {
-  unsigned len = MyStringLen(s);
-
-  if (len == 0)
-    return false;
-
-  if (s[len - 1] != ':')
-    return false;
-
-  return true;
+  return IS_LETTER_CHAR(s[0]) && s[1] == ':' && IS_SEPAR(s[2]);
 }
 
-bool IsAbsolutePath(const wchar_t *s) throw() { return IS_SEPAR(s[0]); }
 
-unsigned GetRootPrefixSize(CFSTR s) throw();
-unsigned GetRootPrefixSize(CFSTR s) throw() { return IS_SEPAR(s[0]) ? 1 : 0; }
-unsigned GetRootPrefixSize(const wchar_t *s) throw() { return IS_SEPAR(s[0]) ? 1 : 0; }
+bool IsDrivePath2(const wchar_t *s) throw()
+{
+  return IS_LETTER_CHAR(s[0]) && s[1] == ':';
+}
+
+
+bool IsDrivePath2(CFSTR s) throw()
+{
+  return IS_LETTER_CHAR(s[0]) && s[1] == ':';
+}
+
+
+bool IsAbsolutePath(const wchar_t *s) throw()
+{
+  return IS_SEPAR(s[0]) || IsDrivePath2(s);
+}
+
+
+static unsigned GetRootPrefixSize_Of_SimplePath(CFSTR s)
+{
+  if (IsDrivePath(s))
+    return kDrivePrefixSize;
+
+  if (!IS_SEPAR(s[0]))
+    return 0;
+
+  if (s[1] == 0 || !IS_SEPAR(s[1]))
+    return 1;
+
+  return 0;
+}
+
+
+static unsigned GetRootPrefixSize_Of_SimplePath(const wchar_t *s)
+{
+  if (IsDrivePath(s))
+    return kDrivePrefixSize;
+
+  if (!IS_SEPAR(s[0]))
+    return 0;
+
+  if (s[1] == 0 || !IS_SEPAR(s[1]))
+    return 1;
+
+  return 0;
+}
+
+
+unsigned GetRootPrefixSize(CFSTR s) throw()
+{
+  return GetRootPrefixSize_Of_SimplePath(s);
+}
+
+
+unsigned GetRootPrefixSize(const wchar_t *s) throw()
+{
+  return GetRootPrefixSize_Of_SimplePath(s);
+}
 
 
 static bool GetCurDir(UString &path)
@@ -166,17 +227,14 @@ bool GetFullPath(CFSTR dirPrefix, CFSTR s, FString &res)
   res = s;
 
   const unsigned prefixSize = GetRootPrefixSize(s);
-  if (prefixSize != 0)
-#ifdef _WIN32
-  if (prefixSize != 1)
-#endif
+  if (prefixSize != 0 && prefixSize != 1)
   {
     if (!AreThereDotsFolders(s + prefixSize))
       return true;
 
     UString rem = fs2us(s + prefixSize);
     if (!ResolveDotsFolders(rem))
-      return true; // maybe false;
+      return true;
     res.DeleteFrom(prefixSize);
     res += us2fs(rem);
     return true;
@@ -184,7 +242,7 @@ bool GetFullPath(CFSTR dirPrefix, CFSTR s, FString &res)
 
   UString curDir;
   if (dirPrefix && prefixSize == 0)
-    curDir = fs2us(dirPrefix);  // we use (dirPrefix), only if (s) path is relative
+    curDir = fs2us(dirPrefix);
   else
   {
     if (!GetCurDir(curDir))
@@ -195,37 +253,29 @@ bool GetFullPath(CFSTR dirPrefix, CFSTR s, FString &res)
   unsigned fixedSize = GetRootPrefixSize(curDir);
 
   UString temp;
-#ifdef _WIN32
+
   if (prefixSize != 0)
   {
-    /* (s) is absolute path, but only (prefixSize == 1) is possible here.
-       So for full resolving we need root of current folder and
-       relative part of (s). */
     s += prefixSize;
     // (s) is relative part now
     if (fixedSize == 0)
     {
-      // (curDir) is not absolute.
-      // That case is unexpected, but we support it too.
       curDir.Empty();
       curDir.Add_PathSepar();
       fixedSize = 1;
-      // (curDir) now is just Separ character.
-      // So final (res) path later also will have Separ prefix.
     }
   }
   else
-#endif // _WIN32
   {
-    // (s) is relative path
     temp = curDir.Ptr(fixedSize);
-    // (temp) is relative_part_of(curDir)
   }
+
   temp += fs2us(s);
+
   if (!ResolveDotsFolders(temp))
     return false;
+
   curDir.DeleteFrom(fixedSize);
-  // (curDir) now contains only absolute prefix part
   res = us2fs(curDir);
   res += us2fs(temp);
 

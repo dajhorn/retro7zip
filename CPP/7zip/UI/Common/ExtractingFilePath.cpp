@@ -4,14 +4,20 @@
 
 #include "../../../Common/Wildcard.h"
 
+#if defined(__DOS__)
+#include "../../../DOS/FileName.h"
+using namespace NDOS;
+#else
 #include "../../../Windows/FileName.h"
+using namespace NWindows;
+#endif
 
 #include "ExtractingFilePath.h"
 
 extern
 bool g_PathTrailReplaceMode;
 bool g_PathTrailReplaceMode =
-    #ifdef _WIN32
+    #if defined(_WIN32) || defined(__DOS__)
       true
     #else
       false
@@ -19,7 +25,7 @@ bool g_PathTrailReplaceMode =
     ;
 
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__DOS__)
 static void ReplaceIncorrectChars(UString &s)
 {
   {
@@ -27,7 +33,7 @@ static void ReplaceIncorrectChars(UString &s)
     {
       wchar_t c = s[i];
       if (
-          #ifdef _WIN32
+          #if defined(_WIN32) || defined(__DOS__)
           c == ':' || c == '*' || c == '?' || c < 0x20 || c == '<' || c == '>' || c == '|' || c == '"'
           || c == '/'
           // || c == 0x202E // RLO
@@ -112,7 +118,7 @@ void Correct_AltStream_Name(UString &s)
     s = '_';
 }
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__DOS__)
 
 static const unsigned g_ReservedWithNum_Index = 4;
 
@@ -167,7 +173,7 @@ static void Correct_PathPart(UString &s)
 
   if (s[0] == '.' && (s[1] == 0 || (s[1] == '.' && s[2] == 0)))
     s.Empty();
-  #ifdef _WIN32
+  #if defined(_WIN32) || defined(__DOS__)
   else
     ReplaceIncorrectChars(s);
   #endif
@@ -181,7 +187,7 @@ UString Get_Correct_FsFile_Name(const UString &name)
   UString res = name;
   Correct_PathPart(res);
   
-  #ifdef _WIN32
+  #if defined(_WIN32) || defined(__DOS__)
   CorrectUnsupportedName(res);
   #endif
   
@@ -197,21 +203,21 @@ void Correct_FsPath(bool absIsAllowed, bool keepAndReplaceEmptyPrefixes, UString
 
   if (absIsAllowed)
   {
-    #if defined(_WIN32) && !defined(UNDER_CE)
+    #if defined(_WIN32) && !defined(UNDER_CE) || defined(__DOS__)
     bool isDrive = false;
     #endif
     
     if (parts[0].IsEmpty())
     {
       i = 1;
-      #if defined(_WIN32) && !defined(UNDER_CE)
+      #if defined(_WIN32) && !defined(UNDER_CE) || defined(__DOS__)
       if (parts.Size() > 1 && parts[1].IsEmpty())
       {
         i = 2;
         if (parts.Size() > 2 && parts[2] == L"?")
         {
           i = 3;
-          if (parts.Size() > 3 && NWindows::NFile::NName::IsDrivePath2(parts[3]))
+          if (parts.Size() > 3 && NFile::NName::IsDrivePath2(parts[3]))
           {
             isDrive = true;
             i = 4;
@@ -220,8 +226,8 @@ void Correct_FsPath(bool absIsAllowed, bool keepAndReplaceEmptyPrefixes, UString
       }
       #endif
     }
-    #if defined(_WIN32) && !defined(UNDER_CE)
-    else if (NWindows::NFile::NName::IsDrivePath2(parts[0]))
+    #if defined(_WIN32) && !defined(UNDER_CE) || defined(__DOS__)
+    else if (NFile::NName::IsDrivePath2(parts[0]))
     {
       isDrive = true;
       i = 1;
@@ -262,7 +268,7 @@ void Correct_FsPath(bool absIsAllowed, bool keepAndReplaceEmptyPrefixes, UString
     else
     {
       keepAndReplaceEmptyPrefixes = false;
-      #ifdef _WIN32
+      #if defined(_WIN32) || defined(__DOS__)
       CorrectUnsupportedName(s);
       #endif
     }

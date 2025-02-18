@@ -118,7 +118,7 @@ void CStdOutStream::Normalize_UString_Path(UString &s)
 {
   if (ListPathSeparatorSlash.Def)
   {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__DOS__)
     if (ListPathSeparatorSlash.Val)
       s.Replace(L'\\', L'/');
 #else
