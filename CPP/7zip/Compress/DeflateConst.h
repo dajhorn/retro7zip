@@ -38,6 +38,8 @@ const unsigned kTableLevel0Number2 = kTableLevel0Number + 1;
 
 const unsigned kLevelMask = 0xF;
 
+#pragma off (unreferenced)
+
 const Byte kLenStart32[kFixedLenTableSize] =
   {0,1,2,3,4,5,6,7,8,10,12,14,16,20,24,28,32,40,48,56,64,80,96,112,128,160,192,224, 255, 0, 0};
 const Byte kLenStart64[kFixedLenTableSize] =
@@ -57,6 +59,8 @@ const Byte kDistDirectBits[kDistTableSize64] =
 const Byte kLevelDirectBits[3] = {2, 3, 7};
 
 const Byte kCodeLengthAlphabetOrder[kLevelTableSize] = {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
+
+#pragma on (unreferenced)
 
 const unsigned kMatchMinLen = 3;
 const unsigned kMatchMaxLen32 = kNumLenSymbols32 + kMatchMinLen - 1; // 256 + 2

@@ -7,29 +7,6 @@ using namespace NDOS;
 using namespace NFile;
 using namespace NName;
 
-
-static bool FiTime_To_timespec(const CFiTime *ft, timespec &ts)
-{
-  if (ft)
-  {
-    ts = *ft;
-    return true;
-  }
-  // else
-  {
-    ts.tv_sec = 0;
-    ts.tv_nsec =
-    #ifdef UTIME_OMIT
-      UTIME_OMIT; // -2 keep old timesptamp
-    #else
-      // UTIME_NOW; -1 // set to the current time
-      0;
-    #endif
-    return false;
-  }
-}
-
-
 namespace NDOS {
 namespace NFile {
 namespace NDir {
@@ -324,7 +301,6 @@ bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CF
     return false;
   }
 
-  int owc_handle;
   time_t owc_posix_seconds = mTime->tv_sec;
   struct tm *owc_posix_time = localtime(&owc_posix_seconds);
 
@@ -343,6 +319,8 @@ bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CF
    * The _dos_open() function always returns EACCES (errno 6) for directories
    * because the DOS platform lacks an API for changing directory metadata.
    */
+
+  int owc_handle;
 
   if (_dos_open(path, O_RDONLY, &owc_handle) != 0) {
     if (errno == EACCES)

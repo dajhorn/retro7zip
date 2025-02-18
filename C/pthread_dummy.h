@@ -2,6 +2,7 @@
 
 #ifndef PTHREAD_H
 #define PTHREAD_H
+#pragma off (unreferenced)
 
 typedef int pthread_t;
 typedef int pthread_mutex_t;
@@ -53,4 +54,5 @@ static inline int pthread_cond_signal(pthread_cond_t *cond) {
   return 0;
 }
 
+#pragma on (unreferenced)
 #endif // PTHREAD_H

@@ -500,6 +500,7 @@ static void ThrowException_if_Error(HRESULT res)
     throw CSystemException(res);
 }
 
+#if !defined(__WATCOMC__)
 static void PrintNum(UInt64 val, unsigned numDigits, char c = ' ')
 {
   char temp[64];
@@ -510,6 +511,7 @@ static void PrintNum(UInt64 val, unsigned numDigits, char c = ' ')
     *--p = c;
   *g_StdStream << p;
 }
+#endif // !defined(__WATCOMC__)
 
 #ifdef _WIN32
 
@@ -569,6 +571,7 @@ EXTERN_C_END
 
 static inline UInt64 GetTime64(const FILETIME &t) { return ((UInt64)t.dwHighDateTime << 32) | t.dwLowDateTime; }
 
+#if !defined(__WATCOMC__)
 static void PrintStat()
 {
   FILETIME creationTimeFT, exitTimeFT, kernelTimeFT, userTimeFT;
@@ -674,6 +677,7 @@ Z7_DIAGNOSTIC_IGNORE_CAST_FUNCTION
   #endif
   *g_StdStream << endl;
 }
+#endif // !defined(__WATCOMC__)
 
 
 #else  // ! _WIN32
@@ -693,6 +697,7 @@ static UInt64 Get_timeofday_us()
 }
 #endif
 
+#if !defined(__WATCOMC__)
 static void PrintTime(const char *s, UInt64 val, UInt64 total_us, UInt64 kFreq)
 {
   *g_StdStream << endl << s << " Time =";
@@ -750,7 +755,9 @@ static void PrintTime(const char *s, UInt64 val, UInt64 total_us, UInt64 kFreq)
   PrintNum(percent, 5);
   *g_StdStream << '%';
 }
+#endif // !defined(__WATCOMC__)
 
+#if !defined(__WATCOMC__)
 static void PrintStat(const UInt64 startTime)
 {
 #if defined(__DOS__)
@@ -767,6 +774,7 @@ static void PrintStat(const UInt64 startTime)
   *g_StdStream << endl;
 #endif
 }
+#endif // !defined(__WATCOMC__)
 
 #endif // ! _WIN32
 

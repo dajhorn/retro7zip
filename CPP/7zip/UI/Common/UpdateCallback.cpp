@@ -315,7 +315,7 @@ Z7_COM7F_IMF(CArchiveUpdateCallback::GetRawProp(UInt32 index, PROPID propID, con
   return S_OK;
 }
 
-#if !defined(UNDER_CE) && defined(_WIN32) || defined(__DOS__)
+#if defined(_WIN32) && !defined(UNDER_CE)
 
 static UString GetRelativePath(const UString &to, const UString &from)
 {

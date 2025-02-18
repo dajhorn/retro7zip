@@ -110,6 +110,7 @@ bool GetRamSize(uint32_t &size)
 
   union REGS registers;
 
+  #pragma off (unreferenced)
   struct dpmi_memory_info_t {
     unsigned long LargestBlockSize;
     unsigned long LargestUnlockableSize;
@@ -122,6 +123,7 @@ bool GetRamSize(uint32_t &size)
     unsigned long PageFileSize;
     unsigned long Reserved[3];
   } dpmi_memory_info;
+  #pragma on (unreferenced)
 
   registers.w.ax = 0x0500;
   registers.x.edi = (unsigned)&dpmi_memory_info;
