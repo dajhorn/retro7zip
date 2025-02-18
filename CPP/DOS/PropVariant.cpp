@@ -400,12 +400,14 @@ int CPropVariant::Compare(const CPropVariant &a) throw()
       return -MyCompare(boolVal, a.boolVal);
 
     case VT_FILETIME:
+    {
       const int res = CompareFileTime(&filetime, &a.filetime);
       if (res != 0)
         return res;
       const unsigned v1 = Get_Ns100();
       const unsigned v2 = a.Get_Ns100();
       return MyCompare(v1, v2);
+    }
 
     case VT_BSTR:
       // Not implemented
