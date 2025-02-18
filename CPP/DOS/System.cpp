@@ -26,10 +26,9 @@ bool LongFileNames()
    */
 
   union REGS regs;
-  char buffer[PATH_MAX +1];
+  char buffer[PATH_MAX +1] = {0};
 
   memset(&regs, 0, sizeof(regs));
-  memset(&buffer, 0, sizeof(buffer));
   regs.h.ah = 0x71;
   regs.h.al = 0x47;
   regs.w.cflag = 1;
