@@ -3189,7 +3189,7 @@ else
       item.FromCentral = cdItem.FromCentral;
       // 22.02: we force utf8 flag, if central header has utf8 flag
       if (cdItem.Flags & NFileHeader::NFlags::kUtf8)
-        item.Flags |= NFileHeader::NFlags::kUtf8;
+        item.Flags |= (uint16_t)NFileHeader::NFlags::kUtf8;
     }
 
     FOR_VECTOR (k, items2)

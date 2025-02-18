@@ -159,7 +159,7 @@ static void SetItemInfoFromCompressingResult(const CCompressingResult &compressi
   item.ExtractVersion.Version = compressingResult.ExtractVersion;
   item.Method = compressingResult.Method;
   if (compressingResult.Method == NFileHeader::NCompressionMethod::kLZMA && compressingResult.LzmaEos)
-    item.Flags |= NFileHeader::NFlags::kLzmaEOS;
+    item.Flags |= (uint16_t)NFileHeader::NFlags::kLzmaEOS;
   item.Crc = compressingResult.CRC;
   item.Size = compressingResult.UnpackSize;
   item.PackSize = compressingResult.PackSize;

@@ -66,7 +66,7 @@ bool CFileInfo::IsDots() const throw()
 }
 
 
-struct timespec timespec_from_dos(unsigned short wr_date, unsigned short wr_time)
+struct timespec timespec_from_dos(unsigned wr_date, unsigned wr_time)
 {
   struct timespec ts;
   struct tm tm_time;

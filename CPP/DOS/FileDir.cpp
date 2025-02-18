@@ -304,12 +304,12 @@ bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CF
   time_t owc_posix_seconds = mTime->tv_sec;
   struct tm *owc_posix_time = localtime(&owc_posix_seconds);
 
-  unsigned owc_dos_date =                    /* DOS 16-bit packed date format masks: */
+  unsigned short owc_dos_date =              /* DOS 16-bit packed date format masks: */
     ((owc_posix_time->tm_year - 80) << 9) |  /* 1111111000000000, years since 1980.  */
     ((owc_posix_time->tm_mon  +  1) << 5) |  /* 0000000111100000, month.             */
     ((owc_posix_time->tm_mday     ) << 0) ;  /* 0000000000011111, day.               */
 
-  unsigned owc_dos_time =                    /* DOS 16-bit packed time format masks: */
+  unsigned short owc_dos_time =              /* DOS 16-bit packed time format masks: */
      (owc_posix_time->tm_hour << 11) |       /* 11111100000000000, hours.            */
      (owc_posix_time->tm_min  <<  5) |       /* 00000011111100000, minutes.          */
      (owc_posix_time->tm_sec  >>  2) ;       /* 00000000000011111, duo-seconds.      */
