@@ -46,6 +46,8 @@ class FString;
               /Zc:wchar_t is on by default
 */
 
+#define IS_LETTER_CHAR(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z'))
+
 #if defined(_WIN32) || defined(__DOS__) 
 #define IS_PATH_SEPAR(c) ((c) == '\\' || (c) == '/')
 #else

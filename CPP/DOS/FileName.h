@@ -5,8 +5,6 @@
 
 #include "../Common/MyString.h"
 
-#define IS_LETTER_CHAR(c) ((((unsigned)(int)(c) | 0x20) - (unsigned)'a' <= (unsigned)('z' - 'a')))
-
 namespace NDOS {
 namespace NFile {
 namespace NName {

@@ -694,10 +694,6 @@ static void AddTrees(CObjectVector<CDir> &trees, CObjectVector<CMetaItem> &metaI
 }
 
 
-#define IS_LETTER_CHAR(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z'))
-
-
-
 Z7_COM7F_IMF(CHandler::UpdateItems(ISequentialOutStream *outSeqStream, UInt32 numItems, IArchiveUpdateCallback *callback))
 {
   COM_TRY_BEGIN

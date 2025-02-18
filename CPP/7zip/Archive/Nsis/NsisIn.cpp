@@ -2859,8 +2859,6 @@ bool CInArchive::IsAbsolutePathVar(UInt32 strPos) const
   return false;
 }
 
-#define IS_LETTER_CHAR(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z'))
-
 // We use same check as in NSIS decoder
 static bool IsDrivePath(const wchar_t *s) { return IS_LETTER_CHAR(s[0]) && s[1] == ':' /* && s[2] == '\\' */ ; }
 static bool IsDrivePath(const char *s)    { return IS_LETTER_CHAR(s[0]) && s[1] == ':' /* && s[2] == '\\' */ ; }
