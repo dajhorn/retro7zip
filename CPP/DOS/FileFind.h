@@ -49,8 +49,6 @@ namespace NAttributes
   inline bool IsSystem(DWORD attrib)     { return (attrib & _A_SYSTEM) != 0; }
   inline bool IsDir(DWORD attrib)        { return (attrib & _A_SUBDIR) != 0; }
   inline bool IsArchived(DWORD attrib)   { return (attrib & _A_ARCH)   != 0; }
-  inline bool IsCompressed(DWORD attrib) { return false; }
-  inline bool IsEncrypted(DWORD attrib)  { return false; }
 
   inline UInt32 Get_PosixMode_From_WinAttrib(DWORD attrib)
   {
