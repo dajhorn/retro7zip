@@ -796,6 +796,9 @@ Z7_class_CHandler_final:
   public IInArchive,
   public IInArchiveGetStream,
   public CMyUnknownImp,
+  #if defined(__WATCOMC__)
+  public
+  #endif
   CDatabase
 {
   Z7_IFACES_IMP_UNK_2(IInArchive, IInArchiveGetStream)

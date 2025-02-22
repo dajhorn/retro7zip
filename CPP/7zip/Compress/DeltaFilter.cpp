@@ -30,6 +30,9 @@ class CEncoder Z7_final:
   public ICompressSetCoderProperties,
   public ICompressWriteCoderProperties,
   public CMyUnknownImp,
+  #if defined(__WATCOMC__)
+  public
+  #endif
   CDelta
 {
   Z7_IFACES_IMP_UNK_3(
@@ -90,6 +93,9 @@ class CDecoder Z7_final:
   public ICompressFilter,
   public ICompressSetDecoderProperties2,
   public CMyUnknownImp,
+  #if defined(__WATCOMC__)
+  public
+  #endif
   CDelta
 {
   Z7_IFACES_IMP_UNK_2(
