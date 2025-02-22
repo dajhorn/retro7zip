@@ -76,6 +76,10 @@ public:
 
   COutHandler() { InitProps7z(); }
 
+  #if defined(__WATCOMC__)
+  virtual ~COutHandler() {}
+  #endif
+
   HRESULT SetProperty(const wchar_t *name, const PROPVARIANT &value);
 };
 

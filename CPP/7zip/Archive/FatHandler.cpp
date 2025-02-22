@@ -389,7 +389,12 @@ struct CDatabase
   UInt64 PhySize;
 
   CDatabase(): Fat(NULL) {}
+
+  #if defined(__WATCOMC__)
+  virtual ~CDatabase() { ClearAndClose(); }
+  #else
   ~CDatabase() { ClearAndClose(); }
+  #endif
 
   void Clear();
   void ClearAndClose();

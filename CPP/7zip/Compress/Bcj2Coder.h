@@ -22,7 +22,12 @@ protected:
   HRESULT Alloc(bool allocForOrig = true);
 public:
   CBaseCoder();
+
+  #if defined(__WATCOMC__)
+  virtual ~CBaseCoder();
+  #else
   ~CBaseCoder();
+  #endif
 };
 
 
@@ -71,6 +76,10 @@ protected:
   }
   void InitCommon();
   void ReadInStream(ISequentialInStream *inStream);
+
+  #if defined(__WATCOMC__)
+  virtual ~CBaseDecoder() {}
+  #endif
 };
 
 

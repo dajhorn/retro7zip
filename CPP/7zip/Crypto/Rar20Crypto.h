@@ -28,7 +28,12 @@ class CData
   void UpdateKeys(const Byte *data);
   void CryptBlock(Byte *buf, bool encrypt);
 public:
+  #if defined(__WATCOMC__)
+  virtual ~CData() { Wipe(); }
+  #else
   ~CData() { Wipe(); }
+  #endif
+
   void Wipe()
   {
     Z7_memset_0_ARRAY(SubstTable);

@@ -164,7 +164,12 @@ public:
   void SetProps(const CEncProps *props2);
 public:
   CCoder(bool deflate64Mode = false);
+
+  #if defined(__WATCOMC__)
+  virtual ~CCoder();
+  #else
   ~CCoder();
+  #endif
 
   HRESULT CodeReal(ISequentialInStream *inStream, ISequentialOutStream *outStream,
       const UInt64 *inSize, const UInt64 *outSize, ICompressProgressInfo *progress);

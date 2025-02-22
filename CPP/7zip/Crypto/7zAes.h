@@ -74,6 +74,10 @@ protected:
   
   void PrepareKey();
   CBase();
+
+  #if defined(__WATCOMC__)
+  virtual ~CBase() {}
+  #endif
 };
 
 class CBaseCoder:

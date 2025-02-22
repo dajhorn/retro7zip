@@ -22,7 +22,11 @@ struct CAlignedMidBuffer
   Byte *_buf;
 
   CAlignedMidBuffer(): _buf(NULL) {}
+  #if defined(__WATCOMC__)
+  virtual ~CAlignedMidBuffer();
+  #else
   ~CAlignedMidBuffer();
+  #endif
   void AllocAligned(size_t size);
 };
 

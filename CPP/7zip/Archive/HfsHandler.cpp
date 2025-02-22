@@ -512,6 +512,10 @@ public:
 
   void GetItemPath(unsigned index, NCOM::CPropVariant &path) const;
   HRESULT Open2(IInStream *inStream, IArchiveOpenCallback *progress);
+
+  #if defined(__WATCOMC__)
+  virtual ~CDatabase() {}
+  #endif
 };
 
 enum

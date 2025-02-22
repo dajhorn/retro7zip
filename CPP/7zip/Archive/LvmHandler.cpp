@@ -571,6 +571,10 @@ struct CVolGroup
     _id.Empty();
     _extentSizeBits = -1;
   }
+
+  #if defined(__WATCOMC__)
+  virtual ~CVolGroup() {}
+  #endif
 };
 
 

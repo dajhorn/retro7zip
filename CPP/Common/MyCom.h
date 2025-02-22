@@ -309,9 +309,9 @@ protected:
   ULONG _m_RefCount;
   CMyUnknownImp(): _m_RefCount(0) {}
 
-  #ifdef _WIN32
-  #if defined(__GNUC__) || defined(__clang__)
-  // virtual ~CMyUnknownImp() {} // to disable GCC/CLANG varnings
+  #if defined(_WIN32) || defined(__DOS__)
+  #if defined(__GNUC__) || defined(__clang__) || defined(__WATCOMC__)
+  virtual ~CMyUnknownImp() {}
   #endif
   #endif
 };

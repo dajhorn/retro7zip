@@ -1486,7 +1486,12 @@ struct CDatabase
   }
 
   CDatabase() { InitProps(); }
+
+  #if defined(__WATCOMC__)
+  virtual ~CDatabase() { ClearAndClose(); }
+  #else
   ~CDatabase() { ClearAndClose(); }
+  #endif
 
   void Clear();
   void ClearAndClose();

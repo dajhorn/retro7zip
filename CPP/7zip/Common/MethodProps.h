@@ -86,6 +86,10 @@ struct CProps
 
   HRESULT SetCoderProps(ICompressSetCoderProperties *scp, const UInt64 *dataSizeReduce = NULL) const;
   HRESULT SetCoderProps_DSReduce_Aff(ICompressSetCoderProperties *scp, const UInt64 *dataSizeReduce, const UInt64 *affinity) const;
+
+  #if defined(__WATCOMC__)
+  virtual ~CProps() {}
+  #endif
 };
 
 class CMethodProps: public CProps
@@ -328,6 +332,10 @@ public:
 
   HRESULT ParseParamsFromString(const UString &srcString);
   HRESULT ParseParamsFromPROPVARIANT(const UString &realName, const PROPVARIANT &value);
+
+  #if defined(__WATCOMC__)
+  virtual ~CMethodProps() {}
+  #endif
 };
 
 class COneMethodInfo: public CMethodProps
@@ -345,6 +353,10 @@ public:
   bool IsEmpty() const { return MethodName.IsEmpty() && Props.IsEmpty(); }
   HRESULT ParseMethodFromPROPVARIANT(const UString &realName, const PROPVARIANT &value);
   HRESULT ParseMethodFromString(const UString &s);
+
+  #if defined(__WATCOMC__)
+  virtual ~COneMethodInfo() {}
+  #endif
 };
 
 #endif

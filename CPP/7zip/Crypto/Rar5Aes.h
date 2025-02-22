@@ -55,8 +55,13 @@ struct CKey: public CKeyBase
   }
 
   CKey();
+
+  #if defined(__WATCOMC__)
+  virtual ~CKey();
+  #else
   ~CKey();
-  
+  #endif
+
   void Wipe();
 
 #ifdef Z7_CPP_IS_SUPPORTED_default

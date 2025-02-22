@@ -1534,6 +1534,10 @@ public:
 
   HRESULT Init(UInt32 startIndex, const CBoolVector *extractStatuses);
   HRESULT CheckFinishedState() const { return (_currentIndex == _extractStatuses->Size()) ? S_OK: E_FAIL; }
+
+  #if defined(__WATCOMC__)
+  virtual ~CRepackStreamBase() {}
+  #endif
 };
 
 HRESULT CRepackStreamBase::Init(UInt32 startIndex, const CBoolVector *extractStatuses)

@@ -2017,6 +2017,10 @@ struct CDatabase
       IInStream *apfsInStream,
       const CRecordVector<CExtent> *extents, UInt64 rem,
       ISequentialInStream **stream);
+
+  #if defined(__WATCOMC__)
+  virtual ~CDatabase() {}
+  #endif
 };
 
 

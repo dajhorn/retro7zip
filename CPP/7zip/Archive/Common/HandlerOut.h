@@ -66,6 +66,10 @@ public:
   bool SetCommonProperty(const UString &name, const PROPVARIANT &value, HRESULT &hres);
 
   CCommonMethodProps() { InitCommon(); }
+
+  #if defined(__WATCOMC__)
+  virtual ~CCommonMethodProps() {}
+  #endif
 };
 
 

@@ -32,7 +32,11 @@ struct CDecoder
       MainDecodeSRes_wasUsed(false)
     {}
   
+  #if defined(__WATCOMC__)
+  virtual ~CDecoder()
+  #else
   ~CDecoder()
+  #endif
   {
     if (xz)
       XzDecMt_Destroy(xz);
