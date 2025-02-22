@@ -119,6 +119,7 @@ static const char * const kOfficeExtensions =
   " pptx pptm potx potm ppam ppsx ppsm sldx sldm"
   " ";
 
+#if defined(SUPPORT_ALT_STREAMS)
 static bool FindExt2(const char *p, const UString &name)
 {
   const int pathPos = name.ReverseFind_PathSepar();
@@ -148,7 +149,7 @@ static bool FindExt2(const char *p, const UString &name)
   }
   return false;
 }
-
+#endif // SUPPORT_ALT_STREAMS
 
 static const char * const k_ZoneId_StreamName_With_Colon_Prefix = ":Zone.Identifier";
 
@@ -1980,7 +1981,7 @@ HRESULT CArchiveExtractCallback::CloseFile()
   _curSize = processedSize;
   _curSize_Defined = true;
 
- #if defined(_WIN32) && !defined(UNDER_CE) && !defined(Z7_SFX) && !defined(__WATCOMC__)
+ #if defined(_WIN32) && !defined(UNDER_CE) && !defined(Z7_SFX) && defined(SUPPORT_ALT_STREAMS)
   if (ZoneBuf.Size() != 0
       && !_item.IsAltStream)
   {

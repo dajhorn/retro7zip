@@ -222,6 +222,7 @@ bool CFileInfo::IsDots() const throw()
   #endif
   */
 
+#if !defined(__WATCOMC__)
 static void Convert_WIN32_FIND_DATA_to_FileInfo(const WIN32_FIND_DATAW &fd, CFileInfo &fi)
 {
   WIN_FD_TO_MY_FI(fi, fd)
@@ -230,6 +231,7 @@ static void Convert_WIN32_FIND_DATA_to_FileInfo(const WIN32_FIND_DATAW &fd, CFil
   // fi.ShortName = us2fs(fd.cAlternateFileName);
   #endif
 }
+#endif
 
 #ifndef _UNICODE
 static void Convert_WIN32_FIND_DATA_to_FileInfo(const WIN32_FIND_DATA &fd, CFileInfo &fi)

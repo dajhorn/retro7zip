@@ -500,7 +500,7 @@ static void ThrowException_if_Error(HRESULT res)
     throw CSystemException(res);
 }
 
-#if !defined(__WATCOMC__)
+#ifdef _WIN32
 static void PrintNum(UInt64 val, unsigned numDigits, char c = ' ')
 {
   char temp[64];
@@ -511,7 +511,7 @@ static void PrintNum(UInt64 val, unsigned numDigits, char c = ' ')
     *--p = c;
   *g_StdStream << p;
 }
-#endif // !defined(__WATCOMC__)
+#endif
 
 #ifdef _WIN32
 
@@ -571,7 +571,7 @@ EXTERN_C_END
 
 static inline UInt64 GetTime64(const FILETIME &t) { return ((UInt64)t.dwHighDateTime << 32) | t.dwLowDateTime; }
 
-#if !defined(__WATCOMC__)
+#ifdef _WIN32
 static void PrintStat()
 {
   FILETIME creationTimeFT, exitTimeFT, kernelTimeFT, userTimeFT;

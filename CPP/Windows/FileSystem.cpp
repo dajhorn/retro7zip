@@ -115,10 +115,8 @@ bool MyGetDiskFreeSpace(CFSTR rootPath, UInt64 &clusterSize, UInt64 &totalSize, 
   bool sizeIsDetected = false;
   
 #if defined(__WATCOMC__)
-    ULARGE_INTEGER freeBytesToCaller2, totalSize2, freeSize2;
-    sizeIsDetected = 0;
-    if (!::GetDiskFreeSpace(fs2fas(rootPath), &numSectorsPerCluster, &bytesPerSector, &numFreeClusters, &numClusters))
-      return false;
+  if (!::GetDiskFreeSpace(fs2fas(rootPath), &numSectorsPerCluster, &bytesPerSector, &numFreeClusters, &numClusters))
+    return false;
 #else
   #ifndef _UNICODE
   if (!g_IsNT)

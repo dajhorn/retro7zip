@@ -1014,7 +1014,7 @@ static inline void SetStreamMode(const CSwitchResult &sw, unsigned &res)
 }
 
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(UNDER_CE) && !defined(__WATCOMC__)
 static void PrintHex(UString &s, UInt64 v)
 {
   char temp[32];

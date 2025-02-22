@@ -324,6 +324,7 @@ EXTERN_C_END
 #endif // UNDER_CE
 #endif // __WATCOMC__
 
+#pragma off (unreferenced)
 bool MyCreateHardLink(CFSTR newFileName, CFSTR existFileName)
 {
 #ifndef __WATCOMC__
@@ -369,7 +370,7 @@ bool MyCreateHardLink(CFSTR newFileName, CFSTR existFileName)
 #endif // __WATCOMC__
   return false;
 }
-
+#pragma on (unreferenced)
 
 /*
 WinXP-64 CreateDir():

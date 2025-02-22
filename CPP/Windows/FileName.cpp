@@ -89,9 +89,6 @@ void NormalizeDirSeparators(FString &s)
 
 #endif
 
-
-#define IS_LETTER_CHAR(c) ((((unsigned)(int)(c) | 0x20) - (unsigned)'a' <= (unsigned)('z' - 'a')))
-
 bool IsDrivePath(const wchar_t *s) throw() { return IS_LETTER_CHAR(s[0]) && s[1] == ':' && IS_SEPAR(s[2]); }
 
 bool IsAltPathPrefix(CFSTR s) throw()
