@@ -5,28 +5,9 @@ Microsoft Windows operating systems.
 
 ## System Requirements
 
+Retro7zip run on nearly all DOS and Windows computers that have a 32-bit CPU.
+
 https://github.com/dajhorn/retro7zip/wiki/System-Requirements
-
-### DOS System Requirements
-
-* 386 CPU
-* 4 MB RAM
-* DOS 3.3 Compatibility
-
-FreeDOS, MS-DOS, PC-DOC, SvarDOS, IBM OS/2 and others are compatible.
-
-Long File Names are supported through the DOSLFN TSR on plain DOS,
-or natively on Windows 95, Windows 98, and Windows Me.
-
-
-### Windows System Requirements
-
-* 386 CPU
-* 12 MB RAM
-* Win32c Compatibility
-
-Windows 9x, Windows NT 3.50, Windows NT 3.51, and Windows NT 4.0 are
-compatible.
 
 
 ## Installation
