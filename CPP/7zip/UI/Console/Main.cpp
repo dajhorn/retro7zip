@@ -571,7 +571,7 @@ EXTERN_C_END
 
 static inline UInt64 GetTime64(const FILETIME &t) { return ((UInt64)t.dwHighDateTime << 32) | t.dwLowDateTime; }
 
-#ifdef _WIN32
+#if !defined(__WATCOMC__)
 static void PrintStat()
 {
   FILETIME creationTimeFT, exitTimeFT, kernelTimeFT, userTimeFT;
@@ -1664,14 +1664,14 @@ int Main2(
   else
     ShowMessageAndThrowException(kUserErrorMessage, NExitCode::kUserError);
 
-  #if !defined(__DOS__)
+  #if !defined(__WATCOMC__)
   if (options.ShowTime && g_StdStream)
     PrintStat(
       #ifndef _WIN32
         startTime
       #endif
     );
-  #endif
+  #endif // !defined(__WATCOMC__)
 
   ThrowException_if_Error(hresultMain);
 

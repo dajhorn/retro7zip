@@ -85,7 +85,11 @@ struct CProps
   }
 
   HRESULT SetCoderProps(ICompressSetCoderProperties *scp, const UInt64 *dataSizeReduce = NULL) const;
-  HRESULT SetCoderProps_DSReduce_Aff(ICompressSetCoderProperties *scp, const UInt64 *dataSizeReduce, const UInt64 *affinity) const;
+  HRESULT SetCoderProps_DSReduce_Aff(ICompressSetCoderProperties *scp,
+      const UInt64 *dataSizeReduce,
+      const UInt64 *affinity,
+      const UInt32 *affinityGroup,
+      const UInt64 *affinityInGroup) const;
 
   #if defined(__WATCOMC__)
   virtual ~CProps() {}

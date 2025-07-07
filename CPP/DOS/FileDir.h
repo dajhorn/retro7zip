@@ -9,6 +9,8 @@
 #include "../Common/MyString.h"
 #include "FileIO.h"
 
+#define RemoveDirAlways_if_Empty RemoveDir 
+
 namespace NDOS {
 namespace NFile {
 namespace NDir {
@@ -21,7 +23,7 @@ bool MyCreateHardLink(CFSTR newFileName, CFSTR existFileName);
 bool MyGetFullPathName(CFSTR path, FString &resFullPath);
 bool MyGetTempPath(FString &resultPath);
 bool MyMoveFile(CFSTR existFileName, CFSTR newFileName);
-bool RemoveDirWithSubItems(const FString &path);
+// bool RemoveDirWithSubItems(const FString &path);
 bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CFiTime *mTime);
 bool SetFileAttrib(CFSTR path, DWORD attrib);
 bool SetFileAttrib_PosixHighDetect(CFSTR path, DWORD attrib);
